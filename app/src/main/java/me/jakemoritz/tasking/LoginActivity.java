@@ -15,7 +15,7 @@ import com.google.android.gms.plus.Plus;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        View.OnClickListener {
+        View.OnClickListener, AccountDialogPreference.OnSignOutListener, HelperActivity.OnHelperCheckListener {
 
     private static final String TAG = "LoginActivity";
 
@@ -136,6 +136,23 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             // Show the signed-out UI
 
         }
+    }
+
+    @Override
+    public void signOut() {
+        // Clear default account so GoogleApiClient won't automatically
+        // connect in the future.
+        if (mGoogleApiClient.isConnected()) {
+            Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+            mGoogleApiClient.disconnect();
+        }
+
+        startActivity(new Intent(this, HelperActivity.class));
+    }
+
+    @Override
+    public boolean checkIfSignedIn() {
+        return mGoogleApiClient.isConnected();
     }
 }
 

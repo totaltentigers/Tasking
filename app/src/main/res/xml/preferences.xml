@@ -4,5 +4,8 @@
         android:key="@+id/pref_account"
         android:title="@string/pref_account"
         android:summary="@string/pref_account_summ"
-        android:dialogTitle="@string/pref_account"/>
+        android:dialogTitle="@string/pref_account"
+        android:positiveButtonText="@string/sign_out"
+        android:negativeButtonText="@string/cancel"
+        android:dialogMessage="@string/pref_account_message"/>
 </PreferenceScreen>

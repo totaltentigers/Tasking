@@ -13,6 +13,12 @@ public class HelperActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        if ((LoginActivity) activity).
+
+    }
+
+    public interface OnHelperCheckListener {
+        public boolean checkIfSignedIn();
     }
 
 }

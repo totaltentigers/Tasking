@@ -17,4 +17,7 @@
     <!-- Strings related to preferences -->
     <string name="pref_account">Account</string>
     <string name="pref_account_summ">Sign out of your Google+ account.</string>
+    <string name="pref_account_message">Would you like to sign out of your Google+ account?</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="cancel">Cancel</string>
 </resources>
