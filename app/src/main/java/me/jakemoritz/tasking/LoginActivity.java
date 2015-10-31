@@ -85,7 +85,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         mShouldResolve = false;
 
         // Show the signed-in UI
-        
+        startActivity(new Intent(this, TaskListActivity.class));
     }
 
     @Override
