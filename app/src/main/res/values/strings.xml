@@ -9,6 +9,12 @@
 
     <string name="title_activity_helper">HelperActivity</string>
 
-    <!-- Strings for side nav -->
+    <!-- Strings related to  side nav -->
     <string name="nav_tasks">Tasks</string>
+    <string name="nav_settings">Settings</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to preferences -->
+    <string name="pref_account">Account</string>
+    <string name="pref_account_summ">Sign out of your Google+ account.</string>
 </resources>

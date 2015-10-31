@@ -1,5 +1,6 @@
 package me.jakemoritz.tasking;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -77,13 +78,16 @@ public class TaskListActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-/*        Intent navIntent = new Intent();
+        Intent navIntent = new Intent();
 
         if (id == R.id.nav_tasks) {
             navIntent.setClass(this, TaskListActivity.class);
         }
-
-        startActivity(navIntent);*/
+        else if (id == R.id.nav_settings) {
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.content_main, new SettingsFragment())
+                    .commit();
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
