@@ -1,6 +1,5 @@
 package me.jakemoritz.tasking;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -11,8 +10,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-public class TaskListActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener,
+TaskListFragment.OnFragmentInteractionListener{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +38,11 @@ public class TaskListActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        // Initialize default fragment
+        getFragmentManager().beginTransaction()
+                .replace(R.id.content_main, new TaskListFragment())
+                .commit();
     }
 
     @Override
@@ -78,10 +83,10 @@ public class TaskListActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        Intent navIntent = new Intent();
-
         if (id == R.id.nav_tasks) {
-            navIntent.setClass(this, TaskListActivity.class);
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.content_main, new TaskListFragment())
+                    .commit();
         }
         else if (id == R.id.nav_settings) {
             getFragmentManager().beginTransaction()
@@ -92,5 +97,10 @@ public class TaskListActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void onFragmentInteraction(String id) {
+
     }
 }
