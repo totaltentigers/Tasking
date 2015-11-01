@@ -1,8 +1,10 @@
 package me.jakemoritz.tasking;
 
+import android.accounts.AccountManager;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -12,7 +14,9 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
+import com.google.android.gms.common.AccountPicker;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -22,7 +26,8 @@ import com.google.android.gms.plus.Plus;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
 TaskListFragment.OnFragmentInteractionListener, AccountDialogPreference.OnSignOutListener,
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
+GetUsernameTask.getAccountName{
 
     private static final String TAG = "MainActivity";
 
@@ -37,6 +42,34 @@ TaskListFragment.OnFragmentInteractionListener, AccountDialogPreference.OnSignOu
 
     /* Should we automatically resolve ConnectionResults when possible? */
     private boolean mShouldResolve = false;
+    static final int REQUEST_CODE_PICK_ACCOUNT = 1000;
+
+
+    String mEmail;
+
+
+    String SCOPE = "oath2:https://www.googleapis.com/auth/tasks";
+
+    // Attempt to retrieve username. If account is unknown, start
+    // account picker. Then begin an AsyncTask to get the auth token.
+    private void getUsername(){
+        Log.d(TAG, "getUsername");
+        if (mEmail == null){
+            taskLogin();
+        } else {
+            if (/*isDeviceOnline()*/true){
+                new GetUsernameTask(MainActivity.this, SCOPE, mEmail).execute();
+            } else {
+
+            }
+        }
+    }
+    public void taskLogin() {
+        String[] accountTypes = new String[]{"com.google"};
+        Intent pickerIntent = AccountPicker.newChooseAccountIntent(null, null, accountTypes,
+                false, null, null, null, null);
+        startActivityForResult(pickerIntent, REQUEST_CODE_PICK_ACCOUNT);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,14 +78,13 @@ TaskListFragment.OnFragmentInteractionListener, AccountDialogPreference.OnSignOu
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                taskLogin();
+            }
+        });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -203,5 +235,22 @@ TaskListFragment.OnFragmentInteractionListener, AccountDialogPreference.OnSignOu
             mIsResolving = false;
             mGoogleApiClient.connect();
         }
+        else if (requestCode == REQUEST_CODE_PICK_ACCOUNT){
+            // Received result from AccountPicker
+            if (resultCode == RESULT_OK){
+                mEmail = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+                // With account name acquired, get auth token
+                getUsername();
+            }
+            else if (resultCode == RESULT_CANCELED){
+                // The account picker dialog closed without selecting an account.
+                // Notify users that they must select an account.
+            }
+        }
+    }
+
+    @Override
+    public String getAccountName() {
+        return mEmail;
     }
 }
