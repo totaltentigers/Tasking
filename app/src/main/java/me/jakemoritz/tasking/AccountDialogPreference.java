@@ -6,9 +6,6 @@ import android.content.DialogInterface;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
 
-/**
- * Created by jakemoritz on 10/31/15.
- */
 public class AccountDialogPreference extends DialogPreference {
 
     private Context context;
@@ -27,7 +24,7 @@ public class AccountDialogPreference extends DialogPreference {
         super.onClick(dialog, which);
 
         if (which == Dialog.BUTTON_POSITIVE){
-            ((LoginActivity) context).signOut();
+            ((MainActivity) context).signOut();
         }
         else {
             dialog.cancel();
