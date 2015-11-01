@@ -2,6 +2,7 @@ package me.jakemoritz.tasking;
 
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -47,15 +48,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 .build();
 
         findViewById(R.id.sign_in_button).setOnClickListener(this);
-
-        if (getCallingActivity() != null){
-            if (getCallingActivity().getClassName() == String.valueOf(HelperActivity.class)){
-                Intent result = new Intent();
-                result.putExtra("isLoggedIn", mGoogleApiClient.isConnected());
-                setResult(RESULT_OK, result);
-                finish();
-            }
-        }
     }
 
     @Override
@@ -95,6 +87,12 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         // establish a service connection to Google Play services.
         Log.d(TAG, "onConnected:" + bundle);
         mShouldResolve = false;
+
+        // Save sign-in state
+        SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("signedIn", true);
+        editor.commit();
 
         Intent mainIntent = new Intent(this, MainActivity.class);
         mainIntent.putExtra("email", Plus.AccountApi.getAccountName(mGoogleApiClient));

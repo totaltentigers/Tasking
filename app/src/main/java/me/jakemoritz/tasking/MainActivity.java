@@ -3,6 +3,7 @@ package me.jakemoritz.tasking;
 import android.accounts.AccountManager;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -206,9 +207,15 @@ TaskListFragment.OnFragmentInteractionListener, AccountDialogPreference.OnSignOu
             Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
             mGoogleApiClient.disconnect();
 
-            startActivity(new Intent(this, HelperActivity.class));
-
             signingOut = false;
+
+            // Save sign-in state
+            SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putBoolean("signedIn", false);
+            editor.commit();
+
+            startActivity(new Intent(this, HelperActivity.class));
         }
     }
 
