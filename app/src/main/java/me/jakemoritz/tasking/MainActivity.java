@@ -1,6 +1,5 @@
 package me.jakemoritz.tasking;
 
-import android.accounts.AccountManager;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
@@ -15,7 +14,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.google.android.gms.common.AccountPicker;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -40,35 +38,15 @@ TaskListFragment.OnFragmentInteractionListener, AccountDialogPreference.OnSignOu
 
     /* Should we automatically resolve ConnectionResults when possible? */
     private boolean mShouldResolve = false;
-    static final int REQUEST_CODE_PICK_ACCOUNT = 1000;
 
     private boolean signingOut = false;
 
+    public String getmEmail() {
+        return mEmail;
+    }
+
     private String mEmail;
 
-
-    String SCOPE = "oath2:https://www.googleapis.com/auth/tasks";
-
-    // Attempt to retrieve username. If account is unknown, start
-    // account picker. Then begin an AsyncTask to get the auth token.
-    private void getUsername(){
-        Log.d(TAG, "getUsername");
-        if (mEmail == null){
-            taskLogin();
-        } else {
-            if (/*isDeviceOnline()*/true){
-                new GetUsernameTask(MainActivity.this, SCOPE, mEmail).execute();
-            } else {
-
-            }
-        }
-    }
-    public void taskLogin() {
-        String[] accountTypes = new String[]{"com.google"};
-        Intent pickerIntent = AccountPicker.newChooseAccountIntent(null, null, accountTypes,
-                false, null, null, null, null);
-        startActivityForResult(pickerIntent, REQUEST_CODE_PICK_ACCOUNT);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,20 +75,6 @@ TaskListFragment.OnFragmentInteractionListener, AccountDialogPreference.OnSignOu
         getFragmentManager().beginTransaction()
                 .replace(R.id.content_main, new TaskListFragment())
                 .commit();
-    }
-
-    private GoogleApiClient connectApiClient(){
-        Log.d(TAG, "connecting yo");
-        GoogleApiClient nGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(Plus.API)
-                .addScope(new Scope(Scopes.PROFILE))
-                .addScope(new Scope(Scopes.EMAIL))
-                .build();
-
-        nGoogleApiClient.connect();
-        return nGoogleApiClient;
     }
 
     @Override
@@ -255,18 +219,6 @@ TaskListFragment.OnFragmentInteractionListener, AccountDialogPreference.OnSignOu
 
             mIsResolving = false;
             mGoogleApiClient.connect();
-        }
-        else if (requestCode == REQUEST_CODE_PICK_ACCOUNT){
-            // Received result from AccountPicker
-            if (resultCode == RESULT_OK){
-                mEmail = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
-                // With account name acquired, get auth token
-                getUsername();
-            }
-            else if (resultCode == RESULT_CANCELED){
-                // The account picker dialog closed without selecting an account.
-                // Notify users that they must select an account.
-            }
         }
     }
 }

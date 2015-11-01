@@ -12,21 +12,16 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.util.DateTime;
 import com.google.api.services.tasks.Tasks;
 import com.google.api.services.tasks.TasksScopes;
-import com.google.api.services.tasks.model.Task;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
-public class GetUsernameTask extends AsyncTask<Void, Void, Void> {
+public class TasksTask extends AsyncTask<Void, Void, Void> {
 
-    private static final String TAG = "GetUsernameTask";
+    private static final String TAG = "TasksTask";
 
     private final static String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
 
@@ -40,11 +35,15 @@ public class GetUsernameTask extends AsyncTask<Void, Void, Void> {
     List<String> tasksList;
     Tasks service;
 
-    public GetUsernameTask(Activity mActivity, String mScope, String mEmail) {
+    public TasksTask TasksTask(Activity mActivity, String mScope, String mEmail) {
         this.mActivity = mActivity;
         this.mScope = mScope;
         this.mEmail = mEmail;
+
+        return this;
     }
+
+
 
     // Executes asynchronous job.
     // Runs when you call execute() on an instance
@@ -60,7 +59,8 @@ public class GetUsernameTask extends AsyncTask<Void, Void, Void> {
                 credential.setSelectedAccountName(mEmail);
                 service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName("Tasking").build();
 
-                tasksList = new ArrayList<String>();
+                addTask();
+/*                tasksList = new ArrayList<String>();
 
                 List<Task> tasks = service.tasks().list("@default").execute().getItems();
 
@@ -72,7 +72,7 @@ public class GetUsernameTask extends AsyncTask<Void, Void, Void> {
                 task.setTitle("Poopy");
                 task.setNotes("Note notey");
                 task.setDue(new DateTime(new Date(2015, 11, 2), TimeZone.getDefault()));
-                Task result = service.tasks().insert("@default", task).execute();
+                Task result = service.tasks().insert("@default", task).execute();*/
             }
         } catch (IOException e){
             // The fetchToken() method handles Google-specific exceptions,
@@ -80,6 +80,10 @@ public class GetUsernameTask extends AsyncTask<Void, Void, Void> {
             Log.d(TAG, e.toString());
         }
         return null;
+    }
+
+    public void addTask(){
+
     }
 
     // Fetches authentication token from Google and

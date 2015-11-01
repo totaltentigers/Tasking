@@ -50,7 +50,6 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
             @Override
             public void onClick(View view) {
                 createTask();
-                //new GetUsernameTask(MainActivity.this, SCOPE, mEmail).execute();
             }
         });
     }

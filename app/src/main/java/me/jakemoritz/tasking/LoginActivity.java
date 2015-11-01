@@ -91,6 +91,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         // Save sign-in state
         SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("email", Plus.AccountApi.getAccountName(mGoogleApiClient));
         editor.putBoolean("signedIn", true);
         editor.commit();
 
