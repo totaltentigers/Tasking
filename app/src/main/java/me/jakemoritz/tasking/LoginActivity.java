@@ -15,7 +15,7 @@ import com.google.android.gms.plus.Plus;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        View.OnClickListener, AccountDialogPreference.OnSignOutListener, HelperActivity.OnHelperCheckListener {
+        View.OnClickListener, AccountDialogPreference.OnSignOutListener{
 
     private static final String TAG = "LoginActivity";
 
@@ -46,6 +46,15 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 .build();
 
         findViewById(R.id.sign_in_button).setOnClickListener(this);
+
+        if (getCallingActivity() != null){
+            if (getCallingActivity().getClassName() == String.valueOf(HelperActivity.class)){
+                Intent result = new Intent();
+                result.putExtra("isLoggedIn", mGoogleApiClient.isConnected());
+                setResult(RESULT_OK, result);
+                finish();
+            }
+        }
     }
 
     @Override
@@ -150,9 +159,5 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         startActivity(new Intent(this, HelperActivity.class));
     }
 
-    @Override
-    public boolean checkIfSignedIn() {
-        return mGoogleApiClient.isConnected();
-    }
 }
 
