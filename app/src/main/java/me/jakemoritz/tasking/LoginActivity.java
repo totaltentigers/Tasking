@@ -43,6 +43,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 .addApi(Plus.API)
                 .addScope(new Scope(Scopes.PROFILE))
                 .addScope(new Scope(Scopes.EMAIL))
+                .addScope(new Scope("https://www.googleapis.com/auth/tasks"))
                 .build();
 
         findViewById(R.id.sign_in_button).setOnClickListener(this);
@@ -95,8 +96,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         Log.d(TAG, "onConnected:" + bundle);
         mShouldResolve = false;
 
+        Intent mainIntent = new Intent(this, MainActivity.class);
+        mainIntent.putExtra("email", Plus.AccountApi.getAccountName(mGoogleApiClient));
         // Show the signed-in UI
-        startActivity(new Intent(this, MainActivity.class));
+        startActivity(mainIntent);
     }
 
     @Override

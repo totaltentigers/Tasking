@@ -26,8 +26,7 @@ import com.google.android.gms.plus.Plus;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
 TaskListFragment.OnFragmentInteractionListener, AccountDialogPreference.OnSignOutListener,
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener,
-GetUsernameTask.getAccountName{
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
     private static final String TAG = "MainActivity";
 
@@ -44,8 +43,9 @@ GetUsernameTask.getAccountName{
     private boolean mShouldResolve = false;
     static final int REQUEST_CODE_PICK_ACCOUNT = 1000;
 
+    private boolean signingOut = false;
 
-    String mEmail;
+    private String mEmail;
 
 
     String SCOPE = "oath2:https://www.googleapis.com/auth/tasks";
@@ -78,11 +78,17 @@ GetUsernameTask.getAccountName{
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        if (getIntent() != null){
+            Intent intent = getIntent();
+            if (intent.getStringExtra("email") != null){
+                mEmail = intent.getStringExtra("email");
+            }
+        }
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                taskLogin();
+                new GetUsernameTask(MainActivity.this, SCOPE, mEmail).execute();
             }
         });
 
@@ -99,6 +105,20 @@ GetUsernameTask.getAccountName{
         getFragmentManager().beginTransaction()
                 .replace(R.id.content_main, new TaskListFragment())
                 .commit();
+    }
+
+    private GoogleApiClient connectApiClient(){
+        Log.d(TAG, "connecting yo");
+        GoogleApiClient nGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(Plus.API)
+                .addScope(new Scope(Scopes.PROFILE))
+                .addScope(new Scope(Scopes.EMAIL))
+                .build();
+
+        nGoogleApiClient.connect();
+        return nGoogleApiClient;
     }
 
     @Override
@@ -133,7 +153,6 @@ GetUsernameTask.getAccountName{
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
@@ -171,6 +190,7 @@ GetUsernameTask.getAccountName{
                 .addScope(new Scope(Scopes.EMAIL))
                 .build();
 
+        signingOut = true;
         mGoogleApiClient.connect();
     }
 
@@ -182,10 +202,14 @@ GetUsernameTask.getAccountName{
         Log.d(TAG, "onConnected:" + bundle);
         mShouldResolve = false;
 
-        Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
-        mGoogleApiClient.disconnect();
+        if (signingOut){
+            Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+            mGoogleApiClient.disconnect();
 
-        startActivity(new Intent(this, HelperActivity.class));
+            startActivity(new Intent(this, HelperActivity.class));
+
+            signingOut = false;
+        }
     }
 
     @Override
@@ -247,10 +271,5 @@ GetUsernameTask.getAccountName{
                 // Notify users that they must select an account.
             }
         }
-    }
-
-    @Override
-    public String getAccountName() {
-        return mEmail;
     }
 }
