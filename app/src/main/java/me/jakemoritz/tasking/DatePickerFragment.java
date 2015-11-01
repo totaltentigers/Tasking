@@ -30,11 +30,4 @@ public class DatePickerFragment extends DialogFragment{
 
         return new DatePickerDialog(getActivity(), addTaskDialogFragment, year, month, day);
     }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        Log.d("sts", activity.toString());
-
-    }
 }
