@@ -73,9 +73,9 @@ public class AddTaskDialogFragment extends DialogFragment implements TimeSetResp
                         List<Task> taskList = new ArrayList<Task>();
                         taskList.add(task);
 
-                        AddTaskTask aaaa = new AddTaskTask(getActivity(), taskList);
-                        aaaa.delegate = (TaskListFragment) parentFragment;
-                        aaaa.execute();
+                        AddTaskTask addTaskTask = new AddTaskTask(getActivity(), taskList);
+                        addTaskTask.delegate = (TaskListFragment) parentFragment;
+                        addTaskTask.execute();
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

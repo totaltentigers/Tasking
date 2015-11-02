@@ -23,7 +23,8 @@ import java.util.List;
 
 public class TaskListFragment extends Fragment implements AbsListView.OnItemClickListener,
         LoadTasksResponse, AddTaskResponse, AbsListView.OnItemLongClickListener,
-        ActionMode.Callback, AbsListView.MultiChoiceModeListener, DeleteTasksResponse{
+        ActionMode.Callback, AbsListView.MultiChoiceModeListener, DeleteTasksResponse,
+EditTaskResponse{
 
     private static final String TAG = "TaskListFragment";
 
@@ -85,6 +86,12 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         addTaskDialogFragment.show(getFragmentManager(), "addTaskDialog");
     }
 
+    private void editTask(int position){
+        Task task = mAdapter.getItem(position);
+        EditTaskDialogFragment editTaskDialogFragment = new EditTaskDialogFragment(this, task);
+        editTaskDialogFragment.show(getFragmentManager(), "editTaskDialog");
+    }
+
     @Override
     public void loadTasksFinish(Object output) {
         tasks = (List<Task>) output;
@@ -102,6 +109,13 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
     @Override
     public void deleteTasksFinish() {
+        LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
+        loadTasksTask.delegate = this;
+        loadTasksTask.execute();
+    }
+
+    @Override
+    public void editTaskFinish() {
         LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
         loadTasksTask.delegate = this;
         loadTasksTask.execute();
@@ -130,6 +144,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        editTask(position);
     }
 
     @Override
@@ -193,6 +208,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         mode.setTitle(checkedCount + " Selected");
         mAdapter.toggleSelection(position);
     }
+
 
 
 }

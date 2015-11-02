@@ -36,10 +36,11 @@ public class EditTaskDialogFragment extends DialogFragment implements TimeSetRes
     TextView chosenTime;
 
     Fragment parentFragment;
+    Task task;
 
-    public EditTaskDialogFragment(Fragment parentFragment) {
+    public EditTaskDialogFragment(Fragment parentFragment, Task task) {
         super();
-
+        this.task = task;
         this.parentFragment = parentFragment;
 
         Log.d(TAG, this.parentFragment.toString());
@@ -57,25 +58,34 @@ public class EditTaskDialogFragment extends DialogFragment implements TimeSetRes
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
         LayoutInflater inflater = getActivity().getLayoutInflater();
         View view = inflater.inflate(R.layout.dialog_add_task, null);
+
+        chosenDate = (TextView) view.findViewById(R.id.chosen_date);
+        chosenTime = (TextView) view.findViewById(R.id.chosen_time);
+        taskTitle = (EditText) view.findViewById(R.id.task_title);
+        taskNotes = (EditText) view.findViewById(R.id.task_notes);
+
+        taskTitle.setText(task.getTitle());
+        taskNotes.setText(task.getNotes());
+        chosenDate.setText(task.getDue().toString());
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
         builder.setView(view)
                 .setTitle("Create your task.")
-                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Save", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        Task task = new Task();
                         task.setTitle(taskTitle.getText().toString());
                         task.setNotes(taskNotes.getText().toString());
                         task.setDue(new DateTime(new Date(year, monthOfYear, dayOfMonth, hourOfDay, minute), TimeZone.getDefault()));
                         List<Task> taskList = new ArrayList<Task>();
                         taskList.add(task);
 
-                        AddTaskTask aaaa = new AddTaskTask(getActivity(), taskList);
-                        aaaa.delegate = (TaskListFragment) parentFragment;
-                        aaaa.execute();
+                        EditTaskTask editTaskTask = new EditTaskTask(getActivity(), task);
+                        editTaskTask.delegate = (TaskListFragment) parentFragment;
+                        editTaskTask.execute();
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -97,7 +107,6 @@ public class EditTaskDialogFragment extends DialogFragment implements TimeSetRes
             }
         });
 
-        chosenDate = (TextView) view.findViewById(R.id.chosen_date);
 
         timePickerButton = (Button) view.findViewById(R.id.time_picker_button);
         timePickerButton.setOnClickListener(new View.OnClickListener() {
@@ -109,11 +118,6 @@ public class EditTaskDialogFragment extends DialogFragment implements TimeSetRes
             }
         });
 
-        chosenTime = (TextView) view.findViewById(R.id.chosen_time);
-
-        taskTitle = (EditText) view.findViewById(R.id.task_title);
-
-        taskNotes = (EditText) view.findViewById(R.id.task_notes);
 
         return alertDialog;
 
