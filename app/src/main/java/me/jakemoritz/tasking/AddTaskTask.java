@@ -25,6 +25,13 @@ public class AddTaskTask extends AsyncTask<Void, Void, Void> {
 
     private static final String TAG = "AddTaskTask";
 
+    public AddTaskResponse delegate = null;
+
+    @Override
+    protected void onPostExecute(Void aVoid) {
+        delegate.addTaskFinish();
+    }
+
     private final static String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
 
     Activity mActivity;
@@ -51,7 +58,7 @@ public class AddTaskTask extends AsyncTask<Void, Void, Void> {
     // Runs when you call execute() on an instance
     @Override
     protected Void doInBackground(Void... params) {
-        Log.d(TAG, "doInBackground");
+        //Log.d(TAG, "doInBackground");
         mScope = SCOPE;
         try {
             String token = fetchToken();
@@ -77,7 +84,6 @@ public class AddTaskTask extends AsyncTask<Void, Void, Void> {
     // handles GoogleAuthExceptions
     protected String fetchToken() throws IOException{
         try {
-            Log.d(TAG, mActivity.toString() + ", " + mEmail + ", " + mScope);
             return GoogleAuthUtil.getToken(mActivity, mEmail, mScope);
         } catch (UserRecoverableAuthException userRecoverableException){
             // GooglePlayServices.apk is either old, disabled, or not present.

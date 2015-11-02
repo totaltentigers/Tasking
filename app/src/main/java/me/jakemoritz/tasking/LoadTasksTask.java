@@ -23,11 +23,11 @@ import java.util.List;
 
 public class LoadTasksTask extends AsyncTask<Void, Void, Void> {
 
-    public AsyncResponse delegate = null;
+    public LoadTaskResponse delegate = null;
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        delegate.processFinish(tasks);
+        delegate.loadTaskFinish(tasks);
     }
 
     private static final String TAG = "LoadTasksTask";
@@ -78,7 +78,6 @@ public class LoadTasksTask extends AsyncTask<Void, Void, Void> {
     // handles GoogleAuthExceptions
     protected String fetchToken() throws IOException{
         try {
-            Log.d(TAG, mActivity.toString() + ", " + mEmail + ", " + mScope);
             return GoogleAuthUtil.getToken(mActivity, mEmail, mScope);
         } catch (UserRecoverableAuthException userRecoverableException){
             // GooglePlayServices.apk is either old, disabled, or not present.

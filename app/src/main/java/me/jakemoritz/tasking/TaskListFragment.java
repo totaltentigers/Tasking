@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class TaskListFragment extends Fragment implements AbsListView.OnItemClickListener, AsyncResponse {
+public class TaskListFragment extends Fragment implements AbsListView.OnItemClickListener, LoadTaskResponse, AddTaskResponse {
 
     private static final String TAG = "TaskListFragment";
 
@@ -61,7 +61,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     }
 
     private void createTask(){
-        AddTaskDialogFragment addTaskDialogFragment = new AddTaskDialogFragment();
+        AddTaskDialogFragment addTaskDialogFragment = new AddTaskDialogFragment(this);
         addTaskDialogFragment.show(getFragmentManager(), "addTaskDialog");
     }
 
@@ -120,11 +120,18 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     }
 
     @Override
-    public void processFinish(Object output) {
+    public void loadTaskFinish(Object output) {
         tasks = (List<Task>) output;
         mAdapter.clear();
         mAdapter.addAll(tasks);
         mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void addTaskFinish() {
+        LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
+        loadTasksTask.delegate = this;
+        loadTasksTask.execute();
     }
 
     /**

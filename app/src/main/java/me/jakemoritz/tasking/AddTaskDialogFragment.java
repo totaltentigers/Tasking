@@ -4,9 +4,11 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.Fragment;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -37,6 +39,18 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
     EditText taskNotes;
     TextView chosenDate;
     TextView chosenTime;
+
+    Fragment parentFragment;
+
+    public AddTaskDialogFragment(Fragment parentFragment) {
+        super();
+
+        this.parentFragment = parentFragment;
+
+        Log.d(TAG, this.parentFragment.toString());
+
+    }
+
     Button datePickerButton;
     Button timePickerButton;
 
@@ -65,6 +79,7 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
                         taskList.add(task);
 
                         AddTaskTask aaaa = new AddTaskTask(getActivity(), taskList);
+                        aaaa.delegate = (TaskListFragment) parentFragment;
                         aaaa.execute();
                     }
                 })
