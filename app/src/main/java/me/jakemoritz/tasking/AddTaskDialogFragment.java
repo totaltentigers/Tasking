@@ -6,9 +6,11 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -64,29 +66,41 @@ public class AddTaskDialogFragment extends DialogFragment implements TimeSetResp
         View view = inflater.inflate(R.layout.dialog_add_task, null);
         builder.setView(view)
                 .setTitle("Create your task.")
-                .setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Task task = new Task();
-                        task.setTitle(taskTitle.getText().toString());
-                        task.setNotes(taskNotes.getText().toString());
-                        task.setDue(new DateTime(new Date(year, monthOfYear, dayOfMonth, hourOfDay, minute), TimeZone.getDefault()));
-                        List<Task> taskList = new ArrayList<Task>();
-                        taskList.add(task);
-
-                        AddTaskTask addTaskTask = new AddTaskTask(getActivity(), taskList);
-                        addTaskTask.delegate = (TaskListFragment) parentFragment;
-                        addTaskTask.execute();
-                    }
-                })
+                .setPositiveButton("Add", null)
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dismiss();
                     }
                 });
-
         AlertDialog alertDialog = builder.create();
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                Button positiveButton = ((AlertDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE);
+                positiveButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Log.d(TAG, "text field: " + taskTitle.getText().toString().isEmpty() );
+                        if (!taskTitle.getText().toString().isEmpty()){
+                            Task task = new Task();
+                            task.setTitle(taskTitle.getText().toString());
+                            task.setNotes(taskNotes.getText().toString());
+                            task.setDue(new DateTime(new Date(year, monthOfYear, dayOfMonth, hourOfDay, minute), TimeZone.getDefault()));
+                            List<Task> taskList = new ArrayList<Task>();
+                            taskList.add(task);
+
+                            AddTaskTask addTaskTask = new AddTaskTask(getActivity(), taskList);
+                            addTaskTask.delegate = (TaskListFragment) parentFragment;
+                            addTaskTask.execute();
+                        } else {
+                            taskTitle.setError("You must enter a task title.");
+
+                        }
+                    }
+                });
+            }
+        });
 
         datePickerButton = (Button) view.findViewById(R.id.date_picker_button);
         datePickerButton.setOnClickListener(new View.OnClickListener() {

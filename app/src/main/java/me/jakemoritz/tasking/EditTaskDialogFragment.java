@@ -73,7 +73,7 @@ public class EditTaskDialogFragment extends DialogFragment implements TimeSetRes
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         builder.setView(view)
-                .setTitle("Create your task.")
+                .setTitle("Edit your task.")
                 .setPositiveButton("Save", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
