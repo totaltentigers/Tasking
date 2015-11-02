@@ -16,9 +16,9 @@ import android.widget.TextView;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.tasks.model.Task;
 
+import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -150,8 +150,10 @@ public class AddTaskDialogFragment extends DialogFragment implements TimeSetResp
         this.hourOfDay = hourOfDay;
         this.minute = minute;
 
-        Calendar cal = Calendar.getInstance();
-        cal.set(0, 0, 0, hourOfDay, minute);
-        chosenTime.setText(cal.getTime().toString());
+        Time time = new Time(hourOfDay, minute, 0);
+        SimpleDateFormat format = new SimpleDateFormat("h:m a");
+
+        String timeString = format.format(time);
+        chosenTime.setText(timeString);
     }
 }
