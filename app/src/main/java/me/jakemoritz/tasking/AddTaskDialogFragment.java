@@ -6,7 +6,6 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -65,11 +64,7 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
                         List<Task> taskList = new ArrayList<Task>();
                         taskList.add(task);
 
-                        // Check sign-in state
-                        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("PREFS_ACC", 0);
-                        String mEmail = sharedPreferences.getString("email", null);
-
-                        AddTaskTask aaaa = new AddTaskTask(getActivity(), mEmail, taskList);
+                        AddTaskTask aaaa = new AddTaskTask(getActivity(), taskList);
                         aaaa.execute();
                     }
                 })

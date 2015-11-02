@@ -9,14 +9,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import me.jakemoritz.tasking.dummy.DummyContent;
+import com.google.api.services.tasks.model.Task;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
-public class TaskListFragment extends Fragment implements AbsListView.OnItemClickListener {
+public class TaskListFragment extends Fragment implements AbsListView.OnItemClickListener, AsyncResponse {
 
     private static final String TAG = "TaskListFragment";
 
@@ -24,11 +25,11 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
     private AbsListView mListView;
 
-    private ListAdapter mAdapter;
+    private TaskAdapter mAdapter;
+    List<Task> tasks;
 
     public static TaskListFragment newInstance() {
-        TaskListFragment fragment = new TaskListFragment();
-        return fragment;
+        return new TaskListFragment();
     }
 
     public TaskListFragment() {
@@ -38,8 +39,13 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mAdapter = new ArrayAdapter<DummyContent.DummyItem>(getActivity(),
-                android.R.layout.simple_list_item_1, android.R.id.text1, DummyContent.ITEMS);
+        tasks = new ArrayList<Task>();
+
+        mAdapter = new TaskAdapter(getActivity(), R.layout.task_item, tasks);
+
+        LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
+        loadTasksTask.delegate = this;
+        loadTasksTask.execute();
     }
 
     @Override
@@ -66,7 +72,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
         // Set the adapter
         mListView = (AbsListView) view.findViewById(android.R.id.list);
-        ((AdapterView<ListAdapter>) mListView).setAdapter(mAdapter);
+        mListView.setAdapter(mAdapter);
 
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
@@ -96,7 +102,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         if (null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
-            mListener.onFragmentInteraction(DummyContent.ITEMS.get(position).id);
+            //mListener.onFragmentInteraction(tasks.get(position).id);
         }
     }
 
@@ -111,6 +117,14 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         if (emptyView instanceof TextView) {
             ((TextView) emptyView).setText(emptyText);
         }
+    }
+
+    @Override
+    public void processFinish(Object output) {
+        tasks = (List<Task>) output;
+        mAdapter.clear();
+        mAdapter.addAll(tasks);
+        mAdapter.notifyDataSetChanged();
     }
 
     /**
