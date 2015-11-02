@@ -69,12 +69,8 @@ public class DeleteTasksTask extends AsyncTask<Void, Void, Void> {
 
                 tasks = service.tasks().list("@default").execute().getItems();
 
-                Log.d(TAG, "reviewing " + mSelectedItemIds.size() + " items for deletion");
-
                 for (int i = 0; i < mSelectedItemIds.size(); i++){
-                    Log.d(TAG, "reviewing item: " + mSelectedItemIds.keyAt(i) + ": " + mSelectedItemIds.get(i));
                     Task task = tasks.get(mSelectedItemIds.keyAt(i));
-                    Log.d(TAG, "deleting task " + i + ": " + task.getTitle() + " with id: " + task.getId());
                     service.tasks().delete("@default", task.getId()).execute();
                 }
             }
