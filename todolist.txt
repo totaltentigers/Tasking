@@ -1,5 +1,8 @@
 ~~~~ Tasking To-Do List ~~~~
 
+^ General ^
+-cache tasks
+
 ^ Task Creation ^
 -disallow adding a task with empty title, notes
 -disallow adding a task with unchosen date, time

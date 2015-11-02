@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
@@ -21,16 +22,16 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-public class LoadTasksTask extends AsyncTask<Void, Void, Void> {
+public class DeleteTasksTask extends AsyncTask<Void, Void, Void> {
 
-    public LoadTasksResponse delegate = null;
+    public DeleteTasksResponse delegate = null;
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        delegate.loadTasksFinish(tasks);
+        delegate.deleteTasksFinish();
     }
 
-    private static final String TAG = "LoadTasksTask";
+    private static final String TAG = "DeleteTasksTask";
 
     private final static String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
 
@@ -43,9 +44,11 @@ public class LoadTasksTask extends AsyncTask<Void, Void, Void> {
     GoogleAccountCredential credential;
     List<Task> tasks;
     Tasks service;
+    SparseBooleanArray mSelectedItemIds;
 
-    public LoadTasksTask(Activity mActivity) {
+    public DeleteTasksTask(Activity mActivity, SparseBooleanArray mSelectedItemIds) {
         this.mActivity = mActivity;
+        this.mSelectedItemIds = mSelectedItemIds;
 
         SharedPreferences sharedPreferences = mActivity.getSharedPreferences("PREFS_ACC", 0);
         this.mEmail = sharedPreferences.getString("email", null);
@@ -65,6 +68,15 @@ public class LoadTasksTask extends AsyncTask<Void, Void, Void> {
                 service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName("Tasking").build();
 
                 tasks = service.tasks().list("@default").execute().getItems();
+
+                Log.d(TAG, "reviewing " + mSelectedItemIds.size() + " items for deletion");
+
+                for (int i = 0; i < mSelectedItemIds.size(); i++){
+                    Log.d(TAG, "reviewing item: " + mSelectedItemIds.keyAt(i) + ": " + mSelectedItemIds.get(i));
+                    Task task = tasks.get(mSelectedItemIds.keyAt(i));
+                    Log.d(TAG, "deleting task " + i + ": " + task.getTitle() + " with id: " + task.getId());
+                    service.tasks().delete("@default", task.getId()).execute();
+                }
             }
         } catch (IOException e){
             // The fetchToken() method handles Google-specific exceptions,

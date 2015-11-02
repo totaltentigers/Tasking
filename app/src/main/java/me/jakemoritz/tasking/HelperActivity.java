@@ -23,8 +23,10 @@ public class HelperActivity extends AppCompatActivity {
 
         if (isLoggedIn){
             startActivity(new Intent(this, MainActivity.class));
+            finish();
         } else {
             startActivity(new Intent(this, LoginActivity.class));
+            finish();
         }
     }
 

@@ -3,6 +3,7 @@ package me.jakemoritz.tasking;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -21,8 +22,8 @@ import java.util.List;
 
 
 public class TaskListFragment extends Fragment implements AbsListView.OnItemClickListener,
-        LoadTaskResponse, AddTaskResponse, AbsListView.OnItemLongClickListener,
-        ActionMode.Callback, AbsListView.MultiChoiceModeListener{
+        LoadTasksResponse, AddTaskResponse, AbsListView.OnItemLongClickListener,
+        ActionMode.Callback, AbsListView.MultiChoiceModeListener, DeleteTasksResponse{
 
     private static final String TAG = "TaskListFragment";
 
@@ -85,7 +86,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     }
 
     @Override
-    public void loadTaskFinish(Object output) {
+    public void loadTasksFinish(Object output) {
         tasks = (List<Task>) output;
         mAdapter.clear();
         mAdapter.addAll(tasks);
@@ -94,6 +95,13 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
     @Override
     public void addTaskFinish() {
+        LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
+        loadTasksTask.delegate = this;
+        loadTasksTask.execute();
+    }
+
+    @Override
+    public void deleteTasksFinish() {
         LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
         loadTasksTask.delegate = this;
         loadTasksTask.execute();
@@ -152,10 +160,17 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
             case R.id.action_delete:
                 SparseBooleanArray selected = mAdapter.getSelectedIds();
 
+                DeleteTasksTask deleteTasksTask = new DeleteTasksTask(getActivity(), selected);
+                deleteTasksTask.delegate = this;
+                deleteTasksTask.execute();
+
                 for (int i = 0; i < selected.size(); i++){
                     if (selected.valueAt(i)){
                         //delete
-                        Task task = mAdapter.getItem(i);
+
+                        Task task = mAdapter.getItem(selected.keyAt(i));
+                        Log.d(TAG, "removing: " + i + ": " + task.getTitle());
+
                         mAdapter.remove(task);
                     }
                 }
@@ -175,6 +190,9 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     @Override
     public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
         final int checkedCount = mListView.getCheckedItemCount();
+        mode.setTitle(checkedCount + " Selected");
         mAdapter.toggleSelection(position);
     }
+
+
 }

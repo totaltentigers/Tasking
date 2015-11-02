@@ -18,6 +18,11 @@ public class TaskAdapter extends ArrayAdapter<Task> {
 
     Context context;
     int layoutResourceId;
+
+    public List<Task> getTaskList() {
+        return taskList;
+    }
+
     List<Task> taskList = null;
     private SparseBooleanArray mSelectedItemIds;
 
