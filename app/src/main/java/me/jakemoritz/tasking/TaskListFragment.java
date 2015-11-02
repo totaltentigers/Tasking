@@ -102,9 +102,13 @@ EditTaskResponse, SwipeRefreshLayout.OnRefreshListener{
     @Override
     public void loadTasksFinish(Object output) {
         tasks = (List<Task>) output;
-        mAdapter.clear();
-        mAdapter.addAll(tasks);
-        mAdapter.notifyDataSetChanged();
+
+        if (tasks != null){
+            mAdapter.clear();
+            mAdapter.addAll(tasks);
+            mAdapter.notifyDataSetChanged();
+        }
+
     }
 
     @Override

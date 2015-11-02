@@ -36,10 +36,6 @@ dependencies {
     compile 'com.google.http-client:google-http-client-android:1.18.0-rc'
     compile 'com.google.apis:google-api-services-oauth2:v1-rev99-1.20.0'
     compile 'com.google.api-client:google-api-client:1.20.0'
-    compile files('/home/jakemoritz/Android/Projects/Tasking/libs/google-api-client-1.4.1-beta.jar')
-    compile files('/home/jakemoritz/Android/Projects/Tasking/libs/google-api-client-1.10.3-beta.jar')
-    compile files('/home/jakemoritz/Android/Projects/Tasking/libs/google-api-services-tasks-v1-1.1.0-beta.jar')
-    compile files('/home/jakemoritz/Android/Projects/Tasking/libs/google-api-services-tasks-v1-1.0.0-beta-sources.jar')
     compile 'com.google.apis:google-api-services-tasks:v1-rev35-1.19.0' exclude module: 'httpclient'
     compile 'com.google.api-client:google-api-client-android:1.19.0' exclude module: 'httpclient'
     compile 'com.google.http-client:google-http-client-gson:1.19.0' exclude module: 'httpclient'

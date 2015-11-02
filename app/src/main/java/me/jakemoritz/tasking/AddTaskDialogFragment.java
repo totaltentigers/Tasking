@@ -125,10 +125,24 @@ public class AddTaskDialogFragment extends DialogFragment implements TimeSetResp
         this.monthOfYear = monthOfYear;
         this.dayOfMonth = dayOfMonth;
 
-        SimpleDateFormat format = new SimpleDateFormat("MM/dd/yyyy");
-        Calendar cal = Calendar.getInstance();
-        cal.set(year, monthOfYear, dayOfMonth);
-        chosenDate.setText(cal.getTime().toString());
+        SimpleDateFormat format = new SimpleDateFormat("MMMM");
+        format.setTimeZone(TimeZone.getDefault());
+        Date date = new Date(year, monthOfYear, dayOfMonth);
+
+        String[] suffixes =
+                //    0     1     2     3     4     5     6     7     8     9
+                { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th",
+                        //    10    11    12    13    14    15    16    17    18    19
+                        "th", "th", "th", "th", "th", "th", "th", "th", "th", "th",
+                        //    20    21    22    23    24    25    26    27    28    29
+                        "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th",
+                        //    30    31
+                        "th", "st" };
+
+        String dayString = dayOfMonth + suffixes[dayOfMonth];
+        String dateString = format.format(date) + " " + dayString + ", " + year;
+
+        chosenDate.setText(dateString);
     }
 
     @Override
