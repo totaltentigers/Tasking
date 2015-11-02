@@ -20,8 +20,7 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.plus.Plus;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener,
-TaskListFragment.OnFragmentInteractionListener, AccountDialogPreference.OnSignOutListener,
+        implements NavigationView.OnNavigationItemSelectedListener, AccountDialogPreference.OnSignOutListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
     private static final String TAG = "MainActivity";
@@ -105,10 +104,6 @@ TaskListFragment.OnFragmentInteractionListener, AccountDialogPreference.OnSignOu
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    @Override
-    public void onFragmentInteraction(String id) {
     }
 
     @Override

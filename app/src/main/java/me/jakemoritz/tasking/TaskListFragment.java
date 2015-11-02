@@ -1,6 +1,5 @@
 package me.jakemoritz.tasking;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -13,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.TextView;
 
 import com.google.api.services.tasks.model.Task;
 
@@ -23,21 +21,15 @@ import java.util.List;
 
 public class TaskListFragment extends Fragment implements AbsListView.OnItemClickListener,
         LoadTaskResponse, AddTaskResponse, AbsListView.OnItemLongClickListener,
-        ActionMode.Callback{
+        ActionMode.Callback, AbsListView.MultiChoiceModeListener{
 
     private static final String TAG = "TaskListFragment";
-
-    private OnFragmentInteractionListener mListener;
 
     private AbsListView mListView;
 
     private TaskAdapter mAdapter;
-    List<Task> tasks;
-    MenuItem deleteItem;
 
-    public static TaskListFragment newInstance() {
-        return new TaskListFragment();
-    }
+    List<Task> tasks;
 
     public TaskListFragment() {
     }
@@ -53,6 +45,25 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
         loadTasksTask.delegate = this;
         loadTasksTask.execute();
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_tasklist, container, false);
+
+        // Set the adapter
+        mListView = (AbsListView) view.findViewById(android.R.id.list);
+        mListView.setAdapter(mAdapter);
+
+        // Set OnItemClickListener so we can be notified on item clicks
+        mListView.setOnItemClickListener(this);
+        mListView.setOnItemLongClickListener(this);
+        mListView.setLongClickable(true);
+        mListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
+        mListView.setMultiChoiceModeListener(this);
+
+        return view;
     }
 
     @Override
@@ -73,66 +84,18 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_tasklist, container, false);
-
-        // Set the adapter
-        mListView = (AbsListView) view.findViewById(android.R.id.list);
-        mListView.setAdapter(mAdapter);
-
-        // Set OnItemClickListener so we can be notified on item clicks
-        mListView.setOnItemClickListener(this);
-        mListView.setOnItemLongClickListener(this);
-
-        return view;
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        try {
-            mListener = (OnFragmentInteractionListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if (null != mListener) {
-            // Notify the active callbacks interface (the activity, if the
-            // fragment is attached to one) that an item has been selected.
-            //mListener.onFragmentInteraction(tasks.get(position).id);
-        }
-    }
-
-    /**
-     * The default content for this Fragment has a TextView that is shown when
-     * the list is empty. If you would like to change the text, call this method
-     * to supply the text it should use.
-     */
-    public void setEmptyText(CharSequence emptyText) {
-        View emptyView = mListView.getEmptyView();
-
-        if (emptyView instanceof TextView) {
-            ((TextView) emptyView).setText(emptyText);
-        }
-    }
-
-    @Override
     public void loadTaskFinish(Object output) {
         tasks = (List<Task>) output;
         mAdapter.clear();
         mAdapter.addAll(tasks);
         mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void addTaskFinish() {
+        LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
+        loadTasksTask.delegate = this;
+        loadTasksTask.execute();
     }
 
     @Override
@@ -157,20 +120,17 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     }
 
     @Override
-    public void addTaskFinish() {
-        LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
-        loadTasksTask.delegate = this;
-        loadTasksTask.execute();
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
     }
 
     @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         getActivity().startActionMode(this);
-        view.setSelected(true);
+        mListView.setItemChecked(position, true);
         return true;
     }
 
-    // Called when action moade is created; startActionMode() called
+    // Called when action mode is created; startActionMode() called
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
         MenuInflater inflater = mode.getMenuInflater();
@@ -181,7 +141,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     // Called when action mode is shown; always after onCreateActionMode or invalidated
     @Override
     public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-        return false;
+        return true;
     }
 
     // Called when user selects contextual menu item
@@ -203,19 +163,8 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onFragmentInteraction(String id);
-    }
+    @Override
+    public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
 
+    }
 }
