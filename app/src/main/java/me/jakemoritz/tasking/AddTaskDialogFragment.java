@@ -19,6 +19,7 @@ import com.google.api.services.tasks.model.Task;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
@@ -115,8 +116,45 @@ public class AddTaskDialogFragment extends DialogFragment implements TimeSetResp
 
         taskNotes = (EditText) view.findViewById(R.id.task_notes);
 
+        displayCurrentDateAndTime();
+
         return alertDialog;
 
+    }
+
+    public void displayCurrentDateAndTime(){
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeZone(TimeZone.getDefault());
+
+        int year = cal.get(Calendar.YEAR);
+        int month = cal.get(Calendar.MONTH);
+        int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
+
+        Date date = new Date(year, month, dayOfMonth);
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM");
+        dateFormat.setTimeZone(TimeZone.getDefault());
+
+        String[] suffixes =
+                //    0     1     2     3     4     5     6     7     8     9
+                { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th",
+                        //    10    11    12    13    14    15    16    17    18    19
+                        "th", "th", "th", "th", "th", "th", "th", "th", "th", "th",
+                        //    20    21    22    23    24    25    26    27    28    29
+                        "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th",
+                        //    30    31
+                        "th", "st" };
+
+        String dayString = dayOfMonth + suffixes[dayOfMonth];
+        String dateString = dateFormat.format(date) + " " + dayString + ", " + year;
+
+        chosenDate.setText(dateString);
+
+        Time time = new Time(cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), 0);
+        SimpleDateFormat timeFormat = new SimpleDateFormat("h:mm a");
+
+        String timeString = timeFormat.format(time);
+        chosenTime.setText(timeString);
     }
 
     @Override
@@ -151,7 +189,7 @@ public class AddTaskDialogFragment extends DialogFragment implements TimeSetResp
         this.minute = minute;
 
         Time time = new Time(hourOfDay, minute, 0);
-        SimpleDateFormat format = new SimpleDateFormat("h:m a");
+        SimpleDateFormat format = new SimpleDateFormat("h:mm a");
 
         String timeString = format.format(time);
         chosenTime.setText(timeString);
