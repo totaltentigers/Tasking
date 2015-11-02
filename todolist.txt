@@ -9,7 +9,33 @@
 -add dividing line under dialog title
 -add icon to dialog
 
+^ Task Deletion ^
+-long press to select 1+ tasks
+-delete from action bar
+-reload task list
+-undo (snackbar?)
+
+^ Task Update ^
+-rework alertdialog or create new subclass for updating
+-reload task list
+
 ^ Task List Items ^
 -increase title and notes text size
 -display date and time
 -add check box
+-implement pull to refresh
+
+^ Side nav ^
+-update avatar to user avatar
+-update name to user name
+-update email to user email
+-update background to user background
+
+^ General UI ^
+-change color scheme
+-login screen
+
+^ Optional ^
+-access different task lists?
+-allow multiple accounts? (heavy shared prefs, multiple files)
+-reminders

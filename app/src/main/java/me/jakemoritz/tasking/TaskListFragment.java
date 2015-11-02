@@ -3,6 +3,7 @@ package me.jakemoritz.tasking;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -60,7 +61,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         mListView.setOnItemClickListener(this);
         mListView.setOnItemLongClickListener(this);
         mListView.setLongClickable(true);
-        mListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE);
+        mListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
         mListView.setMultiChoiceModeListener(this);
 
         return view;
@@ -141,7 +142,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     // Called when action mode is shown; always after onCreateActionMode or invalidated
     @Override
     public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-        return true;
+        return false;
     }
 
     // Called when user selects contextual menu item
@@ -149,7 +150,15 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
         switch (item.getItemId()){
             case R.id.action_delete:
-                //deleteTask();
+                SparseBooleanArray selected = mAdapter.getSelectedIds();
+
+                for (int i = 0; i < selected.size(); i++){
+                    if (selected.valueAt(i)){
+                        //delete
+                        Task task = mAdapter.getItem(i);
+                        mAdapter.remove(task);
+                    }
+                }
                 mode.finish(); // Action picked
                 return true;
             default:
@@ -160,11 +169,12 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     // Called when user exits action mode
     @Override
     public void onDestroyActionMode(ActionMode mode) {
-
+        mAdapter.removeSelection();
     }
 
     @Override
     public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-
+        final int checkedCount = mListView.getCheckedItemCount();
+        mAdapter.toggleSelection(position);
     }
 }

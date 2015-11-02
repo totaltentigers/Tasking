@@ -2,6 +2,7 @@ package me.jakemoritz.tasking;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,12 +19,46 @@ public class TaskAdapter extends ArrayAdapter<Task> {
     Context context;
     int layoutResourceId;
     List<Task> taskList = null;
+    private SparseBooleanArray mSelectedItemIds;
+
+    @Override
+    public void remove(Task object) {
+        taskList.remove(object);
+        notifyDataSetChanged();
+    }
 
     public TaskAdapter(Context context, int layoutResourceId, List<Task> taskList){
         super(context, layoutResourceId, taskList);
         this.layoutResourceId = layoutResourceId;
         this.context = context;
         this.taskList = taskList;
+        mSelectedItemIds = new SparseBooleanArray();
+    }
+
+    public void toggleSelection(int position){
+        selectView(position, !mSelectedItemIds.get(position));
+    }
+
+    public void removeSelection(){
+        mSelectedItemIds = new SparseBooleanArray();
+        notifyDataSetChanged();
+    }
+
+    public void selectView(int position, boolean value){
+        if (value){
+            mSelectedItemIds.put(position, value);
+        } else {
+            mSelectedItemIds.delete(position);
+        }
+        notifyDataSetChanged();
+    }
+
+    public int getSelectedCount(){
+        return mSelectedItemIds.size();
+    }
+
+    public SparseBooleanArray getSelectedIds(){
+        return mSelectedItemIds;
     }
 
     @Override
