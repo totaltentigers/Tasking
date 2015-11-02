@@ -1,21 +1,23 @@
 package me.jakemoritz.tasking;
 
-import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
+import android.widget.DatePicker;
 
 import java.util.Calendar;
 
-public class DatePickerFragment extends DialogFragment{
+public class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener{
 
-    private AddTaskDialogFragment addTaskDialogFragment;
+    private Fragment fragment;
 
-    public DatePickerFragment(AddTaskDialogFragment addTaskDialogFragment) {
+    public DateSetResponse delegate = null;
+
+    public DatePickerFragment(Fragment fragment) {
         super();
-        this.addTaskDialogFragment = addTaskDialogFragment;
+        this.fragment = fragment;
     }
 
     private static final String TAG = "DatePickerFragment";
@@ -28,6 +30,11 @@ public class DatePickerFragment extends DialogFragment{
         int month = c.get(Calendar.MONTH);
         int day = c.get(Calendar.DAY_OF_MONTH);
 
-        return new DatePickerDialog(getActivity(), addTaskDialogFragment, year, month, day);
+        return new DatePickerDialog(getActivity(), this, year, month, day);
+    }
+
+    @Override
+    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+        delegate.dateSet(year, monthOfYear, dayOfMonth);
     }
 }

@@ -24,11 +24,11 @@ import java.util.List;
 import java.util.TimeZone;
 
 
-public class AddTaskDialogFragment extends DialogFragment implements TimeSetResponse, DateSetResponse{
+public class EditTaskDialogFragment extends DialogFragment implements TimeSetResponse, DateSetResponse{
 
-    private static final String TAG = "AddTaskDialogFragment";
+    private static final String TAG = "EditTaskDialogFragment";
 
-    final AddTaskDialogFragment callbackInstance = this;
+    final EditTaskDialogFragment callbackInstance = this;
 
     EditText taskTitle;
     EditText taskNotes;
@@ -37,7 +37,7 @@ public class AddTaskDialogFragment extends DialogFragment implements TimeSetResp
 
     Fragment parentFragment;
 
-    public AddTaskDialogFragment(Fragment parentFragment) {
+    public EditTaskDialogFragment(Fragment parentFragment) {
         super();
 
         this.parentFragment = parentFragment;

@@ -1,7 +1,7 @@
 ~~~~ Tasking To-Do List ~~~~
 
 ^ General ^
--cache tasks
+-cache tasks (database?)
 
 ^ Task Creation ^
 -disallow adding a task with empty title, notes
