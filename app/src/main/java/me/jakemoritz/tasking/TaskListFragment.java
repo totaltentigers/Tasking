@@ -4,7 +4,11 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -17,7 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class TaskListFragment extends Fragment implements AbsListView.OnItemClickListener, LoadTaskResponse, AddTaskResponse {
+public class TaskListFragment extends Fragment implements AbsListView.OnItemClickListener,
+        LoadTaskResponse, AddTaskResponse, AbsListView.OnItemLongClickListener,
+        ActionMode.Callback{
 
     private static final String TAG = "TaskListFragment";
 
@@ -27,6 +33,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
     private TaskAdapter mAdapter;
     List<Task> tasks;
+    MenuItem deleteItem;
 
     public static TaskListFragment newInstance() {
         return new TaskListFragment();
@@ -76,6 +83,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
+        mListView.setOnItemLongClickListener(this);
 
         return view;
     }
@@ -128,10 +136,71 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.main, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_delete) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void addTaskFinish() {
         LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
         loadTasksTask.delegate = this;
         loadTasksTask.execute();
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        getActivity().startActionMode(this);
+        view.setSelected(true);
+        return true;
+    }
+
+    // Called when action moade is created; startActionMode() called
+    @Override
+    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+        MenuInflater inflater = mode.getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        return true;
+    }
+
+    // Called when action mode is shown; always after onCreateActionMode or invalidated
+    @Override
+    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+        return false;
+    }
+
+    // Called when user selects contextual menu item
+    @Override
+    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.action_delete:
+                //deleteTask();
+                mode.finish(); // Action picked
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    // Called when user exits action mode
+    @Override
+    public void onDestroyActionMode(ActionMode mode) {
+
     }
 
     /**

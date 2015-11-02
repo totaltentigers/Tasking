@@ -1,0 +1,15 @@
+~~~~ Tasking To-Do List ~~~~
+
+^ Task Creation ^
+-disallow adding a task with empty title, notes
+-disallow adding a task with unchosen date, time
+-change fab button icon to correct plus sign
+-move date and time TextViews to right of buttons
+-add internal padding
+-add dividing line under dialog title
+-add icon to dialog
+
+^ Task List Items ^
+-increase title and notes text size
+-display date and time
+-add check box
