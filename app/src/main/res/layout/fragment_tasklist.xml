@@ -8,10 +8,13 @@
         android:layout_gravity="bottom|end" android:layout_margin="@dimen/fab_margin"
         android:src="@android:drawable/ic_menu_add" />
 
-    <ListView android:id="@android:id/list" android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_container"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+        <ListView android:id="@android:id/list" android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </android.support.v4.widget.SwipeRefreshLayout>
 
-    <TextView android:id="@android:id/empty" android:layout_width="match_parent"
-        android:layout_height="match_parent" android:gravity="center" />
 
 </FrameLayout>

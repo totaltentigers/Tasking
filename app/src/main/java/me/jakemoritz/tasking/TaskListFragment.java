@@ -3,6 +3,7 @@ package me.jakemoritz.tasking;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
@@ -24,7 +25,7 @@ import java.util.List;
 public class TaskListFragment extends Fragment implements AbsListView.OnItemClickListener,
         LoadTasksResponse, AddTaskResponse, AbsListView.OnItemLongClickListener,
         ActionMode.Callback, AbsListView.MultiChoiceModeListener, DeleteTasksResponse,
-EditTaskResponse{
+EditTaskResponse, SwipeRefreshLayout.OnRefreshListener{
 
     private static final String TAG = "TaskListFragment";
 
@@ -50,10 +51,16 @@ EditTaskResponse{
         loadTasksTask.execute();
     }
 
+    SwipeRefreshLayout swipeRefreshLayout;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tasklist, container, false);
+
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
+        swipeRefreshLayout.setOnRefreshListener(this);
+        //swipeRefreshLayout.setColorSchemeColors();
 
         // Set the adapter
         mListView = (AbsListView) view.findViewById(android.R.id.list);
@@ -210,5 +217,12 @@ EditTaskResponse{
     }
 
 
+    @Override
+    public void onRefresh() {
+        LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
+        loadTasksTask.delegate = this;
+        loadTasksTask.execute();
 
+        swipeRefreshLayout.setRefreshing(false);
+    }
 }
