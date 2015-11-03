@@ -19,7 +19,6 @@ import com.google.api.services.tasks.model.Task;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.List;
 
 public class AddTaskTask extends AsyncTask<Void, Void, Void> {
 
@@ -27,39 +26,29 @@ public class AddTaskTask extends AsyncTask<Void, Void, Void> {
 
     public AddTaskResponse delegate = null;
 
-    @Override
-    protected void onPostExecute(Void aVoid) {
-        delegate.addTaskFinish();
-    }
-
-    private final static String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
+    private final static String mScope = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
 
     Activity mActivity;
-    String mScope;
     String mEmail;
+    Task task;
 
     final HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
     final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
     GoogleAccountCredential credential;
-    List<Task> tasksList;
     Tasks service;
 
-    public AddTaskTask(Activity mActivity, List<Task> tasksList) {
+    public AddTaskTask(Activity mActivity, Task task) {
         this.mActivity = mActivity;
+        this.task = task;
 
         SharedPreferences sharedPreferences = mActivity.getSharedPreferences("PREFS_ACC", 0);
         this.mEmail = sharedPreferences.getString("email", null);
-
-        this.tasksList = tasksList;
     }
-
 
     // Executes asynchronous job.
     // Runs when you call execute() on an instance
     @Override
     protected Void doInBackground(Void... params) {
-        //Log.d(TAG, "doInBackground");
-        mScope = SCOPE;
         try {
             String token = fetchToken();
             if (token != null){
@@ -67,9 +56,7 @@ public class AddTaskTask extends AsyncTask<Void, Void, Void> {
                 credential.setSelectedAccountName(mEmail);
                 service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName("Tasking").build();
 
-                for (Task eachTask : tasksList){
-                    Task result = service.tasks().insert("@default", eachTask).execute();
-                }
+                Task result = service.tasks().insert("@default", task).execute();
             }
         } catch (IOException e){
             // The fetchToken() method handles Google-specific exceptions,
@@ -78,7 +65,6 @@ public class AddTaskTask extends AsyncTask<Void, Void, Void> {
         }
         return null;
     }
-
 
     // Fetches authentication token from Google and
     // handles GoogleAuthExceptions
@@ -94,5 +80,10 @@ public class AddTaskTask extends AsyncTask<Void, Void, Void> {
             Log.e(TAG, fatalException.toString());
         }
         return null;
+    }
+
+    @Override
+    protected void onPostExecute(Void aVoid) {
+        delegate.addTaskFinish();
     }
 }

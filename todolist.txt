@@ -4,7 +4,7 @@
 -cache tasks (database?)
 
 ^ Task Creation ^
--disallow adding a task with empty title, notes
+-disallow adding a task with empty title
 -disallow adding a task with unchosen date, time
 -change fab button icon to correct plus sign
 -move date and time TextViews to right of buttons
@@ -13,9 +13,6 @@
 -add icon to dialog
 
 ^ Task Deletion ^
--long press to select 1+ tasks
--delete from action bar
--reload task list
 -undo (snackbar?)
 
 ^ Task Update ^
@@ -26,13 +23,9 @@
 -increase title and notes text size
 -display date and time
 -add check box
--implement pull to refresh
 
 ^ Side nav ^
--update avatar to user avatar
--update name to user name
--update email to user email
--update background to user background
+-make scaled avatar not hideous
 
 ^ General UI ^
 -change color scheme
@@ -42,3 +35,6 @@
 -access different task lists?
 -allow multiple accounts? (heavy shared prefs, multiple files)
 -reminders
+
+^ Known errors/crashes ^
+-deleting tasks sometimes throws out of bonds

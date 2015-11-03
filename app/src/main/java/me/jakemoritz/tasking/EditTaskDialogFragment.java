@@ -6,7 +6,6 @@ import android.app.DialogFragment;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -16,12 +15,7 @@ import android.widget.TextView;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.tasks.model.Task;
 
-import java.sql.Time;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.TimeZone;
+import java.util.Calendar;
 
 
 public class EditTaskDialogFragment extends DialogFragment implements TimeSetResponse, DateSetResponse{
@@ -30,31 +24,28 @@ public class EditTaskDialogFragment extends DialogFragment implements TimeSetRes
 
     final EditTaskDialogFragment callbackInstance = this;
 
-    EditText taskTitle;
-    EditText taskNotes;
-    TextView chosenDate;
-    TextView chosenTime;
-
     Fragment parentFragment;
     Task task;
-
-    public EditTaskDialogFragment(Fragment parentFragment, Task task) {
-        super();
-        this.task = task;
-        this.parentFragment = parentFragment;
-
-        Log.d(TAG, this.parentFragment.toString());
-
-    }
-
-    Button datePickerButton;
-    Button timePickerButton;
 
     int year;
     int monthOfYear;
     int dayOfMonth;
     int hourOfDay;
     int minute;
+    long timeInMs;
+
+    EditText taskTitle;
+    EditText taskNotes;
+    TextView chosenDate;
+    TextView chosenTime;
+    Button datePickerButton;
+    Button timePickerButton;
+
+    public EditTaskDialogFragment(Fragment parentFragment, Task task) {
+        super();
+        this.task = task;
+        this.parentFragment = parentFragment;
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -65,10 +56,12 @@ public class EditTaskDialogFragment extends DialogFragment implements TimeSetRes
         chosenTime = (TextView) view.findViewById(R.id.chosen_time);
         taskTitle = (EditText) view.findViewById(R.id.task_title);
         taskNotes = (EditText) view.findViewById(R.id.task_notes);
+        datePickerButton = (Button) view.findViewById(R.id.date_picker_button);
+        timePickerButton = (Button) view.findViewById(R.id.time_picker_button);
 
         taskTitle.setText(task.getTitle());
         taskNotes.setText(task.getNotes());
-        chosenDate.setText(task.getDue().toString());
+        displayTaskDueDateAndTime();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
@@ -93,24 +86,29 @@ public class EditTaskDialogFragment extends DialogFragment implements TimeSetRes
                         if (!taskTitle.getText().toString().isEmpty()) {
                             task.setTitle(taskTitle.getText().toString());
                             task.setNotes(taskNotes.getText().toString());
-                            task.setDue(new DateTime(new Date(year, monthOfYear, dayOfMonth, hourOfDay, minute), TimeZone.getDefault()));
-                            List<Task> taskList = new ArrayList<Task>();
-                            taskList.add(task);
+
+                            // Save time in ms
+                            Calendar cal = Calendar.getInstance();
+                            cal.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
+                            timeInMs = cal.getTimeInMillis();
+
+                            DateTime dateTime = new DateTime(timeInMs);
+
+                            task.setDue(dateTime);
 
                             EditTaskTask editTaskTask = new EditTaskTask(getActivity(), task);
                             editTaskTask.delegate = (TaskListFragment) parentFragment;
                             editTaskTask.execute();
+
+                            dismiss();
                         } else {
                             taskTitle.setError("You must enter a task title.");
-
                         }
-
                     }
                 });
             }
         });
 
-        datePickerButton = (Button) view.findViewById(R.id.date_picker_button);
         datePickerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -121,7 +119,6 @@ public class EditTaskDialogFragment extends DialogFragment implements TimeSetRes
         });
 
 
-        timePickerButton = (Button) view.findViewById(R.id.time_picker_button);
         timePickerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -131,9 +128,26 @@ public class EditTaskDialogFragment extends DialogFragment implements TimeSetRes
             }
         });
 
-
         return alertDialog;
+    }
 
+    public void displayTaskDueDateAndTime(){
+        // Get DateTime from task
+        DateTime dateTime = task.getDue();
+
+        // Create calendar from
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(dateTime.getValue());
+
+        // Save current date and time values
+        this.year = cal.get(Calendar.YEAR);
+        this.monthOfYear = cal.get(Calendar.MONTH);
+        this.dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
+        this.hourOfDay = cal.get(Calendar.HOUR_OF_DAY);
+        this.minute = cal.get(Calendar.MINUTE);
+
+        chosenDate.setText(DateFormatter.formatDate(year, monthOfYear, dayOfMonth));
+        chosenTime.setText(TimeFormatter.formatTime(hourOfDay, minute));
     }
 
     @Override
@@ -142,24 +156,7 @@ public class EditTaskDialogFragment extends DialogFragment implements TimeSetRes
         this.monthOfYear = monthOfYear;
         this.dayOfMonth = dayOfMonth;
 
-        SimpleDateFormat format = new SimpleDateFormat("MMMM");
-        format.setTimeZone(TimeZone.getDefault());
-        Date date = new Date(year, monthOfYear, dayOfMonth);
-
-        String[] suffixes =
-                //    0     1     2     3     4     5     6     7     8     9
-                { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th",
-                        //    10    11    12    13    14    15    16    17    18    19
-                        "th", "th", "th", "th", "th", "th", "th", "th", "th", "th",
-                        //    20    21    22    23    24    25    26    27    28    29
-                        "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th",
-                        //    30    31
-                        "th", "st" };
-
-        String dayString = dayOfMonth + suffixes[dayOfMonth];
-        String dateString = format.format(date) + " " + dayString + ", " + year;
-
-        chosenDate.setText(dateString);
+        chosenDate.setText(DateFormatter.formatDate(year, monthOfYear, dayOfMonth));
     }
 
     @Override
@@ -167,10 +164,6 @@ public class EditTaskDialogFragment extends DialogFragment implements TimeSetRes
         this.hourOfDay = hourOfDay;
         this.minute = minute;
 
-        Time time = new Time(hourOfDay, minute, 0);
-        SimpleDateFormat format = new SimpleDateFormat("h:mm a");
-
-        String timeString = format.format(time);
-        chosenTime.setText(timeString);
+        chosenTime.setText(TimeFormatter.formatTime(hourOfDay, minute));
     }
 }

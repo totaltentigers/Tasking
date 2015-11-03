@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.DatePicker;
 
 import java.util.Calendar;
@@ -35,6 +36,7 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
 
     @Override
     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+        Log.d(TAG, "month: " + monthOfYear + ", day: " + dayOfMonth + ", year: " + year);
         delegate.dateSet(year, monthOfYear, dayOfMonth);
     }
 }
