@@ -4,24 +4,14 @@
 -cache tasks (database?)
 
 ^ Task Creation ^
--disallow adding a task with empty title
--disallow adding a task with unchosen date, time
 -change fab button icon to correct plus sign
--move date and time TextViews to right of buttons
--add internal padding
 -add dividing line under dialog title
 -add icon to dialog
 
 ^ Task Deletion ^
 -undo (snackbar?)
 
-^ Task Update ^
--rework alertdialog or create new subclass for updating
--reload task list
-
 ^ Task List Items ^
--increase title and notes text size
--display date and time
 -add check box
 
 ^ Side nav ^
