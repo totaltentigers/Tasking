@@ -92,11 +92,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString("email", Plus.AccountApi.getAccountName(mGoogleApiClient));
+        editor.putString("name", Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getDisplayName());
         editor.putBoolean("signedIn", true);
         editor.commit();
 
         Intent mainIntent = new Intent(this, MainActivity.class);
-        mainIntent.putExtra("email", Plus.AccountApi.getAccountName(mGoogleApiClient));
         // Show the signed-in UI
         startActivity(mainIntent);
     }

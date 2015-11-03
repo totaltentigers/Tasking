@@ -1,5 +1,6 @@
 package me.jakemoritz.tasking;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
@@ -36,6 +37,11 @@ import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.plus.Plus;
 import com.google.android.gms.plus.model.people.Person;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -61,12 +67,6 @@ public class MainActivity extends AppCompatActivity
     private boolean updatingUserInfo = false;
     private View header;
 
-    public String getmEmail() {
-        return mEmail;
-    }
-
-    private String mEmail;
-
     ImageView navUserAvatar;
     TextView navUserName;
     TextView navUserEmail;
@@ -78,13 +78,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        if (getIntent() != null){
-            Intent intent = getIntent();
-            if (intent.getStringExtra("email") != null){
-                mEmail = intent.getStringExtra("email");
-            }
-        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -103,7 +96,7 @@ public class MainActivity extends AppCompatActivity
         navUserEmail = (TextView) header.findViewById(R.id.user_email);
         navUserCover = (LinearLayout) header.findViewById(R.id.user_cover);
 
-        connectApiClientForUserInfo();
+        loadNavUserInfo();
 
         // Initialize default fragment
         getFragmentManager().beginTransaction()
@@ -111,7 +104,7 @@ public class MainActivity extends AppCompatActivity
                 .commit();
     }
 
-    public void connectApiClientForUserInfo(){
+    public GoogleApiClient connectApiClientForUserInfo(){
         // Build GoogleApiClient with access to basic profile
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -121,65 +114,152 @@ public class MainActivity extends AppCompatActivity
                 .addScope(new Scope(Scopes.EMAIL))
                 .build();
 
-        updatingUserInfo = true;
+        //updatingUserInfo = true;
         mGoogleApiClient.connect();
+        return mGoogleApiClient;
     }
 
-    public void updateNavUserInfo(){
-        final Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
+    public void loadNavUserInfo(){
+        loadNavUserName();
+        loadNavUserEmail();
+        loadNavUserImage();
+        loadNavUserCoverImage();
+    }
 
-        navUserName.setText(user.getDisplayName());
-
+    public void loadNavUserName(){
         SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
-        String mEmail = sharedPreferences.getString("email", null);
-        navUserEmail.setText(mEmail);
+        String name = sharedPreferences.getString("name", "");
 
-        new AsyncTask<String, Void, Bitmap>(){
-            @Override
-            protected void onPostExecute(Bitmap bitmap) {
-                Bitmap circle = getCircleBitmap(bitmap);
-                Bitmap scaled = Bitmap.createScaledBitmap(circle, 168, 168, true);
-                navUserAvatar.setImageBitmap(scaled);
-            }
+        navUserName.setText(name);
+    }
 
-            @Override
-            protected Bitmap doInBackground(String... params) {
-                try {
-                    URL url = new URL(params[0]);
-                    InputStream in = url.openStream();
-                    return BitmapFactory.decodeStream(in);
-                } catch (Exception e){
-                    Log.e(TAG, e.toString());
+    public void loadNavUserEmail(){
+        SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
+        String email = sharedPreferences.getString("email", "");
+
+        navUserEmail.setText(email);
+    }
+
+    public void saveImageToFile(Bitmap bitmap, String filename){
+        FileOutputStream outputStream;
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        byte[] bitmapByteArray = byteArrayOutputStream.toByteArray();
+        bitmap.recycle();
+
+        try {
+            outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+            outputStream.write(bitmapByteArray);
+            outputStream.close();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public Bitmap loadImageFromFile(String filename){
+        // Try to load image from file
+        FileInputStream inputStream = null;
+        File file = new File(getFilesDir() + "/" + filename);
+
+        try {
+            inputStream = new FileInputStream(file);
+        } catch (FileNotFoundException fileNotFoundException){
+            return null;
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return BitmapFactory.decodeStream(inputStream);
+    }
+
+    public void loadNavUserImage(){
+        // If an image is loaded, pass it
+        if (loadImageFromFile("user_image") != null){
+            navUserAvatar.setImageBitmap(loadImageFromFile("user_image"));
+        }
+        // If no image is loaded, pull from servers
+        else {
+            GoogleApiClient mGoogleApiClient = connectApiClientForUserInfo();
+            Log.d(TAG, String.valueOf(mGoogleApiClient == null));
+            if (mGoogleApiClient != null){
+                if (mGoogleApiClient.isConnected()){
+                    Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
+                    if (user != null){
+                        new AsyncTask<String, Void, Bitmap>(){
+                            @Override
+                            protected void onPostExecute(Bitmap bitmap) {
+                                Bitmap circle = getCircleBitmap(bitmap);
+                                Bitmap scaled = Bitmap.createScaledBitmap(circle, 168, 168, true);
+                                navUserAvatar.setImageBitmap(scaled);
+
+                                saveImageToFile(scaled, "user_image");
+                            }
+
+                            @Override
+                            protected Bitmap doInBackground(String... params) {
+                                try {
+                                    URL url = new URL(params[0]);
+                                    InputStream in = url.openStream();
+                                    return BitmapFactory.decodeStream(in);
+                                } catch (Exception e){
+                                    Log.e(TAG, e.toString());
+                                }
+                                return null;
+                            }
+                        }.execute(user.getImage().getUrl());
+                    }
                 }
-                return null;
-            }
-        }.execute(user.getImage().getUrl());
-
-        new AsyncTask<String, Void, Bitmap>(){
-            @Override
-            protected void onPostExecute(Bitmap bitmap) {
-                Paint darken = new Paint();
-                darken.setColor(Color.BLACK);
-                darken.setAlpha(100);
-
-                Bitmap bitmapCopy = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-                Canvas c = new Canvas(bitmapCopy);
-                c.drawPaint(darken);
-                navUserCover.setBackground(new BitmapDrawable(getResources(), bitmapCopy));
             }
 
-            @Override
-            protected Bitmap doInBackground(String... params) {
-                try {
-                    URL url = new URL(params[0]);
-                    InputStream in = url.openStream();
-                    return BitmapFactory.decodeStream(in);
-                } catch (Exception e){
-                    Log.e(TAG, e.toString());
+        }
+    }
+
+    public void loadNavUserCoverImage(){
+        final Paint darken = new Paint();
+        darken.setColor(Color.BLACK);
+        darken.setAlpha(100);
+
+        // If an image is loaded, pass it
+        if (loadImageFromFile("user_cover") != null){
+            Bitmap bitmapCopy = loadImageFromFile("user_cover").copy(Bitmap.Config.ARGB_8888, true);
+            Canvas c = new Canvas(bitmapCopy);
+            c.drawPaint(darken);
+            navUserCover.setBackground(new BitmapDrawable(getResources(), bitmapCopy));
+        }
+        // If no image is loaded, pull from servers
+        else {
+            GoogleApiClient mGoogleApiClient = connectApiClientForUserInfo();
+            if (mGoogleApiClient != null){
+                if (mGoogleApiClient.isConnected()){
+                    Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
+                    if (user != null){
+                        new AsyncTask<String, Void, Bitmap>(){
+                            @Override
+                            protected void onPostExecute(Bitmap bitmap) {
+                                Bitmap bitmapCopy = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                                Canvas c = new Canvas(bitmapCopy);
+                                c.drawPaint(darken);
+                                navUserCover.setBackground(new BitmapDrawable(getResources(), bitmapCopy));
+
+                                saveImageToFile(bitmap, "user_cover");
+                            }
+
+                            @Override
+                            protected Bitmap doInBackground(String... params) {
+                                try {
+                                    URL url = new URL(params[0]);
+                                    InputStream in = url.openStream();
+                                    return BitmapFactory.decodeStream(in);
+                                } catch (Exception e){
+                                    Log.e(TAG, e.toString());
+                                }
+                                return null;
+                            }
+                        }.execute(user.getCover().getCoverPhoto().getUrl());
+                    }
                 }
-                return null;
             }
-        }.execute(user.getCover().getCoverPhoto().getUrl());
+        }
     }
 
     public void signOut(){
@@ -255,7 +335,6 @@ public class MainActivity extends AppCompatActivity
             signOut();
         }
         else if (updatingUserInfo){
-            updateNavUserInfo();
         }
     }
 
