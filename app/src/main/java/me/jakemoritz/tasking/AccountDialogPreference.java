@@ -15,10 +15,6 @@ public class AccountDialogPreference extends DialogPreference {
         this.context = context;
     }
 
-    public interface OnSignOutListener {
-        public void connectApiClientForSignOut();
-    }
-
     @Override
     public void onClick(DialogInterface dialog, int which) {
         super.onClick(dialog, which);
