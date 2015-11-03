@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity
         navUserEmail = (TextView) header.findViewById(R.id.user_email);
         navUserCover = (LinearLayout) header.findViewById(R.id.user_cover);
 
-        updateNavUserInfo();
+        connectApiClientForUserInfo();
 
         // Initialize default fragment
         getFragmentManager().beginTransaction()
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity
                 .commit();
     }
 
-    public void updateNavUserInfo(){
+    public void connectApiClientForUserInfo(){
         // Build GoogleApiClient with access to basic profile
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -123,6 +123,78 @@ public class MainActivity extends AppCompatActivity
 
         updatingUserInfo = true;
         mGoogleApiClient.connect();
+    }
+
+    public void updateNavUserInfo(){
+        final Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
+
+        navUserName.setText(user.getDisplayName());
+
+        SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
+        String mEmail = sharedPreferences.getString("email", null);
+        navUserEmail.setText(mEmail);
+
+        new AsyncTask<String, Void, Bitmap>(){
+            @Override
+            protected void onPostExecute(Bitmap bitmap) {
+                Bitmap circle = getCircleBitmap(bitmap);
+                Bitmap scaled = Bitmap.createScaledBitmap(circle, 168, 168, true);
+                navUserAvatar.setImageBitmap(scaled);
+            }
+
+            @Override
+            protected Bitmap doInBackground(String... params) {
+                try {
+                    URL url = new URL(params[0]);
+                    InputStream in = url.openStream();
+                    return BitmapFactory.decodeStream(in);
+                } catch (Exception e){
+                    Log.e(TAG, e.toString());
+                }
+                return null;
+            }
+        }.execute(user.getImage().getUrl());
+
+        new AsyncTask<String, Void, Bitmap>(){
+            @Override
+            protected void onPostExecute(Bitmap bitmap) {
+                Paint darken = new Paint();
+                darken.setColor(Color.BLACK);
+                darken.setAlpha(100);
+
+                Bitmap bitmapCopy = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                Canvas c = new Canvas(bitmapCopy);
+                c.drawPaint(darken);
+                navUserCover.setBackground(new BitmapDrawable(getResources(), bitmapCopy));
+            }
+
+            @Override
+            protected Bitmap doInBackground(String... params) {
+                try {
+                    URL url = new URL(params[0]);
+                    InputStream in = url.openStream();
+                    return BitmapFactory.decodeStream(in);
+                } catch (Exception e){
+                    Log.e(TAG, e.toString());
+                }
+                return null;
+            }
+        }.execute(user.getCover().getCoverPhoto().getUrl());
+    }
+
+    public void signOut(){
+        Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+        mGoogleApiClient.disconnect();
+
+        signingOut = false;
+
+        // Save sign-in state
+        SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("signedIn", false);
+        editor.commit();
+
+        startActivity(new Intent(this, HelperActivity.class));
     }
 
     @Override
@@ -157,7 +229,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void signOut() {
+    public void connectApiClientForSignOut() {
         // Build GoogleApiClient with access to basic profile
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -180,67 +252,10 @@ public class MainActivity extends AppCompatActivity
         mShouldResolve = false;
 
         if (signingOut){
-            Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
-            mGoogleApiClient.disconnect();
-
-            signingOut = false;
-
-            // Save sign-in state
-            SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean("signedIn", false);
-            editor.commit();
-
-            startActivity(new Intent(this, HelperActivity.class));
+            signOut();
         }
         else if (updatingUserInfo){
-            final Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
-
-            navUserName.setText(user.getDisplayName());
-
-            SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
-            String mEmail = sharedPreferences.getString("email", null);
-            navUserEmail.setText(mEmail);
-
-            new AsyncTask<String, Void, Bitmap>(){
-                @Override
-                protected void onPostExecute(Bitmap bitmap) {
-                    Bitmap circle = getCircleBitmap(bitmap);
-                    Bitmap scaled = Bitmap.createScaledBitmap(circle, 168, 168, true);
-                    navUserAvatar.setImageBitmap(scaled);
-                }
-
-                @Override
-                protected Bitmap doInBackground(String... params) {
-                    try {
-                        URL url = new URL(params[0]);
-                        InputStream in = url.openStream();
-                        return BitmapFactory.decodeStream(in);
-                    } catch (Exception e){
-                        Log.e(TAG, e.toString());
-                    }
-                    return null;
-                }
-            }.execute(user.getImage().getUrl());
-
-            new AsyncTask<String, Void, Bitmap>(){
-                @Override
-                protected void onPostExecute(Bitmap bitmap) {
-                    navUserCover.setBackground(new BitmapDrawable(getResources(), bitmap));
-                }
-
-                @Override
-                protected Bitmap doInBackground(String... params) {
-                    try {
-                        URL url = new URL(params[0]);
-                        InputStream in = url.openStream();
-                        return BitmapFactory.decodeStream(in);
-                    } catch (Exception e){
-                        Log.e(TAG, e.toString());
-                    }
-                    return null;
-                }
-            }.execute(user.getCover().getCoverPhoto().getUrl());
+            updateNavUserInfo();
         }
     }
 

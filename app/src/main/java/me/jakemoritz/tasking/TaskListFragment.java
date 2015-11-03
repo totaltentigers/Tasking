@@ -17,7 +17,6 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 
 import com.google.api.services.tasks.model.Task;
-import com.google.api.services.tasks.model.TaskList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -101,15 +100,12 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     }
 
     @Override
-    public void loadTasksFinish(Object output) {
-        tasks = (List<Task>) output;
-
+    public void loadTasksFinish(List<Task> taskList) {
         if (tasks != null){
             mAdapter.clear();
-            mAdapter.addAll(tasks);
+            mAdapter.addAll(taskList);
             mAdapter.notifyDataSetChanged();
         }
-
     }
 
     @Override
@@ -118,16 +114,14 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     }
 
     @Override
-    public void deleteTasksFinish(final TaskList previousTasks) {
+    public void deleteTasksFinish() {
         refreshTasks();
-        undoPressed = false;
     }
 
     @Override
     public void restoreTasksFinish() {
         refreshTasks();
     }
-
 
     @Override
     public void editTaskFinish() {
@@ -139,10 +133,6 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         loadTasksTask.delegate = this;
         loadTasksTask.execute();
     }
-
-    boolean undoPressed = false;
-
-
 
     public void onTasksDeleted(final SparseBooleanArray mSelectedIds, final List<Task> taskList){
         final TaskListFragment callback = this;

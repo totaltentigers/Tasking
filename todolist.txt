@@ -3,6 +3,7 @@
 ^ General ^
 -cache tasks (database?)
 -replace hardcoded strings with resources
+-protect edge cases and null values
 
 ^ Task Creation ^
 -add dividing line under dialog title

@@ -16,7 +16,7 @@ public class AccountDialogPreference extends DialogPreference {
     }
 
     public interface OnSignOutListener {
-        public void signOut();
+        public void connectApiClientForSignOut();
     }
 
     @Override
