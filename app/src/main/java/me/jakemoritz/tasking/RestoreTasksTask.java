@@ -15,31 +15,31 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.tasks.Tasks;
 import com.google.api.services.tasks.TasksScopes;
-import com.google.api.services.tasks.model.Task;
+import com.google.api.services.tasks.model.TaskList;
 
 import java.io.IOException;
 import java.util.Collections;
 
-public class AddTaskTask extends AsyncTask<Void, Void, Void> {
+public class RestoreTasksTask extends AsyncTask<Void, Void, Void> {
 
-    private static final String TAG = "AddTaskTask";
+    private static final String TAG = "RestoreTasksTask";
 
-    public AddTaskResponse delegate = null;
+    public RestoreTasksResponse delegate = null;
 
     private final static String mScope = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
 
     Activity mActivity;
     String mEmail;
-    Task task;
+    TaskList previousTasks;
 
     final HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
     final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
     GoogleAccountCredential credential;
     Tasks service;
 
-    public AddTaskTask(Activity mActivity, Task task) {
+    public RestoreTasksTask(Activity mActivity, TaskList previousTasks) {
         this.mActivity = mActivity;
-        this.task = task;
+        this.previousTasks = previousTasks;
 
         SharedPreferences sharedPreferences = mActivity.getSharedPreferences("PREFS_ACC", 0);
         this.mEmail = sharedPreferences.getString("email", null);
@@ -56,13 +56,12 @@ public class AddTaskTask extends AsyncTask<Void, Void, Void> {
                 credential.setSelectedAccountName(mEmail);
                 service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName("Tasking").build();
 
-                Task result = service.tasks().insert("@default", task).execute();
+                service.tasklists().delete("@default").execute();
+                TaskList result = service.tasklists().insert(previousTasks).execute();
             }
         } catch (IOException e){
             // The fetchToken() method handles Google-specific exceptions,
             // so there was an exception at a higher level.
-            Log.d(TAG, "error");
-
             Log.d(TAG, e.toString());
         }
         return null;
@@ -87,7 +86,7 @@ public class AddTaskTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         if (delegate != null){
-            delegate.addTaskFinish();
+            delegate.restoreTasksFinish();
         }
     }
 }

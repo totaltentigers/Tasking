@@ -2,14 +2,13 @@
 
 ^ General ^
 -cache tasks (database?)
+-replace hardcoded strings with resources
 
 ^ Task Creation ^
--change fab button icon to correct plus sign
 -add dividing line under dialog title
 -add icon to dialog
 
 ^ Task Deletion ^
--undo (snackbar?)
 
 ^ Task List Items ^
 -add check box
@@ -22,7 +21,6 @@
 -login screen
 
 ^ Optional ^
--access different task lists?
 -allow multiple accounts? (heavy shared prefs, multiple files)
 -reminders
 

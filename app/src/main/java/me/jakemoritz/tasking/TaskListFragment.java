@@ -3,8 +3,8 @@ package me.jakemoritz.tasking;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -17,6 +17,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 
 import com.google.api.services.tasks.model.Task;
+import com.google.api.services.tasks.model.TaskList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,7 @@ import java.util.List;
 public class TaskListFragment extends Fragment implements AbsListView.OnItemClickListener,
         LoadTasksResponse, AddTaskResponse, AbsListView.OnItemLongClickListener,
         ActionMode.Callback, AbsListView.MultiChoiceModeListener, DeleteTasksResponse,
-EditTaskResponse, SwipeRefreshLayout.OnRefreshListener{
+        EditTaskResponse, SwipeRefreshLayout.OnRefreshListener, RestoreTasksResponse{
 
     private static final String TAG = "TaskListFragment";
 
@@ -113,23 +114,64 @@ EditTaskResponse, SwipeRefreshLayout.OnRefreshListener{
 
     @Override
     public void addTaskFinish() {
-        LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
-        loadTasksTask.delegate = this;
-        loadTasksTask.execute();
+        refreshTasks();
     }
 
     @Override
-    public void deleteTasksFinish() {
-        LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
-        loadTasksTask.delegate = this;
-        loadTasksTask.execute();
+    public void deleteTasksFinish(final TaskList previousTasks) {
+        refreshTasks();
+        undoPressed = false;
     }
+
+    @Override
+    public void restoreTasksFinish() {
+        refreshTasks();
+    }
+
 
     @Override
     public void editTaskFinish() {
+        refreshTasks();
+    }
+
+    public void refreshTasks(){
         LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
         loadTasksTask.delegate = this;
         loadTasksTask.execute();
+    }
+
+    boolean undoPressed = false;
+
+
+
+    public void onTasksDeleted(final SparseBooleanArray mSelectedIds, final List<Task> taskList){
+        final TaskListFragment callback = this;
+
+        final List<Task> oldTaskList = new ArrayList<>();
+        oldTaskList.addAll(taskList);
+
+        Snackbar snackbar = Snackbar.make(getView(), "Deleted", Snackbar.LENGTH_LONG);
+        snackbar.setAction("Undo", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mAdapter.clear();
+                mAdapter.addAll(oldTaskList);
+                mAdapter.notifyDataSetChanged();
+            }
+        });
+        snackbar.setCallback(new Snackbar.Callback(){
+            @Override
+            public void onDismissed(Snackbar snackbar, int event) {
+                super.onDismissed(snackbar, event);
+
+                if (event == DISMISS_EVENT_TIMEOUT){
+                    DeleteTasksTask deleteTasksTask = new DeleteTasksTask(getActivity(), mSelectedIds);
+                    deleteTasksTask.delegate = callback;
+                    deleteTasksTask.execute();
+                }
+            }
+        });
+        snackbar.show();
     }
 
     @Override
@@ -186,21 +228,15 @@ EditTaskResponse, SwipeRefreshLayout.OnRefreshListener{
             case R.id.action_delete:
                 SparseBooleanArray selected = mAdapter.getSelectedIds();
 
-                DeleteTasksTask deleteTasksTask = new DeleteTasksTask(getActivity(), selected);
-                deleteTasksTask.delegate = this;
-                deleteTasksTask.execute();
+                onTasksDeleted(selected, mAdapter.getTaskList());
 
                 for (int i = 0; i < selected.size(); i++){
                     if (selected.valueAt(i)){
-                        //delete
-
                         Task task = mAdapter.getItem(selected.keyAt(i));
-                        Log.d(TAG, "removing: " + i + ": " + task.getTitle());
-
                         mAdapter.remove(task);
                     }
                 }
-                mode.finish(); // Action picked
+                mode.finish();
                 return true;
             default:
                 return false;
@@ -223,9 +259,7 @@ EditTaskResponse, SwipeRefreshLayout.OnRefreshListener{
 
     @Override
     public void onRefresh() {
-        LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
-        loadTasksTask.delegate = this;
-        loadTasksTask.execute();
+        refreshTasks();
 
         swipeRefreshLayout.setRefreshing(false);
     }

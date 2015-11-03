@@ -17,6 +17,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.tasks.Tasks;
 import com.google.api.services.tasks.TasksScopes;
 import com.google.api.services.tasks.model.Task;
+import com.google.api.services.tasks.model.TaskList;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -28,7 +29,7 @@ public class DeleteTasksTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        delegate.deleteTasksFinish();
+        delegate.deleteTasksFinish(previousTasks);
     }
 
     private static final String TAG = "DeleteTasksTask";
@@ -43,6 +44,7 @@ public class DeleteTasksTask extends AsyncTask<Void, Void, Void> {
     final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
     GoogleAccountCredential credential;
     List<Task> tasks;
+    TaskList previousTasks;
     Tasks service;
     SparseBooleanArray mSelectedItemIds;
 
@@ -68,6 +70,9 @@ public class DeleteTasksTask extends AsyncTask<Void, Void, Void> {
                 service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName("Tasking").build();
 
                 tasks = service.tasks().list("@default").execute().getItems();
+
+                previousTasks = service.tasklists().get("@default").execute();
+
 
                 for (int i = 0; i < mSelectedItemIds.size(); i++){
                     Task task = tasks.get(mSelectedItemIds.keyAt(i));
