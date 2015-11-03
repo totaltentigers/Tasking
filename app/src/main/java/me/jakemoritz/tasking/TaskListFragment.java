@@ -44,7 +44,7 @@ EditTaskResponse, SwipeRefreshLayout.OnRefreshListener{
 
         tasks = new ArrayList<Task>();
 
-        mAdapter = new TaskAdapter(getActivity(), R.layout.task_item, tasks);
+        mAdapter = new TaskAdapter(getActivity(), R.layout.task_list_item, tasks);
 
         LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
         loadTasksTask.delegate = this;
