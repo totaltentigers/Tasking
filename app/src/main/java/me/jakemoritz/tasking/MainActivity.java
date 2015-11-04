@@ -23,6 +23,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -69,12 +70,29 @@ public class MainActivity extends AppCompatActivity
     TextView navUserEmail;
     LinearLayout navUserCover;
 
+    boolean wantToLoad;
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mGoogleApiClient.disconnect();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(Plus.API)
+                .addScope(new Scope(Scopes.PROFILE))
+                .addScope(new Scope(Scopes.EMAIL))
+                .build();
+        mGoogleApiClient.connect();
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -100,27 +118,13 @@ public class MainActivity extends AppCompatActivity
                 .commit();
     }
 
-
-
-    public GoogleApiClient connectApiClient(){
-        // Build GoogleApiClient with access to basic profile
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(Plus.API)
-                .addScope(new Scope(Scopes.PROFILE))
-                .addScope(new Scope(Scopes.EMAIL))
-                .build();
-
-        mGoogleApiClient.connect();
-        return mGoogleApiClient;
-    }
-
     public void loadNavUserInfo(){
         loadNavUserName();
         loadNavUserEmail();
+        wantToLoad = true;
         loadNavUserImage();
         loadNavUserCoverImage();
+        wantToLoad = false;
     }
 
     public void loadNavUserName(){
@@ -172,22 +176,22 @@ public class MainActivity extends AppCompatActivity
     public void loadNavUserImage(){
         // If an image is loaded, pass it
         if (loadImageFromFile("user_image") != null){
-            navUserAvatar.setImageBitmap(loadImageFromFile("user_image"));
+            navUserAvatar.setImageBitmap(getCircleBitmap(loadImageFromFile("user_image")));
         }
         // If no image is loaded, pull from servers
         else {
-            GoogleApiClient mGoogleApiClient = connectApiClient();
-            if (mGoogleApiClient != null && mGoogleApiClient.isConnected()){
+            //mGoogleApiClient.connect();
+            if (mGoogleApiClient.isConnected()){
                 Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
                 if (user != null){
                     new AsyncTask<String, Void, Bitmap>(){
                         @Override
                         protected void onPostExecute(Bitmap bitmap) {
-                            Bitmap circle = getCircleBitmap(bitmap);
-                            Bitmap scaled = Bitmap.createScaledBitmap(circle, 168, 168, true);
-                            navUserAvatar.setImageBitmap(scaled);
+                            Bitmap copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
 
-                            saveImageToFile(scaled, "user_image");
+                            Bitmap userImage = getCircleBitmap(bitmap);
+                            navUserAvatar.setImageBitmap(userImage);
+                            saveImageToFile(copy, "user_image");
                         }
 
                         @Override
@@ -203,6 +207,7 @@ public class MainActivity extends AppCompatActivity
                         }
                     }.execute(user.getImage().getUrl());
                 }
+                mGoogleApiClient.disconnect();
             }
         }
     }
@@ -221,19 +226,21 @@ public class MainActivity extends AppCompatActivity
         }
         // If no image is loaded, pull from servers
         else {
-            GoogleApiClient mGoogleApiClient = connectApiClient();
-            if (mGoogleApiClient != null && mGoogleApiClient.isConnected()){
+            //mGoogleApiClient.connect();
+            if (mGoogleApiClient.isConnected()){
                 Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
                 if (user != null) {
                     new AsyncTask<String, Void, Bitmap>() {
                         @Override
                         protected void onPostExecute(Bitmap bitmap) {
+                            Bitmap copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
+
                             Bitmap bitmapCopy = bitmap.copy(Bitmap.Config.ARGB_8888, true);
                             Canvas c = new Canvas(bitmapCopy);
                             c.drawPaint(darken);
                             navUserCover.setBackground(new BitmapDrawable(getResources(), bitmapCopy));
 
-                            saveImageToFile(bitmap, "user_cover");
+                            saveImageToFile(copy, "user_cover");
                         }
 
                         @Override
@@ -249,14 +256,15 @@ public class MainActivity extends AppCompatActivity
                         }
                     }.execute(user.getCover().getCoverPhoto().getUrl());
                 }
+                mGoogleApiClient.disconnect();
             }
         }
     }
 
     public void signOut(){
-        GoogleApiClient mGoogleApiClient = connectApiClient();
+        //mGoogleApiClient.connect();
 
-        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()){
+        if (mGoogleApiClient.isConnected()){
             Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
             mGoogleApiClient.disconnect();
 
@@ -308,6 +316,17 @@ public class MainActivity extends AppCompatActivity
         // establish a service connection to Google Play services.
         Log.d(TAG, "onConnected:" + bundle);
         mShouldResolve = false;
+
+        if (wantToLoad){
+            loadNavUserImage();
+            loadNavUserCoverImage();
+        }
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        mGoogleApiClient.connect();
     }
 
     private Bitmap getCircleBitmap(Bitmap bitmap){
@@ -330,7 +349,8 @@ public class MainActivity extends AppCompatActivity
 
         bitmap.recycle();
 
-        return output;
+        int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 64, getResources().getDisplayMetrics());
+        return Bitmap.createScaledBitmap(output, px, px, true);
     }
 
     @Override
