@@ -1,6 +1,7 @@
 package me.jakemoritz.tasking;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -16,9 +18,10 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.tasks.model.Task;
 
 import java.util.Calendar;
+import java.util.TimeZone;
 
 
-public class EditTaskDialogFragment extends DialogFragment implements TimeSetResponse, DateSetResponse{
+public class EditTaskDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener{
 
     private static final String TAG = "EditTaskDialogFragment";
 
@@ -30,21 +33,18 @@ public class EditTaskDialogFragment extends DialogFragment implements TimeSetRes
     int year;
     int monthOfYear;
     int dayOfMonth;
-    int hourOfDay;
-    int minute;
     long timeInMs;
 
     EditText taskTitle;
     EditText taskNotes;
     TextView chosenDate;
-    TextView chosenTime;
     Button datePickerButton;
-    Button timePickerButton;
 
-    public EditTaskDialogFragment(Fragment parentFragment, Task task) {
-        super();
-        this.task = task;
-        this.parentFragment = parentFragment;
+    public static EditTaskDialogFragment newInstance(Fragment parentFragment, Task task) {
+        EditTaskDialogFragment editTaskDialogFragment = new EditTaskDialogFragment();
+        editTaskDialogFragment.parentFragment = parentFragment;
+        editTaskDialogFragment.task = task;
+        return editTaskDialogFragment;
     }
 
     @Override
@@ -53,15 +53,14 @@ public class EditTaskDialogFragment extends DialogFragment implements TimeSetRes
         View view = inflater.inflate(R.layout.dialog_add_task, null);
 
         chosenDate = (TextView) view.findViewById(R.id.chosen_date);
-        chosenTime = (TextView) view.findViewById(R.id.chosen_time);
         taskTitle = (EditText) view.findViewById(R.id.task_title);
         taskNotes = (EditText) view.findViewById(R.id.task_notes);
         datePickerButton = (Button) view.findViewById(R.id.date_picker_button);
-        timePickerButton = (Button) view.findViewById(R.id.time_picker_button);
 
         taskTitle.setText(task.getTitle());
         taskNotes.setText(task.getNotes());
-        displayTaskDueDateAndTime();
+
+        displayTaskDueDate();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
@@ -87,14 +86,16 @@ public class EditTaskDialogFragment extends DialogFragment implements TimeSetRes
                             task.setTitle(taskTitle.getText().toString());
                             task.setNotes(taskNotes.getText().toString());
 
-                            // Save time in ms
-                            Calendar cal = Calendar.getInstance();
-                            cal.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
-                            timeInMs = cal.getTimeInMillis();
+                            if (task.getDue() != null){
+                                // Save time in ms
+                                Calendar cal = Calendar.getInstance();
+                                cal.set(year, monthOfYear, dayOfMonth);
+                                cal.setTimeZone(TimeZone.getDefault());
+                                timeInMs = cal.getTimeInMillis();
 
-                            DateTime dateTime = new DateTime(timeInMs);
-
-                            task.setDue(dateTime);
+                                DateTime dateTime = new DateTime(timeInMs);
+                                task.setDue(dateTime);
+                            }
 
                             EditTaskTask editTaskTask = new EditTaskTask(getActivity(), task);
                             editTaskTask.delegate = (TaskListFragment) parentFragment;
@@ -112,58 +113,38 @@ public class EditTaskDialogFragment extends DialogFragment implements TimeSetRes
         datePickerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DatePickerFragment datePickerFragment = new DatePickerFragment(callbackInstance);
-                datePickerFragment.delegate = callbackInstance;
+                DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(callbackInstance);
                 datePickerFragment.show(getFragmentManager(), "datePickerFragment");
-            }
-        });
-
-
-        timePickerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TimePickerFragment timePickerFragment = new TimePickerFragment(callbackInstance);
-                timePickerFragment.delegate = callbackInstance;
-                timePickerFragment.show(getFragmentManager(), "timePickerFragment");
             }
         });
 
         return alertDialog;
     }
 
-    public void displayTaskDueDateAndTime(){
-        // Get DateTime from task
-        DateTime dateTime = task.getDue();
+    public void displayTaskDueDate(){
+        if (task.getDue() != null){
+            // Get DateTime from task
+            DateTime dateTime = task.getDue();
 
-        // Create calendar from
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(dateTime.getValue());
+            // Create calendar from
+            Calendar cal = Calendar.getInstance();
+            cal.setTimeInMillis(dateTime.getValue());
 
-        // Save current date and time values
-        this.year = cal.get(Calendar.YEAR);
-        this.monthOfYear = cal.get(Calendar.MONTH);
-        this.dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
-        this.hourOfDay = cal.get(Calendar.HOUR_OF_DAY);
-        this.minute = cal.get(Calendar.MINUTE);
+            // Save current date and time values
+            this.year = cal.get(Calendar.YEAR);
+            this.monthOfYear = cal.get(Calendar.MONTH);
+            this.dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
 
-        chosenDate.setText(DateFormatter.formatDate(year, monthOfYear, dayOfMonth));
-        chosenTime.setText(TimeFormatter.formatTime(hourOfDay, minute));
+            chosenDate.setText(DateFormatter.formatDate(year, monthOfYear, dayOfMonth));
+        }
     }
 
     @Override
-    public void dateSet(int year, int monthOfYear, int dayOfMonth) {
+    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
         this.year = year;
         this.monthOfYear = monthOfYear;
         this.dayOfMonth = dayOfMonth;
 
         chosenDate.setText(DateFormatter.formatDate(year, monthOfYear, dayOfMonth));
-    }
-
-    @Override
-    public void timeSet(int hourOfDay, int minute) {
-        this.hourOfDay = hourOfDay;
-        this.minute = minute;
-
-        chosenTime.setText(TimeFormatter.formatTime(hourOfDay, minute));
     }
 }

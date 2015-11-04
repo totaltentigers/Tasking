@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 
 import com.google.api.services.tasks.model.Task;
 
@@ -25,12 +27,12 @@ import java.util.List;
 public class TaskListFragment extends Fragment implements AbsListView.OnItemClickListener,
         LoadTasksResponse, AddTaskResponse, AbsListView.OnItemLongClickListener,
         ActionMode.Callback, AbsListView.MultiChoiceModeListener, DeleteTasksResponse,
-        EditTaskResponse, SwipeRefreshLayout.OnRefreshListener, RestoreTasksResponse{
+        EditTaskResponse, SwipeRefreshLayout.OnRefreshListener, RestoreTasksResponse, CheckBox.OnCheckedChangeListener{
 
     private static final String TAG = "TaskListFragment";
 
     private AbsListView mListView;
-
+    SwipeRefreshLayout swipeRefreshLayout;
     private TaskAdapter mAdapter;
 
     List<Task> tasks;
@@ -42,16 +44,14 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        tasks = new ArrayList<Task>();
+        tasks = new ArrayList<>();
 
-        mAdapter = new TaskAdapter(getActivity(), R.layout.task_list_item, tasks);
+        mAdapter = new TaskAdapter(getActivity(), this, R.layout.task_list_item, tasks);
 
         LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
         loadTasksTask.delegate = this;
         loadTasksTask.execute();
     }
-
-    SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -60,7 +60,6 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
         swipeRefreshLayout.setOnRefreshListener(this);
-        //swipeRefreshLayout.setColorSchemeColors();
 
         // Set the adapter
         mListView = (AbsListView) view.findViewById(android.R.id.list);
@@ -79,6 +78,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
         FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,13 +89,13 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     }
 
     private void createTask(){
-        AddTaskDialogFragment addTaskDialogFragment = new AddTaskDialogFragment(this);
+        AddTaskDialogFragment addTaskDialogFragment = AddTaskDialogFragment.newInstance(this);
         addTaskDialogFragment.show(getFragmentManager(), "addTaskDialog");
     }
 
     private void editTask(int position){
         Task task = mAdapter.getItem(position);
-        EditTaskDialogFragment editTaskDialogFragment = new EditTaskDialogFragment(this, task);
+        EditTaskDialogFragment editTaskDialogFragment = EditTaskDialogFragment.newInstance(this, task);
         editTaskDialogFragment.show(getFragmentManager(), "editTaskDialog");
     }
 
@@ -149,12 +149,12 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
                 mAdapter.notifyDataSetChanged();
             }
         });
-        snackbar.setCallback(new Snackbar.Callback(){
+        snackbar.setCallback(new Snackbar.Callback() {
             @Override
             public void onDismissed(Snackbar snackbar, int event) {
                 super.onDismissed(snackbar, event);
 
-                if (event == DISMISS_EVENT_TIMEOUT){
+                if (event == DISMISS_EVENT_TIMEOUT) {
                     DeleteTasksTask deleteTasksTask = new DeleteTasksTask(getActivity(), mSelectedIds);
                     deleteTasksTask.delegate = callback;
                     deleteTasksTask.execute();
@@ -246,11 +246,35 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         mAdapter.toggleSelection(position);
     }
 
-
     @Override
     public void onRefresh() {
         refreshTasks();
-
         swipeRefreshLayout.setRefreshing(false);
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        int position = mListView.getPositionForView(buttonView);
+        Task task = tasks.get(position);
+        Task newTask = new Task();
+        newTask.setId(task.getId());
+        newTask.setTitle(task.getTitle());
+        newTask.setNotes(task.getNotes());
+        if (isChecked){
+            task.setStatus("completed");
+            task.setCompleted(task.getDue());
+            newTask.setStatus("completed");
+            newTask.setDue(task.getDue());
+            newTask.setCompleted(task.getDue());
+        } else {
+            task.setStatus("needsAction");
+            task.setDue(task.getCompleted());
+            newTask.setStatus("needsAction");
+            newTask.setDue(task.getCompleted());
+        }
+
+        EditTaskTask editTaskTask = new EditTaskTask(getActivity(), newTask);
+        editTaskTask.delegate = this;
+        editTaskTask.execute();
     }
 }

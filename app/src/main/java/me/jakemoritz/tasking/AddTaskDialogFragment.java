@@ -1,6 +1,7 @@
 package me.jakemoritz.tasking;
 
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
@@ -9,6 +10,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -16,9 +18,10 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.tasks.model.Task;
 
 import java.util.Calendar;
+import java.util.TimeZone;
 
 
-public class AddTaskDialogFragment extends DialogFragment implements TimeSetResponse, DateSetResponse{
+public class AddTaskDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener{
 
     private static final String TAG = "AddTaskDialogFragment";
 
@@ -29,20 +32,17 @@ public class AddTaskDialogFragment extends DialogFragment implements TimeSetResp
     int year;
     int monthOfYear;
     int dayOfMonth;
-    int hourOfDay;
-    int minute;
     long timeInMs;
 
     EditText taskTitle;
     EditText taskNotes;
     TextView chosenDate;
-    TextView chosenTime;
     Button datePickerButton;
-    Button timePickerButton;
 
-    public AddTaskDialogFragment(Fragment parentFragment) {
-        super();
-        this.parentFragment = parentFragment;
+    public static AddTaskDialogFragment newInstance(Fragment parentFragment) {
+        AddTaskDialogFragment addTaskDialogFragment = new AddTaskDialogFragment();
+        addTaskDialogFragment.parentFragment = parentFragment;
+        return addTaskDialogFragment;
     }
 
     @Override
@@ -51,13 +51,11 @@ public class AddTaskDialogFragment extends DialogFragment implements TimeSetResp
         View view = inflater.inflate(R.layout.dialog_add_task, null);
 
         chosenDate = (TextView) view.findViewById(R.id.chosen_date);
-        chosenTime = (TextView) view.findViewById(R.id.chosen_time);
         taskTitle = (EditText) view.findViewById(R.id.task_title);
         taskNotes = (EditText) view.findViewById(R.id.task_notes);
         datePickerButton = (Button) view.findViewById(R.id.date_picker_button);
-        timePickerButton = (Button) view.findViewById(R.id.time_picker_button);
 
-        displayCurrentDateAndTime();
+        displayCurrentDate();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(view)
@@ -85,7 +83,8 @@ public class AddTaskDialogFragment extends DialogFragment implements TimeSetResp
 
                             // Save time in ms
                             Calendar cal = Calendar.getInstance();
-                            cal.set(year, monthOfYear, dayOfMonth, hourOfDay, minute);
+                            cal.set(year, monthOfYear, dayOfMonth);
+                            cal.setTimeZone(TimeZone.getDefault());
                             timeInMs = cal.getTimeInMillis();
 
                             DateTime dateTime = new DateTime(timeInMs);
@@ -106,25 +105,15 @@ public class AddTaskDialogFragment extends DialogFragment implements TimeSetResp
         datePickerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DatePickerFragment datePickerFragment = new DatePickerFragment(callbackInstance);
-                datePickerFragment.delegate = callbackInstance;
+                DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(callbackInstance);
                 datePickerFragment.show(getFragmentManager(), "datePickerFragment");
-            }
-        });
-
-        timePickerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TimePickerFragment timePickerFragment = new TimePickerFragment(callbackInstance);
-                timePickerFragment.delegate = callbackInstance;
-                timePickerFragment.show(getFragmentManager(), "timePickerFragment");
             }
         });
 
         return alertDialog;
     }
 
-    public void displayCurrentDateAndTime(){
+    public void displayCurrentDate(){
         // Get new Calendar instance
         Calendar cal = Calendar.getInstance();
 
@@ -132,27 +121,16 @@ public class AddTaskDialogFragment extends DialogFragment implements TimeSetResp
         this.year = cal.get(Calendar.YEAR);
         this.monthOfYear = cal.get(Calendar.MONTH);
         this.dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
-        this.hourOfDay = cal.get(Calendar.HOUR_OF_DAY);
-        this.minute = cal.get(Calendar.MINUTE);
 
         chosenDate.setText(DateFormatter.formatDate(year, monthOfYear, dayOfMonth));
-        chosenTime.setText(TimeFormatter.formatTime(hourOfDay, minute));
     }
 
     @Override
-    public void dateSet(int year, int monthOfYear, int dayOfMonth) {
+    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
         this.year = year;
         this.monthOfYear = monthOfYear;
         this.dayOfMonth = dayOfMonth;
 
         chosenDate.setText(DateFormatter.formatDate(year, monthOfYear, dayOfMonth));
-    }
-
-    @Override
-    public void timeSet(int hourOfDay, int minute) {
-        this.hourOfDay = hourOfDay;
-        this.minute = minute;
-
-        chosenTime.setText(TimeFormatter.formatTime(hourOfDay, minute));
     }
 }

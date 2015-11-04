@@ -52,7 +52,6 @@ public class EditTaskTask extends AsyncTask<Void, Void, Void> {
         this.task = task;
     }
 
-
     // Executes asynchronous job.
     // Runs when you call execute() on an instance
     @Override
@@ -67,6 +66,7 @@ public class EditTaskTask extends AsyncTask<Void, Void, Void> {
                 service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName("Tasking").build();
 
                 Task result = service.tasks().update("@default", task.getId(), task).execute();
+                Log.d(TAG, result.toPrettyString());
             }
         } catch (IOException e){
             // The fetchToken() method handles Google-specific exceptions,

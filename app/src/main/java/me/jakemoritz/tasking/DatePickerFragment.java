@@ -5,23 +5,20 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.DatePicker;
 
 import java.util.Calendar;
 
-public class DatePickerFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener{
+public class DatePickerFragment extends DialogFragment{
+
+    private static final String TAG = "DatePickerFragment";
 
     private Fragment fragment;
 
-    public DateSetResponse delegate = null;
-
-    public DatePickerFragment(Fragment fragment) {
-        super();
-        this.fragment = fragment;
+    public static DatePickerFragment newInstance(Fragment parentFragment){
+        DatePickerFragment datePickerFragment = new DatePickerFragment();
+        datePickerFragment.fragment = parentFragment;
+        return datePickerFragment;
     }
-
-    private static final String TAG = "DatePickerFragment";
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -31,12 +28,11 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
         int month = c.get(Calendar.MONTH);
         int day = c.get(Calendar.DAY_OF_MONTH);
 
-        return new DatePickerDialog(getActivity(), this, year, month, day);
-    }
-
-    @Override
-    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-        Log.d(TAG, "month: " + monthOfYear + ", day: " + dayOfMonth + ", year: " + year);
-        delegate.dateSet(year, monthOfYear, dayOfMonth);
+        if (fragment instanceof  AddTaskDialogFragment){
+            return new DatePickerDialog(getActivity(),(AddTaskDialogFragment) fragment, year, month, day);
+        } else {
+            // fragment instanceof  EditTaskDialogFragment
+            return new DatePickerDialog(getActivity(),(EditTaskDialogFragment) fragment, year, month, day);
+        }
     }
 }

@@ -65,6 +65,10 @@ public class LoadTasksTask extends AsyncTask<Void, Void, Void> {
                 service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName("Tasking").build();
 
                 tasks = service.tasks().list("@default").execute().getItems();
+                Task emptyTask = tasks.get(tasks.size()-1);
+                if (emptyTask.getTitle().length() == 0 && emptyTask.getNotes() == null){
+                    tasks.remove(tasks.size() -1);
+                }
             }
         } catch (IOException e){
             // The fetchToken() method handles Google-specific exceptions,

@@ -4,6 +4,8 @@
 -cache tasks (database?)
 -replace hardcoded strings with resources
 -protect edge cases and null values
+-sort tasks by due date
+-save task list to disk
 
 ^ Task Creation ^
 -add dividing line under dialog title
@@ -27,3 +29,4 @@
 
 ^ Known errors/crashes ^
 -deleting tasks sometimes throws out of bonds
+-sign out doesnt always work?

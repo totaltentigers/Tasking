@@ -33,19 +33,4 @@
         style="@style/Base.TextAppearance.AppCompat.Subhead"
         android:layout_alignBaseline="@+id/date_picker_button" />
 
-    <Button
-        android:id="@+id/time_picker_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Choose a time"
-        android:layout_below="@id/date_picker_button"/>
-
-    <TextView
-        android:id="@+id/chosen_time"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@id/time_picker_button"
-        style="@style/Base.TextAppearance.AppCompat.Subhead"
-        android:layout_alignBaseline="@+id/time_picker_button" />
-
 </RelativeLayout>
