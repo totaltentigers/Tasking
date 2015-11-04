@@ -101,7 +101,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
     @Override
     public void loadTasksFinish(List<Task> taskList) {
-        if (tasks != null){
+        if (taskList != null){
             mAdapter.clear();
             mAdapter.addAll(taskList);
             mAdapter.notifyDataSetChanged();

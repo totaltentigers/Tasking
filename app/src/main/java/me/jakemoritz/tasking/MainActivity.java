@@ -70,7 +70,9 @@ public class MainActivity extends AppCompatActivity
     TextView navUserEmail;
     LinearLayout navUserCover;
 
-    boolean wantToLoad;
+    boolean wantToLoadUserImage;
+    boolean wantToLoadUserCoverImage;
+    boolean wantToSignOut;
 
     @Override
     protected void onStop() {
@@ -94,6 +96,10 @@ public class MainActivity extends AppCompatActivity
                 .build();
         mGoogleApiClient.connect();
 
+        wantToLoadUserImage = true;
+        wantToLoadUserCoverImage = true;
+        wantToSignOut = false;
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -110,21 +116,13 @@ public class MainActivity extends AppCompatActivity
         navUserEmail = (TextView) header.findViewById(R.id.user_email);
         navUserCover = (LinearLayout) header.findViewById(R.id.user_cover);
 
-        loadNavUserInfo();
+        loadNavUserName();
+        loadNavUserEmail();
 
         // Initialize default fragment
         getFragmentManager().beginTransaction()
                 .replace(R.id.content_main, new TaskListFragment())
                 .commit();
-    }
-
-    public void loadNavUserInfo(){
-        loadNavUserName();
-        loadNavUserEmail();
-        wantToLoad = true;
-        loadNavUserImage();
-        loadNavUserCoverImage();
-        wantToLoad = false;
     }
 
     public void loadNavUserName(){
@@ -181,34 +179,33 @@ public class MainActivity extends AppCompatActivity
         // If no image is loaded, pull from servers
         else {
             //mGoogleApiClient.connect();
-            if (mGoogleApiClient.isConnected()){
-                Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
-                if (user != null){
-                    new AsyncTask<String, Void, Bitmap>(){
-                        @Override
-                        protected void onPostExecute(Bitmap bitmap) {
-                            Bitmap copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
+            Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
+            if (user != null){
+                new AsyncTask<String, Void, Bitmap>(){
+                    @Override
+                    protected void onPostExecute(Bitmap bitmap) {
+                        Bitmap copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
 
-                            Bitmap userImage = getCircleBitmap(bitmap);
-                            navUserAvatar.setImageBitmap(userImage);
-                            saveImageToFile(copy, "user_image");
-                        }
+                        Bitmap userImage = getCircleBitmap(bitmap);
+                        navUserAvatar.setImageBitmap(userImage);
+                        saveImageToFile(copy, "user_image");
+                    }
 
-                        @Override
-                        protected Bitmap doInBackground(String... params) {
-                            try {
-                                URL url = new URL(params[0]);
-                                InputStream in = url.openStream();
-                                return BitmapFactory.decodeStream(in);
-                            } catch (Exception e){
-                                Log.e(TAG, e.toString());
-                            }
-                            return null;
+                    @Override
+                    protected Bitmap doInBackground(String... params) {
+                        try {
+                            URL url = new URL(params[0]);
+                            InputStream in = url.openStream();
+                            return BitmapFactory.decodeStream(in);
+                        } catch (Exception e){
+                            Log.e(TAG, e.toString());
                         }
-                    }.execute(user.getImage().getUrl());
-                }
-                mGoogleApiClient.disconnect();
+                        return null;
+                    }
+                }.execute(user.getImage().getUrl());
             }
+            //mGoogleApiClient.disconnect();
+            wantToLoadUserImage = false;
         }
     }
 
@@ -227,55 +224,64 @@ public class MainActivity extends AppCompatActivity
         // If no image is loaded, pull from servers
         else {
             //mGoogleApiClient.connect();
-            if (mGoogleApiClient.isConnected()){
-                Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
-                if (user != null) {
-                    new AsyncTask<String, Void, Bitmap>() {
-                        @Override
-                        protected void onPostExecute(Bitmap bitmap) {
-                            Bitmap copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
+            Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
+            if (user != null) {
+                new AsyncTask<String, Void, Bitmap>() {
+                    @Override
+                    protected void onPostExecute(Bitmap bitmap) {
+                        Bitmap copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
 
-                            Bitmap bitmapCopy = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-                            Canvas c = new Canvas(bitmapCopy);
-                            c.drawPaint(darken);
-                            navUserCover.setBackground(new BitmapDrawable(getResources(), bitmapCopy));
+                        Bitmap bitmapCopy = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                        Canvas c = new Canvas(bitmapCopy);
+                        c.drawPaint(darken);
+                        navUserCover.setBackground(new BitmapDrawable(getResources(), bitmapCopy));
 
-                            saveImageToFile(copy, "user_cover");
+                        saveImageToFile(copy, "user_cover");
+                    }
+
+                    @Override
+                    protected Bitmap doInBackground(String... params) {
+                        try {
+                            URL url = new URL(params[0]);
+                            InputStream in = url.openStream();
+                            return BitmapFactory.decodeStream(in);
+                        } catch (Exception e) {
+                            Log.e(TAG, e.toString());
                         }
-
-                        @Override
-                        protected Bitmap doInBackground(String... params) {
-                            try {
-                                URL url = new URL(params[0]);
-                                InputStream in = url.openStream();
-                                return BitmapFactory.decodeStream(in);
-                            } catch (Exception e) {
-                                Log.e(TAG, e.toString());
-                            }
-                            return null;
-                        }
-                    }.execute(user.getCover().getCoverPhoto().getUrl());
-                }
-                mGoogleApiClient.disconnect();
+                        return null;
+                    }
+                }.execute(user.getCover().getCoverPhoto().getUrl());
             }
+            //mGoogleApiClient.disconnect();
+            wantToLoadUserCoverImage = false;
+
         }
     }
 
+    public void signOutHelper(){
+        mGoogleApiClient.connect();
+        Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+        mGoogleApiClient.disconnect();
+
+
+        // Save sign-in state
+        SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.putBoolean("signedIn", false);
+        editor.commit();
+
+        deleteFile("user_image");
+        deleteFile("user_cover");
+
+        wantToSignOut = false;
+        startActivity(new Intent(this, HelperActivity.class));
+
+    }
+
     public void signOut(){
-        //mGoogleApiClient.connect();
-
-        if (mGoogleApiClient.isConnected()){
-            Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
-            mGoogleApiClient.disconnect();
-
-            // Save sign-in state
-            SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putBoolean("signedIn", false);
-            editor.commit();
-
-            startActivity(new Intent(this, HelperActivity.class));
-        }
+        wantToSignOut = true;
+        mGoogleApiClient.connect();
     }
 
     @Override
@@ -317,9 +323,14 @@ public class MainActivity extends AppCompatActivity
         Log.d(TAG, "onConnected:" + bundle);
         mShouldResolve = false;
 
-        if (wantToLoad){
+        if (wantToLoadUserImage){
             loadNavUserImage();
+        }
+        if (wantToLoadUserCoverImage){
             loadNavUserCoverImage();
+        }
+        if (wantToSignOut){
+            signOutHelper();
         }
     }
 
