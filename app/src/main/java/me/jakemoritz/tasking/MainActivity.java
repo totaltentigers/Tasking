@@ -70,8 +70,7 @@ public class MainActivity extends AppCompatActivity
     TextView navUserEmail;
     LinearLayout navUserCover;
 
-    boolean wantToLoadUserImage;
-    boolean wantToLoadUserCoverImage;
+    boolean wantToLoadUserImages;
     boolean wantToSignOut;
 
     @Override
@@ -96,8 +95,7 @@ public class MainActivity extends AppCompatActivity
                 .build();
         mGoogleApiClient.connect();
 
-        wantToLoadUserImage = true;
-        wantToLoadUserCoverImage = true;
+        wantToLoadUserImages = true;
         wantToSignOut = false;
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -205,7 +203,6 @@ public class MainActivity extends AppCompatActivity
                 }.execute(user.getImage().getUrl());
             }
             //mGoogleApiClient.disconnect();
-            wantToLoadUserImage = false;
         }
     }
 
@@ -252,8 +249,8 @@ public class MainActivity extends AppCompatActivity
                     }
                 }.execute(user.getCover().getCoverPhoto().getUrl());
             }
-            //mGoogleApiClient.disconnect();
-            wantToLoadUserCoverImage = false;
+            mGoogleApiClient.disconnect();
+            wantToLoadUserImages = false;
 
         }
     }
@@ -268,11 +265,17 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.clear();
+        editor.commit();
+
+        sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
+        editor = sharedPreferences.edit();
         editor.putBoolean("signedIn", false);
         editor.commit();
 
-        deleteFile("user_image");
-        deleteFile("user_cover");
+        File userImage = new File(getFilesDir() + File.separator + "user_image");
+        userImage.delete();
+        File userCoverImage = new File(getFilesDir() + File.separator + "user_cover");
+        userCoverImage.delete();
 
         wantToSignOut = false;
         startActivity(new Intent(this, HelperActivity.class));
@@ -323,10 +326,8 @@ public class MainActivity extends AppCompatActivity
         Log.d(TAG, "onConnected:" + bundle);
         mShouldResolve = false;
 
-        if (wantToLoadUserImage){
+        if (wantToLoadUserImages){
             loadNavUserImage();
-        }
-        if (wantToLoadUserCoverImage){
             loadNavUserCoverImage();
         }
         if (wantToSignOut){
