@@ -32,11 +32,25 @@ dependencies {
     compile 'com.google.android.gms:play-services-identity:8.1.0'
     compile 'com.google.android.gms:play-services-plus:8.1.0'
     compile 'com.android.support:support-v4:23.1.0'
-    compile 'com.google.apis:google-api-services-tasks:v1-rev41-1.20.0'
-    compile 'com.google.http-client:google-http-client-android:1.18.0-rc'
-    compile 'com.google.apis:google-api-services-oauth2:v1-rev99-1.20.0'
-    compile 'com.google.api-client:google-api-client:1.20.0'
-    compile 'com.google.apis:google-api-services-tasks:v1-rev35-1.19.0' exclude module: 'httpclient'
-    compile 'com.google.api-client:google-api-client-android:1.19.0' exclude module: 'httpclient'
-    compile 'com.google.http-client:google-http-client-gson:1.19.0' exclude module: 'httpclient'
+    compile ('com.google.apis:google-api-services-tasks:v1-rev41-1.20.0'){
+        exclude module: 'httpclient'
+    }
+    compile ('com.google.http-client:google-http-client-android:1.18.0-rc'){
+        exclude module: 'httpclient'
+    }
+    compile ('com.google.apis:google-api-services-oauth2:v1-rev99-1.20.0'){
+        exclude module: 'httpclient'
+    }
+    compile ('com.google.api-client:google-api-client:1.20.0'){
+        exclude module: 'httpclient'
+    }
+    compile ('com.google.apis:google-api-services-tasks:v1-rev35-1.19.0') {
+        exclude module: 'httpclient'
+    }
+    compile ('com.google.api-client:google-api-client-android:1.19.0') {
+        exclude module: 'httpclient'
+    }
+    compile ('com.google.http-client:google-http-client-gson:1.19.0'){
+        exclude module: 'httpclient'
+    }
 }
