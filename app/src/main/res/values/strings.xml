@@ -11,6 +11,8 @@
     <string name="action_delete">Delete</string>
     <string name="action_sort">Sort</string>
 
+    <string name="sort_by_date">Sort by: Date</string>
+
     <!-- Strings related to  side nav -->
     <string name="nav_tasks">Tasks</string>
     <string name="nav_settings">Settings</string>

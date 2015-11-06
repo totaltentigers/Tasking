@@ -17,6 +17,7 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.PopupMenu;
 
 import com.google.api.services.tasks.model.Task;
 
@@ -175,11 +176,16 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     public void sortTasks(){
         List<Task> taskList = new ArrayList<>();
         taskList.addAll(mAdapter.getTaskList());
-        Collections.sort(taskList, new CompareTaskDueDate());
 
-        mAdapter.clear();
-        mAdapter.addAll(taskList);
-        mAdapter.notifyDataSetChanged();
+        if (!taskList.isEmpty()){
+            Collections.sort(taskList, new CompareTaskDueDate());
+
+            mAdapter.clear();
+            mAdapter.addAll(taskList);
+            mAdapter.notifyDataSetChanged();
+
+
+        }
     }
 
     @Override
@@ -190,7 +196,17 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         int id = item.getItemId();
 
         if (id == R.id.action_sort) {
-            sortTasks();
+//            View actionSortView = getView().findViewById(R.id.)
+            PopupMenu popupMenu = new PopupMenu(getActivity(), getActivity().findViewById(R.id.action_sort));
+            popupMenu.inflate(R.menu.sort_popup_menu);
+            popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                @Override
+                public boolean onMenuItemClick(MenuItem item) {
+                    sortTasks();
+                    return false;
+                }
+            });
+            popupMenu.show();
             return true;
         }
 
