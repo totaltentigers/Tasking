@@ -9,6 +9,7 @@
 
     <!-- Strings related to menu items -->
     <string name="action_delete">Delete</string>
+    <string name="action_sort">Sort</string>
 
     <!-- Strings related to  side nav -->
     <string name="nav_tasks">Tasks</string>

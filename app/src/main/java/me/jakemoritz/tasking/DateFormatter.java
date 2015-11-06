@@ -21,8 +21,6 @@ public class DateFormatter {
         SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM");
 
         String dayString = dayOfMonth + suffixes[dayOfMonth];
-        String dateString = dateFormat.format(date) + " " + dayString + ", " + year;
-
-        return dateString;
+        return dateFormat.format(date) + " " + dayString + ", " + year;
     }
 }

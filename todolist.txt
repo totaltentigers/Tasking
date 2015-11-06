@@ -6,6 +6,7 @@
 -protect edge cases and null values
 -sort tasks by due date
 -save task list to disk
+-figure out how to upgrade google play services without breaking code
 
 ^ Task Creation ^
 -add dividing line under dialog title

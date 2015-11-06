@@ -21,6 +21,7 @@ import android.widget.CompoundButton;
 import com.google.api.services.tasks.model.Task;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -43,6 +44,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
 
         tasks = new ArrayList<>();
 
@@ -170,6 +172,16 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         inflater.inflate(R.menu.main, menu);
     }
 
+    public void sortTasks(){
+        List<Task> taskList = new ArrayList<>();
+        taskList.addAll(mAdapter.getTaskList());
+        Collections.sort(taskList, new CompareTaskDueDate());
+
+        mAdapter.clear();
+        mAdapter.addAll(taskList);
+        mAdapter.notifyDataSetChanged();
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -177,8 +189,8 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_delete) {
+        if (id == R.id.action_sort) {
+            sortTasks();
             return true;
         }
 
@@ -201,7 +213,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
         MenuInflater inflater = mode.getMenuInflater();
-        inflater.inflate(R.menu.main, menu);
+        inflater.inflate(R.menu.contextual_menu, menu);
         return true;
     }
 
