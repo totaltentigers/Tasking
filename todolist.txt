@@ -5,17 +5,16 @@
 -replace hardcoded strings with resources
 -protect edge cases and null values
 -sort tasks by due date
+-delete option to dialog
 -save task list to disk
 -figure out how to upgrade google play services without breaking code
 
 ^ Task Creation ^
 -add dividing line under dialog title
--add icon to dialog
 
 ^ Task Deletion ^
 
 ^ Task List Items ^
--add check box
 
 ^ Side nav ^
 -make scaled avatar not hideous

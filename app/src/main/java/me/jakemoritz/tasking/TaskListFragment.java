@@ -29,7 +29,8 @@ import java.util.List;
 public class TaskListFragment extends Fragment implements AbsListView.OnItemClickListener,
         LoadTasksResponse, AddTaskResponse, AbsListView.OnItemLongClickListener,
         ActionMode.Callback, AbsListView.MultiChoiceModeListener, DeleteTasksResponse,
-        EditTaskResponse, SwipeRefreshLayout.OnRefreshListener, RestoreTasksResponse, CheckBox.OnCheckedChangeListener{
+        EditTaskResponse, SwipeRefreshLayout.OnRefreshListener, RestoreTasksResponse, CheckBox.OnCheckedChangeListener,
+        UpdateTasklistResponse{
 
     private static final String TAG = "TaskListFragment";
 
@@ -184,7 +185,9 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
             mAdapter.addAll(taskList);
             mAdapter.notifyDataSetChanged();
 
-
+            UpdateTasklistTask updateTasklistTask = new UpdateTasklistTask(getActivity(), mAdapter.getTaskList());
+            updateTasklistTask.delegate = this;
+            updateTasklistTask.execute();
         }
     }
 
@@ -304,5 +307,10 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         EditTaskTask editTaskTask = new EditTaskTask(getActivity(), newTask);
         editTaskTask.delegate = this;
         editTaskTask.execute();
+    }
+
+    @Override
+    public void updateTasklistFinish() {
+
     }
 }
