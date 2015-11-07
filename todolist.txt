@@ -4,7 +4,6 @@
 -cache tasks (database?)
 -replace hardcoded strings with resources
 -protect edge cases and null values
--sort tasks by due date
 -delete option to dialog
 -save task list to disk
 -figure out how to upgrade google play services without breaking code

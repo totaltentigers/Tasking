@@ -86,7 +86,7 @@ public class EditTaskDialogFragment extends DialogFragment implements DatePicker
                             task.setTitle(taskTitle.getText().toString());
                             task.setNotes(taskNotes.getText().toString());
 
-                            if (task.getDue() != null){
+                            if (!chosenDate.getText().toString().isEmpty()){
                                 // Save time in ms
                                 Calendar cal = Calendar.getInstance();
                                 cal.set(year, monthOfYear, dayOfMonth);
