@@ -107,6 +107,13 @@ public class EditTaskDialogFragment extends DialogFragment implements DatePicker
                         }
                     }
                 });
+                Button neutralButton = ((AlertDialog) dialog).getButton(DialogInterface.BUTTON_NEUTRAL);
+                neutralButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                    }
+                });
             }
         });
 

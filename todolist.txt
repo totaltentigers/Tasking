@@ -7,6 +7,7 @@
 -delete option to dialog
 -save task list to disk
 -figure out how to upgrade google play services without breaking code
+0save files to cache instead
 
 ^ Task Creation ^
 -add dividing line under dialog title

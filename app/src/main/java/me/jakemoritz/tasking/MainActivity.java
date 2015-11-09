@@ -1,6 +1,5 @@
 package me.jakemoritz.tasking;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
@@ -143,9 +142,9 @@ public class MainActivity extends AppCompatActivity
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
         byte[] bitmapByteArray = byteArrayOutputStream.toByteArray();
         bitmap.recycle();
-
+        String filepath = getCacheDir() + File.separator + filename;
         try {
-            outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+            outputStream = new FileOutputStream(new File(filepath), true);
             outputStream.write(bitmapByteArray);
             outputStream.close();
         } catch (Exception e){
@@ -156,7 +155,7 @@ public class MainActivity extends AppCompatActivity
     public Bitmap loadImageFromFile(String filename){
         // Try to load image from file
         FileInputStream inputStream = null;
-        File file = new File(getFilesDir() + "/" + filename);
+        File file = new File(getCacheDir() + File.separator + filename);
 
         try {
             inputStream = new FileInputStream(file);
@@ -260,26 +259,44 @@ public class MainActivity extends AppCompatActivity
         Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
         mGoogleApiClient.disconnect();
 
+        clearAppData();
 
-        // Save sign-in state
         SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.clear();
-        editor.commit();
-
-        sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
-        editor = sharedPreferences.edit();
         editor.putBoolean("signedIn", false);
         editor.commit();
-
-        File userImage = new File(getFilesDir() + File.separator + "user_image");
-        userImage.delete();
-        File userCoverImage = new File(getFilesDir() + File.separator + "user_cover");
-        userCoverImage.delete();
 
         wantToSignOut = false;
         startActivity(new Intent(this, HelperActivity.class));
 
+    }
+
+    public void clearAppData(){
+        File cache = getCacheDir();
+        File appDir = new File(cache.getParent());
+        if (appDir.exists()){
+            String[] children = appDir.list();
+            for (String s : children){
+                if (!s.equals("lib")){
+                    deleteDir(new File(appDir, s));
+                    Log.i(TAG, "File /data/data/me.jakemoritz.tasking/" + s + " DELETED");
+                }
+            }
+        }
+    }
+
+    public static boolean deleteDir(File dir){
+        if (dir != null && dir.isDirectory()){
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++){
+                boolean success = deleteDir(new File(dir, children[i]));
+                if (!success){
+                    return false;
+                }
+            }
+        }
+
+        return dir.delete();
     }
 
     public void signOut(){
