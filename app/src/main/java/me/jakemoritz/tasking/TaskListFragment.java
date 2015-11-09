@@ -1,6 +1,10 @@
 package me.jakemoritz.tasking;
 
 import android.app.Fragment;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -19,6 +23,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.PopupMenu;
 
+import com.google.api.client.util.DateTime;
 import com.google.api.services.tasks.model.Task;
 
 import java.util.ArrayList;
@@ -51,10 +56,12 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         tasks = new ArrayList<>();
 
         mAdapter = new TaskAdapter(getActivity(), this, R.layout.task_list_item, tasks);
+    }
 
-        LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
-        loadTasksTask.delegate = this;
-        loadTasksTask.execute();
+    public boolean isNetworkAvailable(){
+        ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+        return (activeNetwork != null && activeNetwork.isConnectedOrConnecting());
     }
 
     @Override
@@ -109,6 +116,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
             mAdapter.clear();
             mAdapter.addAll(taskList);
             mAdapter.notifyDataSetChanged();
+            saveUserTasks();
         }
     }
 
@@ -166,6 +174,80 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
             }
         });
         snackbar.show();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        if (isNetworkAvailable()){
+            LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
+            loadTasksTask.delegate = this;
+            loadTasksTask.execute();
+        } else {
+            loadUserTasks();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        saveUserTasks();
+    }
+
+    public void saveUserTasks(){
+        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+
+        if (mAdapter.getTaskList() != null){
+            for (Task task : mAdapter.getTaskList()){
+                dbHelper.insertTask(task);
+            }
+        }
+        dbHelper.close();
+    }
+
+    public void loadUserTasks(){
+        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+
+        Cursor res = dbHelper.getAllTasks();
+
+        res.moveToFirst();
+        List<Task> taskList = new ArrayList<>();
+
+        for (int i = res.getCount() - 1; i >= 0; i--){
+            String taskId = res.getString(res.getColumnIndex("_id"));
+            String taskTitle = res.getString(res.getColumnIndex("title"));
+            String taskNotes = res.getString(res.getColumnIndex("notes"));
+            String taskStatus = res.getString(res.getColumnIndex("status"));
+            String taskDueDate = res.getString(res.getColumnIndex("duedate"));
+            String taskCompletedDate = res.getString(res.getColumnIndex("completeddate"));
+
+            Task task = new Task();
+            task.setId(taskId);
+            if (taskTitle != null){
+                task.setTitle(taskTitle);
+            }
+            if (taskNotes != null){
+                task.setNotes(taskNotes);
+            }
+            if (taskStatus != null){
+                task.setStatus(taskStatus);
+            }
+            if (taskDueDate != null){
+                task.setDue(new DateTime(Long.valueOf(taskDueDate)));
+            }
+            if (taskCompletedDate != null){
+                task.setCompleted(new DateTime(Long.valueOf(taskCompletedDate)));
+            }
+            taskList.add(task);
+            res.moveToNext();
+        }
+
+        if (!taskList.isEmpty()){
+            mAdapter.clear();
+            mAdapter.addAll(taskList);
+            mAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override

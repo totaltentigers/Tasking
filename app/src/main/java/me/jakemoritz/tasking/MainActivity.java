@@ -181,11 +181,13 @@ public class MainActivity extends AppCompatActivity
                 new AsyncTask<String, Void, Bitmap>(){
                     @Override
                     protected void onPostExecute(Bitmap bitmap) {
-                        Bitmap copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
+                        if (bitmap != null){
+                            Bitmap copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
 
-                        Bitmap userImage = getCircleBitmap(bitmap);
-                        navUserAvatar.setImageBitmap(userImage);
-                        saveImageToFile(copy, "user_image");
+                            Bitmap userImage = getCircleBitmap(bitmap);
+                            navUserAvatar.setImageBitmap(userImage);
+                            saveImageToFile(copy, "user_image");
+                        }
                     }
 
                     @Override
@@ -225,14 +227,16 @@ public class MainActivity extends AppCompatActivity
                 new AsyncTask<String, Void, Bitmap>() {
                     @Override
                     protected void onPostExecute(Bitmap bitmap) {
-                        Bitmap copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
+                        if (bitmap != null){
+                            Bitmap copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
 
-                        Bitmap bitmapCopy = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-                        Canvas c = new Canvas(bitmapCopy);
-                        c.drawPaint(darken);
-                        navUserCover.setBackground(new BitmapDrawable(getResources(), bitmapCopy));
+                            Bitmap bitmapCopy = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                            Canvas c = new Canvas(bitmapCopy);
+                            c.drawPaint(darken);
+                            navUserCover.setBackground(new BitmapDrawable(getResources(), bitmapCopy));
 
-                        saveImageToFile(copy, "user_cover");
+                            saveImageToFile(copy, "user_cover");
+                        }
                     }
 
                     @Override
