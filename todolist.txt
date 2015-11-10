@@ -1,13 +1,11 @@
 ~~~~ Tasking To-Do List ~~~~
 
 ^ General ^
--cache tasks (database?)
 -replace hardcoded strings with resources
 -protect edge cases and null values
--delete option to dialog
+-remove date option in dialog
 -save task list to disk
 -figure out how to upgrade google play services without breaking code
-0save files to cache instead
 
 ^ Task Creation ^
 -add dividing line under dialog title
@@ -29,4 +27,3 @@
 
 ^ Known errors/crashes ^
 -deleting tasks sometimes throws out of bonds
--sign out doesnt always work?

@@ -77,7 +77,12 @@ public class TaskAdapter extends ArrayAdapter<Task>{
         }
 
         // Get DateTime from task
-        DateTime dateTime = task.getDue();
+        DateTime dateTime = null;
+        if (task.getStatus().equals("completed")){
+            dateTime = task.getCompleted();
+        } else if (task.getStatus().equals("needsAction")){
+            dateTime = task.getDue();
+        }
 
         if (dateTime != null){
             // Create calendar from
@@ -91,7 +96,7 @@ public class TaskAdapter extends ArrayAdapter<Task>{
 
             holder.taskDate.setText(DateFormatter.formatDate(year, monthOfYear, dayOfMonth));
         } else {
-            holder.taskNotes.setVisibility(View.GONE);
+            holder.taskDate.setVisibility(View.GONE);
         }
 
         return row;

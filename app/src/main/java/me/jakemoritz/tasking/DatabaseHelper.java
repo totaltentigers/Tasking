@@ -67,7 +67,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return true;
     }
 
-    public boolean updateTask(Integer id, Task task){
+    public boolean updateTask(String id, Task task){
         String taskId = task.getId();
         String taskTitle = task.getTitle();
         String taskNotes = task.getNotes();
@@ -95,15 +95,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         db.update("tasks", contentValues, "_id = ? ", new String[]{
-                Integer.toString(id)
+                id
         });
         return true;
     }
 
-    public Cursor getTask(int id){
+    public Cursor getTask(String id){
         SQLiteDatabase db = getReadableDatabase();
         Cursor res = db.rawQuery("SELECT * FROM tasks WHERE _id = ?", new String[]{
-                Integer.toString(id)
+                id
         });
         return res;
     }
@@ -114,12 +114,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return res;
     }
 
-    public Integer deleteTask(Integer id){
+    public Integer deleteTask(String id){
         SQLiteDatabase db = getWritableDatabase();
         return db.delete("tasks",
                 "_id = ? ",
                 new String[]{
-                        Integer.toString(id)
+                        id
                 });
     }
 }

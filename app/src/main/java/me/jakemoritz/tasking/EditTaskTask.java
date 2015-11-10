@@ -66,6 +66,10 @@ public class EditTaskTask extends AsyncTask<Void, Void, Void> {
                 service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName("Tasking").build();
 
                 Task result = service.tasks().update("@default", task.getId(), task).execute();
+
+                DatabaseHelper dbHelper = new DatabaseHelper(mActivity);
+                dbHelper.updateTask(task.getId(), task);
+                dbHelper.close();
                 Log.d(TAG, result.toPrettyString());
             }
         } catch (IOException e){

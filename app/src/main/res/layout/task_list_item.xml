@@ -1,42 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/activatedBackgroundIndicator">
+    android:background="?android:attr/activatedBackgroundIndicator"
+    android:paddingTop="0dp"
+    android:paddingBottom="0dp">
 
     <CheckBox
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/task_item_checkbox"
-        android:layout_centerVertical="true"
+        android:layout_gravity="center_vertical"
         android:layout_margin="8dp"
         android:focusable="false"/>
 
-    <TextView
-        android:id="@+id/task_item_title"
+    <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textColor="#000000"
-        style="@style/Base.TextAppearance.AppCompat.Title"
-        android:layout_centerVertical="true"
-        android:layout_toRightOf="@+id/task_item_checkbox"
-        android:layout_toEndOf="@+id/task_item_checkbox" />
+        android:paddingBottom="4dp"
+        android:paddingTop="4dp">
+        <TextView
+            android:id="@+id/task_item_title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#000000"
+            style="@style/Base.TextAppearance.AppCompat.Title"
+            android:layout_gravity="center_vertical" />
 
-    <TextView
-        android:id="@+id/task_item_notes"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/task_item_title"
-        android:layout_toRightOf="@+id/task_item_checkbox"
-        android:layout_toEndOf="@+id/task_item_checkbox" />
+        <TextView
+            android:id="@+id/task_item_notes"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            style="@style/Base.TextAppearance.AppCompat.Subhead"
+            android:layout_below="@id/task_item_title" />
 
-    <TextView
-        android:id="@+id/task_item_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/task_item_notes"
-        android:layout_toRightOf="@id/task_item_checkbox"
-        android:layout_toEndOf="@+id/task_item_checkbox"/>
+        <TextView
+            android:id="@+id/task_item_date"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            style="@style/Base.TextAppearance.AppCompat.Body1"
+            android:layout_below="@+id/task_item_notes" />
+    </RelativeLayout>
 
-</RelativeLayout>
+
+</LinearLayout>

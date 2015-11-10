@@ -73,11 +73,14 @@ public class DeleteTasksTask extends AsyncTask<Void, Void, Void> {
 
                 previousTasks = service.tasklists().get("@default").execute();
 
+                DatabaseHelper dbHelper = new DatabaseHelper(mActivity);
 
                 for (int i = 0; i < mSelectedItemIds.size(); i++){
                     Task task = tasks.get(mSelectedItemIds.keyAt(i));
+                    dbHelper.deleteTask(task.getId());
                     service.tasks().delete("@default", task.getId()).execute();
                 }
+                dbHelper.close();
             }
         } catch (IOException e){
             // The fetchToken() method handles Google-specific exceptions,

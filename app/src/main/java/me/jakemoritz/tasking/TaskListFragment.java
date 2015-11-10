@@ -41,6 +41,11 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
     private AbsListView mListView;
     SwipeRefreshLayout swipeRefreshLayout;
+
+    public TaskAdapter getmAdapter() {
+        return mAdapter;
+    }
+
     private TaskAdapter mAdapter;
 
     List<Task> tasks;
@@ -141,6 +146,8 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     }
 
     public void refreshTasks(){
+        mAdapter.notifyDataSetChanged();
+
         LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
         loadTasksTask.delegate = this;
         loadTasksTask.execute();
@@ -200,7 +207,11 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
         if (mAdapter.getTaskList() != null){
             for (Task task : mAdapter.getTaskList()){
-                dbHelper.insertTask(task);
+                if (dbHelper.getTask(task.getId()) != null){
+                    dbHelper.updateTask(task.getId(), task);
+                } else {
+                    dbHelper.insertTask(task);
+                }
             }
         }
         dbHelper.close();
