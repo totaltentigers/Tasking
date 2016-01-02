@@ -34,17 +34,13 @@ import java.util.List;
 public class TaskListFragment extends Fragment implements AbsListView.OnItemClickListener,
         LoadTasksResponse, AddTaskResponse, AbsListView.OnItemLongClickListener,
         ActionMode.Callback, AbsListView.MultiChoiceModeListener, DeleteTasksResponse,
-        EditTaskResponse, SwipeRefreshLayout.OnRefreshListener, RestoreTasksResponse, CheckBox.OnCheckedChangeListener,
+        EditTaskResponse, SwipeRefreshLayout.OnRefreshListener, CheckBox.OnCheckedChangeListener,
         UpdateTasklistResponse{
 
     private static final String TAG = "TaskListFragment";
 
     private AbsListView mListView;
     SwipeRefreshLayout swipeRefreshLayout;
-
-    public TaskAdapter getmAdapter() {
-        return mAdapter;
-    }
 
     private TaskAdapter mAdapter;
 
@@ -61,12 +57,6 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         tasks = new ArrayList<>();
 
         mAdapter = new TaskAdapter(getActivity(), this, R.layout.task_list_item, tasks);
-    }
-
-    public boolean isNetworkAvailable(){
-        ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
-        return (activeNetwork != null && activeNetwork.isConnectedOrConnecting());
     }
 
     @Override
@@ -104,6 +94,12 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         });
     }
 
+    public boolean isNetworkAvailable(){
+        ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
+        return (activeNetwork != null && activeNetwork.isConnectedOrConnecting());
+    }
+
     private void createTask(){
         AddTaskDialogFragment addTaskDialogFragment = AddTaskDialogFragment.newInstance(this);
         addTaskDialogFragment.show(getFragmentManager(), "addTaskDialog");
@@ -136,12 +132,12 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     }
 
     @Override
-    public void restoreTasksFinish() {
+    public void editTaskFinish() {
         refreshTasks();
     }
 
     @Override
-    public void editTaskFinish() {
+    public void updateTasklistFinish() {
         refreshTasks();
     }
 
@@ -204,10 +200,11 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
     public void saveUserTasks(){
         DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
+        Cursor res = null;
 
         if (mAdapter.getTaskList() != null){
             for (Task task : mAdapter.getTaskList()){
-                if (dbHelper.getTask(task.getId()) != null){
+                if (dbHelper.getTask(task.getId()).getCount() != 0){
                     dbHelper.updateTask(task.getId(), task);
                 } else {
                     dbHelper.insertTask(task);
@@ -259,6 +256,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
             mAdapter.addAll(taskList);
             mAdapter.notifyDataSetChanged();
         }
+        dbHelper.close();
     }
 
     @Override
@@ -400,10 +398,5 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         EditTaskTask editTaskTask = new EditTaskTask(getActivity(), newTask);
         editTaskTask.delegate = this;
         editTaskTask.execute();
-    }
-
-    @Override
-    public void updateTasklistFinish() {
-
     }
 }

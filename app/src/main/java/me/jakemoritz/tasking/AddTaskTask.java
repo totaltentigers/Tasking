@@ -59,6 +59,7 @@ public class AddTaskTask extends AsyncTask<Void, Void, Void> {
                 Task result = service.tasks().insert("@default", task).execute();
                 DatabaseHelper dbHelper = new DatabaseHelper(mActivity);
                 dbHelper.insertTask(task);
+                dbHelper.close();
             }
         } catch (IOException e){
             // The fetchToken() method handles Google-specific exceptions,

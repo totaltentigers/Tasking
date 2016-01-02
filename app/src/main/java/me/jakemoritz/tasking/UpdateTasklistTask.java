@@ -60,13 +60,20 @@ public class UpdateTasklistTask extends AsyncTask<Void, Void, Void> {
                 credential.setSelectedAccountName(mEmail);
                 service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName("Tasking").build();
 
+                /*DatabaseHelper dbHelper = new DatabaseHelper(mActivity);
+                SQLiteDatabase s = dbHelper.getWritableDatabase();
+                s.execSQL("DROP TABLE IF EXISTS tasks");
+                dbHelper.onCreate(s);*/
+
                 List<Task> list = service.tasks().list("@default").execute().getItems();
-                 for (Task task : list){
+                for (Task task : list){
                     service.tasks().delete("@default", task.getId()).execute();
                 }
+
                 for (int i = taskList.size() - 1; i >= 0; i--){
                     Task newTask = new Task();
                     Task task = taskList.get(i);
+                    newTask.setId(task.getId());
                     newTask.setTitle(task.getTitle());
                     newTask.setNotes(task.getNotes());
                     newTask.setStatus(task.getStatus());
@@ -78,6 +85,7 @@ public class UpdateTasklistTask extends AsyncTask<Void, Void, Void> {
                     }
                     //task.setPosition(null);
                     Task result = service.tasks().insert("@default", newTask).execute();
+                    //dbHelper.insertTask(newTask);
                 }
             }
         } catch (IOException e){

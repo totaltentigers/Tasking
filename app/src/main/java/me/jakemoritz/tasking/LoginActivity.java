@@ -1,9 +1,14 @@
 package me.jakemoritz.tasking;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -19,6 +24,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         View.OnClickListener{
 
     private static final String TAG = "LoginActivity";
+    private static final int MY_PERMISSIONS_REQUEST_GET_ACCOUNTS = 99;
 
     /* Request code used to invoke sign in user interactions. */
     private static final int RC_SIGN_IN = 0;
@@ -79,6 +85,32 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode){
+            case MY_PERMISSIONS_REQUEST_GET_ACCOUNTS: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    saveUserInfo();
+
+                    Intent mainIntent = new Intent(this, MainActivity.class);
+                    // Show the signed-in UI
+                    startActivity(mainIntent);
+                } else {
+                    // User didn't grant permission
+                }
+            }
+        }
+    }
+
+    private void saveUserInfo(){
+        // Save sign-in state
+        SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("email", Plus.AccountApi.getAccountName(mGoogleApiClient));
+        editor.putString("name", Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getDisplayName());
+        editor.putBoolean("signedIn", true);
+        editor.commit();
+    }
 
     @Override
     public void onConnected(Bundle bundle) {
@@ -88,17 +120,15 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         Log.d(TAG, "onConnected:" + bundle);
         mShouldResolve = false;
 
-        // Save sign-in state
-        SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("email", Plus.AccountApi.getAccountName(mGoogleApiClient));
-        editor.putString("name", Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getDisplayName());
-        editor.putBoolean("signedIn", true);
-        editor.commit();
 
-        Intent mainIntent = new Intent(this, MainActivity.class);
-        // Show the signed-in UI
-        startActivity(mainIntent);
+
+        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS);
+
+        if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.GET_ACCOUNTS}, MY_PERMISSIONS_REQUEST_GET_ACCOUNTS);
+        }
+
+
     }
 
     @Override

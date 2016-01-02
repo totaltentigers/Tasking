@@ -5,7 +5,10 @@
 -protect edge cases and null values
 -remove date option in dialog
 -save task list to disk
+-task date doesn't display after settings from EditDialog
+-must save position in database
 -figure out how to upgrade google play services without breaking code
+-check permissions
 
 ^ Task Creation ^
 -add dividing line under dialog title
