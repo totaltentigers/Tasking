@@ -37,11 +37,10 @@ public class EditTaskTask extends AsyncTask<Void, Void, Void> {
 
     public EditTaskTask(Activity mActivity, Task task) {
         this.mActivity = mActivity;
+        this.task = task;
 
         SharedPreferences sharedPreferences = mActivity.getSharedPreferences(mActivity.getString(R.string.shared_prefs_account), 0);
         this.mEmail = sharedPreferences.getString(mActivity.getString(R.string.shared_prefs_email), null);
-
-        this.task = task;
     }
 
     // Executes asynchronous job.

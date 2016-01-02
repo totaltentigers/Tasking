@@ -1,10 +1,7 @@
 ~~~~ Tasking To-Do List ~~~~
 
 ^ General ^
--replace hardcoded strings with resources
 -protect edge cases and null values
--remove date option in dialog
--save task list to disk
 -task date doesn't display after settings from EditDialog
 -must save position in database
 -figure out how to upgrade google play services without breaking code
@@ -22,7 +19,7 @@
 
 ^ Task List Items ^
 
-^ Side nav ^
+^ Side Nav ^
 -make scaled avatar not hideous
 
 ^ General UI ^
@@ -34,4 +31,4 @@
 -reminders
 
 ^ Known errors/crashes ^
--deleting tasks sometimes throws out of bonds
+-deleting tasks sometimes throws out of bounds

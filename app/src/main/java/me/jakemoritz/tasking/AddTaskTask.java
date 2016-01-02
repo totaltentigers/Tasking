@@ -54,7 +54,7 @@ public class AddTaskTask extends AsyncTask<Void, Void, Void> {
                 credential.setSelectedAccountName(mEmail);
                 service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName(mActivity.getString(R.string.app_name)).build();
 
-                //Task result = service.tasks().insert("@default", task).execute();
+                Task result = service.tasks().insert("@default", task).execute();
                 DatabaseHelper dbHelper = new DatabaseHelper(mActivity);
                 dbHelper.insertTask(task);
                 dbHelper.close();
