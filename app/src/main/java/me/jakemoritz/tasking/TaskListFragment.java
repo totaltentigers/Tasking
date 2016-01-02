@@ -155,8 +155,8 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         final List<Task> oldTaskList = new ArrayList<>();
         oldTaskList.addAll(taskList);
 
-        Snackbar snackbar = Snackbar.make(getView(), "Deleted", Snackbar.LENGTH_LONG);
-        snackbar.setAction("Undo", new View.OnClickListener() {
+        Snackbar snackbar = Snackbar.make(getView(), getString(R.string.task_deleted_snackbar_text), Snackbar.LENGTH_LONG);
+        snackbar.setAction(getString(R.string.task_deleted_snackbar_undo), new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mAdapter.clear();
@@ -223,12 +223,12 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         List<Task> taskList = new ArrayList<>();
 
         for (int i = res.getCount() - 1; i >= 0; i--){
-            String taskId = res.getString(res.getColumnIndex("_id"));
-            String taskTitle = res.getString(res.getColumnIndex("title"));
-            String taskNotes = res.getString(res.getColumnIndex("notes"));
-            String taskStatus = res.getString(res.getColumnIndex("status"));
-            String taskDueDate = res.getString(res.getColumnIndex("duedate"));
-            String taskCompletedDate = res.getString(res.getColumnIndex("completeddate"));
+            String taskId = res.getString(res.getColumnIndex(DatabaseHelper.TASK_COLUMN_ID));
+            String taskTitle = res.getString(res.getColumnIndex(DatabaseHelper.TASK_COLUMN_TITLE));
+            String taskNotes = res.getString(res.getColumnIndex(DatabaseHelper.TASK_COLUMN_NOTES));
+            String taskStatus = res.getString(res.getColumnIndex(DatabaseHelper.TASK_COLUMN_STATUS));
+            String taskDueDate = res.getString(res.getColumnIndex(DatabaseHelper.TASK_COLUMN_DUE_DATE));
+            String taskCompletedDate = res.getString(res.getColumnIndex(DatabaseHelper.TASK_COLUMN_COMP_DATE));
 
             Task task = new Task();
             task.setId(taskId);
@@ -382,16 +382,17 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         newTask.setId(task.getId());
         newTask.setTitle(task.getTitle());
         newTask.setNotes(task.getNotes());
+
         if (isChecked){
-            task.setStatus("completed");
+            task.setStatus(getString(R.string.task_completed));
             task.setCompleted(task.getDue());
-            newTask.setStatus("completed");
+            newTask.setStatus(getString(R.string.task_completed));
             newTask.setDue(task.getDue());
             newTask.setCompleted(task.getDue());
         } else {
-            task.setStatus("needsAction");
+            task.setStatus(getString(R.string.task_needsAction));
             task.setDue(task.getCompleted());
-            newTask.setStatus("needsAction");
+            newTask.setStatus(getString(R.string.task_needsAction));
             newTask.setDue(task.getCompleted());
         }
 

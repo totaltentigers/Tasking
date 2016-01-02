@@ -26,8 +26,6 @@ public class AddTaskTask extends AsyncTask<Void, Void, Void> {
 
     public AddTaskResponse delegate = null;
 
-    private final static String mScope = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
-
     Activity mActivity;
     String mEmail;
     Task task;
@@ -41,8 +39,8 @@ public class AddTaskTask extends AsyncTask<Void, Void, Void> {
         this.mActivity = mActivity;
         this.task = task;
 
-        SharedPreferences sharedPreferences = mActivity.getSharedPreferences("PREFS_ACC", 0);
-        this.mEmail = sharedPreferences.getString("email", null);
+        SharedPreferences sharedPreferences = mActivity.getSharedPreferences(mActivity.getString(R.string.shared_prefs_account), 0);
+        this.mEmail = sharedPreferences.getString(mActivity.getString(R.string.shared_prefs_email), null);
     }
 
     // Executes asynchronous job.
@@ -54,9 +52,9 @@ public class AddTaskTask extends AsyncTask<Void, Void, Void> {
             if (token != null){
                 credential = GoogleAccountCredential.usingOAuth2(mActivity, Collections.singleton(TasksScopes.TASKS));
                 credential.setSelectedAccountName(mEmail);
-                service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName("Tasking").build();
+                service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName(mActivity.getString(R.string.app_name)).build();
 
-                Task result = service.tasks().insert("@default", task).execute();
+                //Task result = service.tasks().insert("@default", task).execute();
                 DatabaseHelper dbHelper = new DatabaseHelper(mActivity);
                 dbHelper.insertTask(task);
                 dbHelper.close();
@@ -75,7 +73,7 @@ public class AddTaskTask extends AsyncTask<Void, Void, Void> {
     // handles GoogleAuthExceptions
     protected String fetchToken() throws IOException{
         try {
-            return GoogleAuthUtil.getToken(mActivity, mEmail, mScope);
+            return GoogleAuthUtil.getToken(mActivity, mEmail, mActivity.getString(R.string.update_task_oathscope));
         } catch (UserRecoverableAuthException userRecoverableException){
             // GooglePlayServices.apk is either old, disabled, or not present.
             // so we must display a UI to recover.

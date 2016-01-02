@@ -27,13 +27,7 @@ public class UpdateTasklistTask extends AsyncTask<Void, Void, Void> {
 
     public UpdateTasklistResponse delegate = null;
 
-    @Override
-    protected void onPostExecute(Void aVoid) {
-        delegate.updateTasklistFinish();
-    }
-
     Activity mActivity;
-    String mScope = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
     String mEmail;
 
     final HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
@@ -45,8 +39,8 @@ public class UpdateTasklistTask extends AsyncTask<Void, Void, Void> {
     public UpdateTasklistTask(Activity mActivity, List<Task> taskList) {
         this.mActivity = mActivity;
 
-        SharedPreferences sharedPreferences = mActivity.getSharedPreferences("PREFS_ACC", 0);
-        this.mEmail = sharedPreferences.getString("email", null);
+        SharedPreferences sharedPreferences = mActivity.getSharedPreferences(mActivity.getString(R.string.shared_prefs_account), 0);
+        this.mEmail = sharedPreferences.getString(mActivity.getString(R.string.shared_prefs_email), null);
 
         this.taskList = taskList;
     }
@@ -100,7 +94,7 @@ public class UpdateTasklistTask extends AsyncTask<Void, Void, Void> {
     // handles GoogleAuthExceptions
     protected String fetchToken() throws IOException{
         try {
-            return GoogleAuthUtil.getToken(mActivity, mEmail, mScope);
+            return GoogleAuthUtil.getToken(mActivity, mEmail, mActivity.getString(R.string.update_task_oathscope));
         } catch (UserRecoverableAuthException userRecoverableException){
             // GooglePlayServices.apk is either old, disabled, or not present.
             // so we must display a UI to recover.
@@ -111,4 +105,10 @@ public class UpdateTasklistTask extends AsyncTask<Void, Void, Void> {
         }
         return null;
     }
+
+    @Override
+    protected void onPostExecute(Void aVoid) {
+        delegate.updateTasklistFinish();
+    }
+
 }

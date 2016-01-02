@@ -54,7 +54,7 @@ public class TaskAdapter extends ArrayAdapter<Task>{
         holder.taskNotes = (TextView) row.findViewById(R.id.task_item_notes);
         holder.taskDate = (TextView) row.findViewById(R.id.task_item_date);
         holder.taskCompleted = (CheckBox) row.findViewById(R.id.task_item_checkbox);
-        if (task.getStatus().equals("completed")){
+        if (task.getStatus().equals(context.getString(R.string.task_completed))){
             holder.taskCompleted.setChecked(true);
         } else {
             holder.taskCompleted.setChecked(false);
@@ -78,9 +78,9 @@ public class TaskAdapter extends ArrayAdapter<Task>{
 
         // Get DateTime from task
         DateTime dateTime = null;
-        if (task.getStatus().equals("completed")){
+        if (task.getStatus().equals(context.getString(R.string.task_completed))){
             dateTime = task.getCompleted();
-        } else if (task.getStatus().equals("needsAction")){
+        } else if (task.getStatus().equals(context.getString(R.string.task_needsAction))){
             dateTime = task.getDue();
         }
 

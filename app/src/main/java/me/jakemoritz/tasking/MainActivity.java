@@ -123,15 +123,15 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void loadNavUserName(){
-        SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
-        String name = sharedPreferences.getString("name", "");
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.shared_prefs_account), 0);
+        String name = sharedPreferences.getString(getString(R.string.shared_prefs_name), "");
 
         navUserName.setText(name);
     }
 
     public void loadNavUserEmail(){
-        SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
-        String email = sharedPreferences.getString("email", "");
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.shared_prefs_account), 0);
+        String email = sharedPreferences.getString(getString(R.string.shared_prefs_email), "");
 
         navUserEmail.setText(email);
     }
@@ -170,8 +170,8 @@ public class MainActivity extends AppCompatActivity
 
     public void loadNavUserImage(){
         // If an image is loaded, pass it
-        if (loadImageFromFile("user_image") != null){
-            navUserAvatar.setImageBitmap(getCircleBitmap(loadImageFromFile("user_image")));
+        if (loadImageFromFile(getString(R.string.user_image)) != null){
+            navUserAvatar.setImageBitmap(getCircleBitmap(loadImageFromFile(getString(R.string.user_image))));
         }
         // If no image is loaded, pull from servers
         else {
@@ -186,7 +186,7 @@ public class MainActivity extends AppCompatActivity
 
                             Bitmap userImage = getCircleBitmap(bitmap);
                             navUserAvatar.setImageBitmap(userImage);
-                            saveImageToFile(copy, "user_image");
+                            saveImageToFile(copy, getString(R.string.user_image));
                         }
                     }
 
@@ -213,8 +213,8 @@ public class MainActivity extends AppCompatActivity
         darken.setAlpha(100);
 
         // If an image is loaded, pass it
-        if (loadImageFromFile("user_cover") != null){
-            Bitmap bitmapCopy = loadImageFromFile("user_cover").copy(Bitmap.Config.ARGB_8888, true);
+        if (loadImageFromFile(getString(R.string.user_cover_image)) != null){
+            Bitmap bitmapCopy = loadImageFromFile(getString(R.string.user_cover_image)).copy(Bitmap.Config.ARGB_8888, true);
             Canvas c = new Canvas(bitmapCopy);
             c.drawPaint(darken);
             navUserCover.setBackground(new BitmapDrawable(getResources(), bitmapCopy));
@@ -235,7 +235,7 @@ public class MainActivity extends AppCompatActivity
                             c.drawPaint(darken);
                             navUserCover.setBackground(new BitmapDrawable(getResources(), bitmapCopy));
 
-                            saveImageToFile(copy, "user_cover");
+                            saveImageToFile(copy, getString(R.string.user_cover_image));
                         }
                     }
 
@@ -265,9 +265,9 @@ public class MainActivity extends AppCompatActivity
 
         clearAppData();
 
-        SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.shared_prefs_account), 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean("signedIn", false);
+        editor.putBoolean(getString(R.string.shared_prefs_logged_in), false);
         editor.commit();
 
         wantToSignOut = false;

@@ -59,9 +59,9 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setView(view)
-                .setTitle("Create your task.")
-                .setPositiveButton("Add", null)
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                .setTitle(getString(R.string.add_task_dialog_title))
+                .setPositiveButton(getString(R.string.add_task_dialog_add), null)
+                .setNegativeButton(getString(R.string.add_task_dialog_cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dismiss();
@@ -95,7 +95,7 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
                             addTaskTask.execute();
                             dismiss();
                         } else {
-                            taskTitle.setError("You must enter a task title.");
+                            taskTitle.setError(getString(R.string.add_task_dialog_error_notitle));
                         }
                     }
                 });
@@ -106,7 +106,7 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
             @Override
             public void onClick(View v) {
                 DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(callbackInstance);
-                datePickerFragment.show(getFragmentManager(), "datePickerFragment");
+                datePickerFragment.show(getFragmentManager(), null);
             }
         });
 

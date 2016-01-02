@@ -8,7 +8,6 @@ import android.support.v7.widget.Toolbar;
 
 public class HelperActivity extends AppCompatActivity {
 
-    private boolean isLoggedIn = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,8 +17,8 @@ public class HelperActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         // Check sign-in state
-        SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
-        isLoggedIn = sharedPreferences.getBoolean("signedIn", false);
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.shared_prefs_account), 0);
+        boolean isLoggedIn = sharedPreferences.getBoolean(getString(R.string.shared_prefs_logged_in), false);
 
         if (isLoggedIn){
             startActivity(new Intent(this, MainActivity.class));

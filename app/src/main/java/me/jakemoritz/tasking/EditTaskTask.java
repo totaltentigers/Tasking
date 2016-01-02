@@ -26,15 +26,7 @@ public class EditTaskTask extends AsyncTask<Void, Void, Void> {
 
     public EditTaskResponse delegate = null;
 
-    @Override
-    protected void onPostExecute(Void aVoid) {
-        delegate.editTaskFinish();
-    }
-
-    private final static String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
-
     Activity mActivity;
-    String mScope;
     String mEmail;
 
     final HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
@@ -46,8 +38,8 @@ public class EditTaskTask extends AsyncTask<Void, Void, Void> {
     public EditTaskTask(Activity mActivity, Task task) {
         this.mActivity = mActivity;
 
-        SharedPreferences sharedPreferences = mActivity.getSharedPreferences("PREFS_ACC", 0);
-        this.mEmail = sharedPreferences.getString("email", null);
+        SharedPreferences sharedPreferences = mActivity.getSharedPreferences(mActivity.getString(R.string.shared_prefs_account), 0);
+        this.mEmail = sharedPreferences.getString(mActivity.getString(R.string.shared_prefs_email), null);
 
         this.task = task;
     }
@@ -57,13 +49,12 @@ public class EditTaskTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... params) {
         //Log.d(TAG, "doInBackground");
-        mScope = SCOPE;
         try {
             String token = fetchToken();
             if (token != null){
                 credential = GoogleAccountCredential.usingOAuth2(mActivity, Collections.singleton(TasksScopes.TASKS));
                 credential.setSelectedAccountName(mEmail);
-                service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName("Tasking").build();
+                service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName(mActivity.getString(R.string.app_name)).build();
 
                 Task result = service.tasks().update("@default", task.getId(), task).execute();
 
@@ -84,7 +75,7 @@ public class EditTaskTask extends AsyncTask<Void, Void, Void> {
     // handles GoogleAuthExceptions
     protected String fetchToken() throws IOException{
         try {
-            return GoogleAuthUtil.getToken(mActivity, mEmail, mScope);
+            return GoogleAuthUtil.getToken(mActivity, mEmail, mActivity.getString(R.string.update_task_oathscope));
         } catch (UserRecoverableAuthException userRecoverableException){
             // GooglePlayServices.apk is either old, disabled, or not present.
             // so we must display a UI to recover.
@@ -95,4 +86,10 @@ public class EditTaskTask extends AsyncTask<Void, Void, Void> {
         }
         return null;
     }
+
+    @Override
+    protected void onPostExecute(Void aVoid) {
+        delegate.editTaskFinish();
+    }
+
 }

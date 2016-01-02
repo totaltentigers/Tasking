@@ -24,6 +24,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         View.OnClickListener{
 
     private static final String TAG = "LoginActivity";
+
     private static final int MY_PERMISSIONS_REQUEST_GET_ACCOUNTS = 99;
 
     /* Request code used to invoke sign in user interactions. */
@@ -50,7 +51,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 .addApi(Plus.API)
                 .addScope(new Scope(Scopes.PROFILE))
                 .addScope(new Scope(Scopes.EMAIL))
-                .addScope(new Scope("https://www.googleapis.com/auth/tasks"))
+                .addScope(new Scope(getString(R.string.gac_task_scope)))
                 .build();
 
         findViewById(R.id.sign_in_button).setOnClickListener(this);
@@ -104,11 +105,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     private void saveUserInfo(){
         // Save sign-in state
-        SharedPreferences sharedPreferences = getSharedPreferences("PREFS_ACC", 0);
+        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.shared_prefs_account), 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("email", Plus.AccountApi.getAccountName(mGoogleApiClient));
-        editor.putString("name", Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getDisplayName());
-        editor.putBoolean("signedIn", true);
+        editor.putString(getString(R.string.shared_prefs_email), Plus.AccountApi.getAccountName(mGoogleApiClient));
+        editor.putString(getString(R.string.shared_prefs_name), Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getDisplayName());
+        editor.putBoolean(getString(R.string.shared_prefs_logged_in), true);
         editor.commit();
     }
 
@@ -120,15 +121,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         Log.d(TAG, "onConnected:" + bundle);
         mShouldResolve = false;
 
-
-
         int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS);
 
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.GET_ACCOUNTS}, MY_PERMISSIONS_REQUEST_GET_ACCOUNTS);
         }
-
-
     }
 
     @Override

@@ -23,19 +23,11 @@ import java.util.List;
 
 public class LoadTasksTask extends AsyncTask<Void, Void, Void> {
 
-    public LoadTasksResponse delegate = null;
-
-    @Override
-    protected void onPostExecute(Void aVoid) {
-        delegate.loadTasksFinish(tasks);
-    }
-
     private static final String TAG = "LoadTasksTask";
 
-    private final static String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
+    public LoadTasksResponse delegate = null;
 
     Activity mActivity;
-    String mScope;
     String mEmail;
 
     final HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
@@ -47,8 +39,8 @@ public class LoadTasksTask extends AsyncTask<Void, Void, Void> {
     public LoadTasksTask(Activity mActivity) {
         this.mActivity = mActivity;
 
-        SharedPreferences sharedPreferences = mActivity.getSharedPreferences("PREFS_ACC", 0);
-        this.mEmail = sharedPreferences.getString("email", null);
+        SharedPreferences sharedPreferences = mActivity.getSharedPreferences(mActivity.getString(R.string.shared_prefs_account), 0);
+        this.mEmail = sharedPreferences.getString(mActivity.getString(R.string.shared_prefs_email), null);
     }
 
     // Executes asynchronous job.
@@ -56,13 +48,12 @@ public class LoadTasksTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... params) {
         //Log.d(TAG, "doInBackground");
-        mScope = SCOPE;
         try {
             String token = fetchToken();
             if (token != null){
                 credential = GoogleAccountCredential.usingOAuth2(mActivity, Collections.singleton(TasksScopes.TASKS));
                 credential.setSelectedAccountName(mEmail);
-                service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName("Tasking").build();
+                service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName(mActivity.getString(R.string.app_name)).build();
 
                 tasks = service.tasks().list("@default").execute().getItems();
                 Task emptyTask = tasks.get(tasks.size()-1);
@@ -82,7 +73,7 @@ public class LoadTasksTask extends AsyncTask<Void, Void, Void> {
     // handles GoogleAuthExceptions
     protected String fetchToken() throws IOException{
         try {
-            return GoogleAuthUtil.getToken(mActivity, mEmail, mScope);
+            return GoogleAuthUtil.getToken(mActivity, mEmail, mActivity.getString(R.string.update_task_oathscope));
         } catch (UserRecoverableAuthException userRecoverableException){
             // GooglePlayServices.apk is either old, disabled, or not present.
             // so we must display a UI to recover.
@@ -93,4 +84,10 @@ public class LoadTasksTask extends AsyncTask<Void, Void, Void> {
         }
         return null;
     }
+
+    @Override
+    protected void onPostExecute(Void aVoid) {
+        delegate.loadTasksFinish(tasks);
+    }
+
 }

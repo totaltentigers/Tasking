@@ -10,14 +10,14 @@ import com.google.api.services.tasks.model.Task;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    static final String dbName="taskDB";
-    static final String taskTable = "Tasks";
-    static final String taskID ="_id";
-    static final String colTitle="Title";
-    static final String colNotes="Notes";
-    static final String colStatus="Status";
-    static final String colDueDate="DueDate";
-    static final String colCompletedDate="CompletedDate";
+    public static final String dbName="taskDB";
+    public static final String TASK_TABLE_NAME = "tasks";
+    public static final String TASK_COLUMN_ID ="_id";
+    public static final String TASK_COLUMN_TITLE ="Title";
+    public static final String TASK_COLUMN_NOTES ="Notes";
+    public static final String TASK_COLUMN_STATUS ="Status";
+    public static final String TASK_COLUMN_DUE_DATE ="DueDate";
+    public static final String TASK_COLUMN_COMP_DATE ="CompletedDate";
 
 
     public DatabaseHelper(Context context){
@@ -26,14 +26,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE tasks ( _id TEXT PRIMARY KEY "
-                + ", title TEXT, notes TEXT, status TEXT, duedate TEXT,"
-                + "completeddate TEXT)");
+        db.execSQL("CREATE TABLE " + TASK_TABLE_NAME + " ( " +
+                TASK_COLUMN_ID + " TEXT PRIMARY KEY, " +
+                TASK_COLUMN_TITLE + " TEXT, " +
+                TASK_COLUMN_NOTES + " TEXT, " +
+                TASK_COLUMN_STATUS + " TEXT, " +
+                TASK_COLUMN_DUE_DATE + " TEXT," +
+                TASK_COLUMN_COMP_DATE + " TEXT)");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS tasks");
+        db.execSQL("DROP TABLE IF EXISTS " + TASK_TABLE_NAME);
         onCreate(db);
     }
 
@@ -53,17 +57,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put("_id", taskId);
-        contentValues.put("title", taskTitle);
-        contentValues.put("notes", taskNotes);
-        contentValues.put("status", taskStatus);
+        contentValues.put(TASK_COLUMN_ID, taskId);
+        contentValues.put(TASK_COLUMN_TITLE, taskTitle);
+        contentValues.put(TASK_COLUMN_NOTES, taskNotes);
+        contentValues.put(TASK_COLUMN_STATUS, taskStatus);
         if (taskDueDate != null){
-            contentValues.put("duedate", taskDueDate);
+            contentValues.put(TASK_COLUMN_DUE_DATE, taskDueDate);
         }
         if (taskCompletedDate != null){
-            contentValues.put("completeddate", taskCompletedDate);
+            contentValues.put(TASK_COLUMN_COMP_DATE, taskCompletedDate);
         }
-        db.insert("tasks", null, contentValues);
+        db.insert(TASK_TABLE_NAME , null, contentValues);
         return true;
     }
 
@@ -83,18 +87,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         SQLiteDatabase db = getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put("_id", taskId);
-        contentValues.put("title", taskTitle);
-        contentValues.put("notes", taskNotes);
-        contentValues.put("status", taskStatus);
+        contentValues.put(TASK_COLUMN_ID, taskId);
+        contentValues.put(TASK_COLUMN_TITLE, taskTitle);
+        contentValues.put(TASK_COLUMN_NOTES, taskNotes);
+        contentValues.put(TASK_COLUMN_STATUS, taskStatus);
         if (taskDueDate != null){
-            contentValues.put("duedate", taskDueDate);
+            contentValues.put(TASK_COLUMN_DUE_DATE, taskDueDate);
         }
         if (taskCompletedDate != null){
-            contentValues.put("completeddate", taskCompletedDate);
+            contentValues.put(TASK_COLUMN_COMP_DATE, taskCompletedDate);
         }
 
-        db.update("tasks", contentValues, "_id = ? ", new String[]{
+        db.update(TASK_TABLE_NAME, contentValues, TASK_COLUMN_ID + " = ? ", new String[]{
                 id
         });
         return true;
@@ -102,22 +106,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public Cursor getTask(String id){
         SQLiteDatabase db = getReadableDatabase();
-        Cursor res = db.rawQuery("SELECT * FROM tasks WHERE _id = ?", new String[]{
-                id
-        });
-        return res;
+         return db.rawQuery("SELECT * FROM " + TASK_TABLE_NAME + " WHERE " + TASK_COLUMN_ID + " = ?", new String[]{id});
     }
 
     public Cursor getAllTasks(){
         SQLiteDatabase db = getReadableDatabase();
-        Cursor res = db.rawQuery("SELECT * FROM tasks", null);
-        return res;
+        return db.rawQuery("SELECT * FROM " + TASK_TABLE_NAME, null);
     }
 
     public Integer deleteTask(String id){
         SQLiteDatabase db = getWritableDatabase();
-        return db.delete("tasks",
-                "_id = ? ",
+        return db.delete(TASK_TABLE_NAME,
+                TASK_COLUMN_ID + " = ? ",
                 new String[]{
                         id
                 });

@@ -9,6 +9,11 @@
 -must save position in database
 -figure out how to upgrade google play services without breaking code
 -check permissions
+-provide localization
+-allow sharing to for saving as task
+-clean comments and unused code
+-handle exceptions
+-transfer API client to dev acc
 
 ^ Task Creation ^
 -add dividing line under dialog title

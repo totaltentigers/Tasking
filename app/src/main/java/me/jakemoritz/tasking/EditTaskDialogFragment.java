@@ -65,9 +65,9 @@ public class EditTaskDialogFragment extends DialogFragment implements DatePicker
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         builder.setView(view)
-                .setTitle("Edit your task.")
-                .setPositiveButton("Save", null)
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                .setTitle(getString(R.string.edit_task_dialog_edit))
+                .setPositiveButton(R.string.edit_task_dialog_save, null)
+                .setNegativeButton(R.string.add_task_dialog_cancel, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dismiss();
@@ -103,7 +103,7 @@ public class EditTaskDialogFragment extends DialogFragment implements DatePicker
 
                             dismiss();
                         } else {
-                            taskTitle.setError("You must enter a task title.");
+                            taskTitle.setError(getString(R.string.add_task_dialog_error_notitle));
                         }
                     }
                 });
@@ -114,7 +114,7 @@ public class EditTaskDialogFragment extends DialogFragment implements DatePicker
             @Override
             public void onClick(View v) {
                 DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(callbackInstance);
-                datePickerFragment.show(getFragmentManager(), "datePickerFragment");
+                datePickerFragment.show(getFragmentManager(), null);
             }
         });
 
