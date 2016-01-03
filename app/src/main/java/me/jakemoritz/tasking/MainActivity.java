@@ -95,7 +95,6 @@ public class MainActivity extends AppCompatActivity
         mGoogleApiClient.connect();
 
         wantToLoadUserImages = true;
-        wantToSignOut = false;
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -304,8 +303,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void signOut(){
-        wantToSignOut = true;
-        mGoogleApiClient.connect();
+        //wantToSignOut = true;
+        //mGoogleApiClient.connect();
+        signOutHelper();
     }
 
     @Override
@@ -352,7 +352,7 @@ public class MainActivity extends AppCompatActivity
             loadNavUserCoverImage();
         }
         if (wantToSignOut){
-            signOutHelper();
+            //signOutHelper();
         }
     }
 

@@ -102,13 +102,13 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
     private void createTask(){
         AddTaskDialogFragment addTaskDialogFragment = AddTaskDialogFragment.newInstance(this);
-        addTaskDialogFragment.show(getFragmentManager(), "addTaskDialog");
+        addTaskDialogFragment.show(getFragmentManager(), null);
     }
 
     private void editTask(int position){
         Task task = mAdapter.getItem(position);
         EditTaskDialogFragment editTaskDialogFragment = EditTaskDialogFragment.newInstance(this, task);
-        editTaskDialogFragment.show(getFragmentManager(), "editTaskDialog");
+        editTaskDialogFragment.show(getFragmentManager(), null);
     }
 
     @Override

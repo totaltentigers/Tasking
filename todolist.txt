@@ -11,6 +11,8 @@
 -clean comments and unused code
 -handle exceptions
 -transfer API client to dev acc
+-update dependencies
+-create release-level API project
 
 ^ Task Creation ^
 -add dividing line under dialog title

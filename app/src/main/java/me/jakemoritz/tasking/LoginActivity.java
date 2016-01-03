@@ -60,7 +60,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     @Override
     protected void onStart() {
         super.onStart();
-        mGoogleApiClient.connect();
+        //mGoogleApiClient.connect();
     }
 
     @Override
@@ -130,7 +130,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     @Override
     public void onConnectionSuspended(int i) {
-
     }
 
     @Override
@@ -147,7 +146,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         mGoogleApiClient.connect();
 
         // Show a message to the user that we are signing in.
-
     }
 
     @Override
@@ -170,13 +168,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             } else {
                 // Could not resolve the connection result, show the user an
                 // error dialog.
-
             }
         } else {
             // Show the signed-out UI
-
         }
     }
-
 }
 

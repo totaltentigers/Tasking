@@ -10,14 +10,14 @@ import com.google.api.services.tasks.model.Task;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    public static final String dbName="taskDB";
+    public static final String dbName = "taskDB";
     public static final String TASK_TABLE_NAME = "tasks";
-    public static final String TASK_COLUMN_ID ="_id";
-    public static final String TASK_COLUMN_TITLE ="Title";
-    public static final String TASK_COLUMN_NOTES ="Notes";
-    public static final String TASK_COLUMN_STATUS ="Status";
-    public static final String TASK_COLUMN_DUE_DATE ="DueDate";
-    public static final String TASK_COLUMN_COMP_DATE ="CompletedDate";
+    public static final String TASK_COLUMN_ID = "_id";
+    public static final String TASK_COLUMN_TITLE = "title";
+    public static final String TASK_COLUMN_NOTES = "notes";
+    public static final String TASK_COLUMN_STATUS = "status";
+    public static final String TASK_COLUMN_DUE_DATE = "duedate";
+    public static final String TASK_COLUMN_COMP_DATE = "completeddate";
 
 
     public DatabaseHelper(Context context){
@@ -27,7 +27,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE " + TASK_TABLE_NAME + " ( " +
-                TASK_COLUMN_ID + " TEXT PRIMARY KEY, " +
+                TASK_COLUMN_ID + " TEXT PRIMARY KEY NOT NULL, " +
                 TASK_COLUMN_TITLE + " TEXT, " +
                 TASK_COLUMN_NOTES + " TEXT, " +
                 TASK_COLUMN_STATUS + " TEXT, " +
@@ -98,9 +98,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             contentValues.put(TASK_COLUMN_COMP_DATE, taskCompletedDate);
         }
 
-        db.update(TASK_TABLE_NAME, contentValues, TASK_COLUMN_ID + " = ? ", new String[]{
-                id
-        });
+        db.update(TASK_TABLE_NAME, contentValues, TASK_COLUMN_ID + " = ? ", new String[]{id});
         return true;
     }
 
@@ -118,9 +116,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getWritableDatabase();
         return db.delete(TASK_TABLE_NAME,
                 TASK_COLUMN_ID + " = ? ",
-                new String[]{
-                        id
-                });
+                new String[]{id});
     }
 
 }
