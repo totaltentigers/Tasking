@@ -91,16 +91,20 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         switch (requestCode){
             case MY_PERMISSIONS_REQUEST_GET_ACCOUNTS: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                    saveUserInfo();
-
-                    Intent mainIntent = new Intent(this, MainActivity.class);
-                    // Show the signed-in UI
-                    startActivity(mainIntent);
+                    startMainActivity();
                 } else {
                     // User didn't grant permission
                 }
             }
         }
+    }
+
+    private void startMainActivity(){
+        saveUserInfo();
+
+        Intent mainIntent = new Intent(this, MainActivity.class);
+        // Show the signed-in UI
+        startActivity(mainIntent);
     }
 
     private void saveUserInfo(){
@@ -125,6 +129,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
         if (permissionCheck != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.GET_ACCOUNTS}, MY_PERMISSIONS_REQUEST_GET_ACCOUNTS);
+        } else {
+            startMainActivity();
         }
     }
 
