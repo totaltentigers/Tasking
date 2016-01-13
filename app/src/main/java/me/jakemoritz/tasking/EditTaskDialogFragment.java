@@ -129,7 +129,7 @@ public class EditTaskDialogFragment extends DialogFragment implements DatePicker
             // Create calendar from
             Calendar cal = Calendar.getInstance();
             cal.setTimeInMillis(dateTime.getValue());
-
+            cal.setTimeZone(TimeZone.getDefault());
             // Save current date and time values
             this.year = cal.get(Calendar.YEAR);
             this.monthOfYear = cal.get(Calendar.MONTH);
