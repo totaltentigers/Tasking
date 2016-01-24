@@ -15,7 +15,6 @@ import com.google.api.services.tasks.model.Task;
 
 import java.util.Calendar;
 import java.util.List;
-import java.util.TimeZone;
 
 
 public class TaskAdapter extends ArrayAdapter<Task>{
@@ -87,7 +86,7 @@ public class TaskAdapter extends ArrayAdapter<Task>{
         if (dateTime != null){
             // Create calendar from
             Calendar cal = Calendar.getInstance();
-            cal.setTimeInMillis(dateTime.getValue() - TimeZone.getDefault().getRawOffset());
+//            cal.setTimeInMillis(dateTime.getValue() - TimeZone.getDefault().getRawOffset());
 
             // Save current date and time values
             int year = cal.get(Calendar.YEAR);

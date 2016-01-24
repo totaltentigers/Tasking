@@ -2,17 +2,16 @@
 
 ^ General ^
 -protect edge cases and null values
--task date doesn't display after settings from EditDialog
 -must save position in database
 -figure out how to upgrade google play services without breaking code
 -check permissions
 -provide localization
--allow sharing to for saving as task
 -clean comments and unused code
 -handle exceptions
 -transfer API client to dev acc
 -update dependencies
 -create release-level API project
+-reflect items deleted from website on database
 
 ^ Task Creation ^
 -add dividing line under dialog title
@@ -27,10 +26,6 @@
 ^ General UI ^
 -change color scheme
 -login screen
-
-^ Optional ^
--allow multiple accounts? (heavy shared prefs, multiple files)
--reminders
 
 ^ Known errors/crashes ^
 -deleting tasks sometimes throws out of bounds

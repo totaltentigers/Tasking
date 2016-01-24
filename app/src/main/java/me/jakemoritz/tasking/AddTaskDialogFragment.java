@@ -18,7 +18,6 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.tasks.model.Task;
 
 import java.util.Calendar;
-import java.util.TimeZone;
 
 
 public class AddTaskDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener{
@@ -84,13 +83,17 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
                             // Save time in ms
                             Calendar cal = Calendar.getInstance();
                             cal.set(year, monthOfYear, dayOfMonth);
-                            cal.setTimeZone(TimeZone.getDefault());
+//                            cal.setTimeZone(TimeZone.getDefault());
 //                            cal.set(Calendar.HOUR_OF_DAY, 0);
 //                            cal.set(Calendar.MINUTE, 0);
 //                            cal.set(Calendar.SECOND, 0);
 //                            cal.set(Calendar.MILLISECOND, 0);
                             timeInMs = cal.getTimeInMillis();
-                            timeInMs += cal.getTimeZone().getRawOffset();
+//                            if (cal.getTimeZone().getRawOffset() > 0){
+//                                timeInMs += cal.getTimeZone().getRawOffset();
+//                            } else if (cal.getTimeZone().getRawOffset() < 0){
+//                                timeInMs -= cal.getTimeZone().getRawOffset();
+//                            }
 
                             DateTime dateTime = new DateTime(timeInMs);
                             //dateTime = new DateTime(timeInMs, 0);
