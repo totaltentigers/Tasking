@@ -21,11 +21,11 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-public class LoadTasksTask extends AsyncTask<Void, Void, Void> {
+public class GetTasksTask extends AsyncTask<Void, Void, Void> {
 
-    private static final String TAG = "LoadTasksTask";
+    private static final String TAG = "GetTasksTask";
 
-    public LoadTasksResponse delegate = null;
+    public GetTasksResponse delegate = null;
 
     Activity mActivity;
     String mEmail;
@@ -36,7 +36,7 @@ public class LoadTasksTask extends AsyncTask<Void, Void, Void> {
     List<Task> tasks;
     Tasks service;
 
-    public LoadTasksTask(Activity mActivity) {
+    public GetTasksTask(Activity mActivity) {
         this.mActivity = mActivity;
 
         SharedPreferences sharedPreferences = mActivity.getSharedPreferences(mActivity.getString(R.string.shared_prefs_account), 0);
@@ -87,7 +87,7 @@ public class LoadTasksTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        delegate.loadTasksFinish(tasks);
+        delegate.getTasksFinish(tasks);
     }
 
 }

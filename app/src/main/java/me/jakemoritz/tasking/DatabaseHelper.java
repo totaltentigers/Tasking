@@ -11,6 +11,7 @@ import com.google.api.services.tasks.model.Task;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     public static final String dbName = "taskDB";
+    private static final int DATABASE_VERSION = 1;
     public static final String TASK_TABLE_NAME = "tasks";
     public static final String TASK_COLUMN_ID = "_id";
     public static final String TASK_COLUMN_TITLE = "title";
@@ -21,7 +22,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     public DatabaseHelper(Context context){
-        super(context, dbName, null , 1);
+        super(context, dbName, null , DATABASE_VERSION);
     }
 
     @Override

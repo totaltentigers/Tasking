@@ -3,6 +3,7 @@ package me.jakemoritz.tasking;
 import android.app.Fragment;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -32,7 +33,7 @@ import java.util.List;
 
 
 public class TaskListFragment extends Fragment implements AbsListView.OnItemClickListener,
-        LoadTasksResponse, AddTaskResponse, AbsListView.OnItemLongClickListener,
+        GetTasksResponse, AddTaskResponse, AbsListView.OnItemLongClickListener,
         ActionMode.Callback, AbsListView.MultiChoiceModeListener, DeleteTasksResponse,
         EditTaskResponse, SwipeRefreshLayout.OnRefreshListener, CheckBox.OnCheckedChangeListener,
         UpdateTasklistResponse{
@@ -112,41 +113,41 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     }
 
     @Override
-    public void loadTasksFinish(List<Task> taskList) {
+    public void getTasksFinish(List<Task> taskList) {
         if (taskList != null){
             mAdapter.clear();
             mAdapter.addAll(taskList);
             mAdapter.notifyDataSetChanged();
-            saveUserTasks();
+            saveTasksToDb();
         }
     }
 
     @Override
     public void addTaskFinish() {
-        refreshTasks();
+        getTasksFromServer();
     }
 
     @Override
     public void deleteTasksFinish() {
-        refreshTasks();
+        getTasksFromServer();
     }
 
     @Override
     public void editTaskFinish() {
-        refreshTasks();
+        getTasksFromServer();
     }
 
     @Override
     public void updateTasklistFinish() {
-        refreshTasks();
+        getTasksFromServer();
     }
 
-    public void refreshTasks(){
+    public void getTasksFromServer(){
         mAdapter.notifyDataSetChanged();
 
-        LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
-        loadTasksTask.delegate = this;
-        loadTasksTask.execute();
+        GetTasksTask getTasksTask = new GetTasksTask(getActivity());
+        getTasksTask.delegate = this;
+        getTasksTask.execute();
     }
 
     public void onTasksDeleted(final SparseBooleanArray mSelectedIds, final List<Task> taskList){
@@ -184,23 +185,26 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         super.onStart();
 
         if (isNetworkAvailable()){
-            LoadTasksTask loadTasksTask = new LoadTasksTask(getActivity());
-            loadTasksTask.delegate = this;
-            loadTasksTask.execute();
+            GetTasksTask getTasksTask = new GetTasksTask(getActivity());
+            getTasksTask.delegate = this;
+            getTasksTask.execute();
         } else {
-            loadUserTasks();
+            getTasksFromDb();
         }
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        saveUserTasks();
+        saveTasksToDb();
     }
 
-    public void saveUserTasks(){
+    public void saveTasksToDb(){
         DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
         Cursor res = null;
+
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        dbHelper.onUpgrade(db, 1, 1);
 
         if (mAdapter.getTaskList() != null){
             for (Task task : mAdapter.getTaskList()){
@@ -214,7 +218,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         dbHelper.close();
     }
 
-    public void loadUserTasks(){
+    public void getTasksFromDb(){
         DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
 
         Cursor res = dbHelper.getAllTasks();
@@ -370,7 +374,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
     @Override
     public void onRefresh() {
-        refreshTasks();
+        getTasksFromServer();
         swipeRefreshLayout.setRefreshing(false);
     }
 

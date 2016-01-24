@@ -8,13 +8,11 @@
 -provide localization
 -clean comments and unused code
 -handle exceptions
--transfer API client to dev acc
 -update dependencies
 -create release-level API project
 -reflect items deleted from website on database
 
 ^ Task Creation ^
--add dividing line under dialog title
 
 ^ Task Deletion ^
 
@@ -24,8 +22,6 @@
 -make scaled avatar not hideous
 
 ^ General UI ^
--change color scheme
--login screen
 
 ^ Known errors/crashes ^
 -deleting tasks sometimes throws out of bounds
