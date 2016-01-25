@@ -4,7 +4,6 @@
 -check permissions
 -clean comments and unused code
 -handle exceptions
--update dependencies
 -create release-level API project
 -stop tapping screen exit fullscreen
 -make scaled avatar not hideous
