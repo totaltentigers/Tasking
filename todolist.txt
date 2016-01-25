@@ -2,7 +2,6 @@
 
 -protect edge cases and null values
 -check permissions
--clean comments and unused code
 -handle exceptions
 -create release-level API project
 -stop tapping screen exit fullscreen

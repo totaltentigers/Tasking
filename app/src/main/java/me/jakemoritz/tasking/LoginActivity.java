@@ -107,6 +107,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     startMainActivity();
                 } else {
                     // User didn't grant permission
+                    Snackbar.make(findViewById(R.id.activity_login), getString(R.string.permissions_not_granted), Snackbar.LENGTH_LONG).show();
                 }
             }
         }
@@ -185,7 +186,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             } else {
                 // Could not resolve the connection result, show the user an
                 // error dialog.
-                Snackbar.make(findViewById(R.id.activity_login), getString(R.string.gpservices_conn_fail), Snackbar.LENGTH_INDEFINITE);
+                Snackbar.make(findViewById(R.id.activity_login), getString(R.string.gpservices_conn_fail), Snackbar.LENGTH_INDEFINITE).show();
             }
         }
     }
