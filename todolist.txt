@@ -12,6 +12,4 @@
 -reflect items deleted from website on database
 -stop tapping screen exit fullscreen
 -make scaled avatar not hideous
--deleting tasks sometimes throws out of bounds
 -fix UI alignment for tasks
--catch null returns

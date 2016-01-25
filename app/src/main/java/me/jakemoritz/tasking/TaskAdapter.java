@@ -84,9 +84,12 @@ public class TaskAdapter extends ArrayAdapter<Task>{
         }
 
         if (dateTime != null){
+            long timeInMs = dateTime.getValue();
+
             // Create calendar from
             Calendar cal = Calendar.getInstance();
-//            cal.setTimeInMillis(dateTime.getValue() - TimeZone.getDefault().getRawOffset());
+            timeInMs -= cal.getTimeZone().getRawOffset(); //fixes UTC time offset in dialog
+            cal.setTimeInMillis(timeInMs);
 
             // Save current date and time values
             int year = cal.get(Calendar.YEAR);
