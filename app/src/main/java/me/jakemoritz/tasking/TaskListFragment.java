@@ -344,14 +344,38 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
             case R.id.action_delete:
                 SparseBooleanArray selected = mAdapter.getSelectedIds();
 
+                List<Task> tasksToDelete = new ArrayList<>();
+                for (int i = 0; i < selected.size(); i++){
+                    tasksToDelete.add(mAdapter.getItem(selected.keyAt(i)));
+                }
+
+                List<Task> tasksToKeep = new ArrayList<>();
+                for (Task task : mAdapter.getTaskList()){
+                    boolean mustKeep = true;
+                    for (Task taskToDelete : tasksToDelete){
+                        if (task == taskToDelete){
+                            mustKeep = false;
+                        }
+                    }
+                    if (mustKeep){
+                        tasksToKeep.add(task);
+                    }
+                    mustKeep = true;
+                }
+
                 onTasksDeleted(selected, mAdapter.getTaskList());
 
-                for (int i = 0; i < selected.size(); i++){
-                    if (selected.valueAt(i)){
-                        Task task = mAdapter.getItem(selected.keyAt(i));
-                        mAdapter.remove(task);
-                    }
-                }
+                mAdapter.clear();
+                mAdapter.addAll(tasksToKeep);
+                mAdapter.notifyDataSetChanged();
+                saveTasksToDb();
+
+//                for (int i = 0; i < selected.size(); i++){
+//                    if (selected.valueAt(i)){
+//                        Task task = mAdapter.getItem(selected.keyAt(i));
+//                        mAdapter.remove(task);
+//                    }
+//                }
                 mode.finish();
                 return true;
             default:

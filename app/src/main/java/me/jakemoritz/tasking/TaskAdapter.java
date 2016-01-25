@@ -109,8 +109,8 @@ public class TaskAdapter extends ArrayAdapter<Task>{
     }
 
     @Override
-    public void remove(Task object) {
-        taskList.remove(object);
+    public void remove(Task task) {
+        taskList.remove(task);
         notifyDataSetChanged();
     }
 
