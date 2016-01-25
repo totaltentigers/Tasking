@@ -258,7 +258,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void signOutHelper(){
-        mGoogleApiClient.connect();
         Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
         mGoogleApiClient.disconnect();
 
@@ -303,9 +302,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void signOut(){
-        //wantToSignOut = true;
-        //mGoogleApiClient.connect();
-        signOutHelper();
+        wantToSignOut = true;
+        mGoogleApiClient.connect();
     }
 
     @Override
@@ -352,7 +350,7 @@ public class MainActivity extends AppCompatActivity
             loadNavUserCoverImage();
         }
         if (wantToSignOut){
-            //signOutHelper();
+            signOutHelper();
         }
     }
 

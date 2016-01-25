@@ -1,16 +1,16 @@
 ~~~~ Tasking To-Do List ~~~~
 
 -protect edge cases and null values
--must save position in database
--figure out how to upgrade google play services without breaking code
 -check permissions
--provide localization
 -clean comments and unused code
 -handle exceptions
 -update dependencies
 -create release-level API project
--reflect items deleted from website on database
 -stop tapping screen exit fullscreen
 -make scaled avatar not hideous
 -fix UI alignment for tasks
+-create empty task list screen
+
+==== Tasking Stretch Goals ====
 -support different task lists
+-provide localization
