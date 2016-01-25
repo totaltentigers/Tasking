@@ -1,6 +1,5 @@
 ~~~~ Tasking To-Do List ~~~~
 
-^ General ^
 -protect edge cases and null values
 -must save position in database
 -figure out how to upgrade google play services without breaking code
@@ -11,17 +10,8 @@
 -update dependencies
 -create release-level API project
 -reflect items deleted from website on database
-
-^ Task Creation ^
-
-^ Task Deletion ^
-
-^ Task List Items ^
-
-^ Side Nav ^
+-stop tapping screen exit fullscreen
 -make scaled avatar not hideous
-
-^ General UI ^
-
-^ Known errors/crashes ^
 -deleting tasks sometimes throws out of bounds
+-fix UI alignment for tasks
+-catch null returns

@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity
         else {
             //mGoogleApiClient.connect();
             Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
-            if (user != null){
+            if (user != null && user.getImage() != null){
                 new AsyncTask<String, Void, Bitmap>(){
                     @Override
                     protected void onPostExecute(Bitmap bitmap) {
@@ -222,7 +222,7 @@ public class MainActivity extends AppCompatActivity
         else {
             //mGoogleApiClient.connect();
             Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
-            if (user != null) {
+            if (user != null && user.getCover() != null) {
                 new AsyncTask<String, Void, Bitmap>() {
                     @Override
                     protected void onPostExecute(Bitmap bitmap) {
