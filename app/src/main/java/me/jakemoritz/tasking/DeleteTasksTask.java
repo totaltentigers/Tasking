@@ -60,16 +60,19 @@ public class DeleteTasksTask extends AsyncTask<Void, Void, Void> {
                 credential.setSelectedAccountName(mEmail);
                 service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName(mActivity.getString(R.string.app_name)).build();
 
-                tasks = service.tasks().list("@default").execute().getItems();
+                List<TaskList> tasklists = service.tasklists().list().execute().getItems();
+                String firstTasklistId = tasklists.get(0).getId();
 
-                previousTasks = service.tasklists().get("@default").execute();
+                tasks = service.tasks().list(firstTasklistId).execute().getItems();
+
+                previousTasks = service.tasklists().get(firstTasklistId).execute();
 
                 DatabaseHelper dbHelper = new DatabaseHelper(mActivity);
 
                 for (int i = 0; i < mSelectedItemIds.size(); i++){
                     Task task = tasks.get(mSelectedItemIds.keyAt(i));
                     dbHelper.deleteTask(task.getId());
-                    service.tasks().delete("@default", task.getId()).execute();
+                    service.tasks().delete(firstTasklistId, task.getId()).execute();
                 }
                 dbHelper.close();
             }

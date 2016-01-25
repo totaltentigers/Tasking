@@ -13,3 +13,4 @@
 -stop tapping screen exit fullscreen
 -make scaled avatar not hideous
 -fix UI alignment for tasks
+-support different task lists

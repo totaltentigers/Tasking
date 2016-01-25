@@ -72,7 +72,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return true;
     }
 
-    public boolean updateTask(String id, Task task){
+    public boolean updateTaskInDb(String id, Task task){
         String taskId = task.getId();
         String taskTitle = task.getTitle();
         String taskNotes = task.getNotes();

@@ -36,7 +36,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         GetTasksResponse, AddTaskResponse, AbsListView.OnItemLongClickListener,
         ActionMode.Callback, AbsListView.MultiChoiceModeListener, DeleteTasksResponse,
         EditTaskResponse, SwipeRefreshLayout.OnRefreshListener, CheckBox.OnCheckedChangeListener,
-        UpdateTasklistResponse{
+        sortTasklistResponse {
 
     private static final String TAG = "TaskListFragment";
 
@@ -138,7 +138,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     }
 
     @Override
-    public void updateTasklistFinish() {
+    public void sortTasklistFinish() {
         getTasksFromServer();
     }
 
@@ -209,7 +209,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         if (mAdapter.getTaskList() != null){
             for (Task task : mAdapter.getTaskList()){
                 if (dbHelper.getTask(task.getId()).getCount() != 0){
-                    dbHelper.updateTask(task.getId(), task);
+                    dbHelper.updateTaskInDb(task.getId(), task);
                 } else {
                     dbHelper.insertTask(task);
                 }
@@ -280,9 +280,9 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
             mAdapter.addAll(taskList);
             mAdapter.notifyDataSetChanged();
 
-            UpdateTasklistTask updateTasklistTask = new UpdateTasklistTask(getActivity(), mAdapter.getTaskList());
-            updateTasklistTask.delegate = this;
-            updateTasklistTask.execute();
+            SortTasklistTask sortTasklistTask = new SortTasklistTask(getActivity(), mAdapter.getTaskList());
+            sortTasklistTask.delegate = this;
+            sortTasklistTask.execute();
         }
     }
 

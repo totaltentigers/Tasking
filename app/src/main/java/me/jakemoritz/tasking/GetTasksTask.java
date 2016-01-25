@@ -16,6 +16,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.tasks.Tasks;
 import com.google.api.services.tasks.TasksScopes;
 import com.google.api.services.tasks.model.Task;
+import com.google.api.services.tasks.model.TaskList;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -55,10 +56,14 @@ public class GetTasksTask extends AsyncTask<Void, Void, Void> {
                 credential.setSelectedAccountName(mEmail);
                 service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName(mActivity.getString(R.string.app_name)).build();
 
-                tasks = service.tasks().list("@default").execute().getItems();
-                Task emptyTask = tasks.get(tasks.size()-1);
-                if (emptyTask.getTitle().length() == 0 && emptyTask.getNotes() == null){
-                    tasks.remove(tasks.size() -1);
+                List<TaskList> tasklists = service.tasklists().list().execute().getItems();
+                String firstTasklistId = tasklists.get(0).getId();
+                tasks = service.tasks().list(firstTasklistId).execute().getItems();
+                if (tasks != null){
+                    Task emptyTask = tasks.get(tasks.size()-1);
+                    if (emptyTask.getTitle().length() == 0 && emptyTask.getNotes() == null){
+                        tasks.remove(tasks.size() -1);
+                    }
                 }
             }
         } catch (IOException e){

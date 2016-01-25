@@ -16,9 +16,11 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.tasks.Tasks;
 import com.google.api.services.tasks.TasksScopes;
 import com.google.api.services.tasks.model.Task;
+import com.google.api.services.tasks.model.TaskList;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 
 public class AddTaskTask extends AsyncTask<Void, Void, Void> {
 
@@ -54,7 +56,9 @@ public class AddTaskTask extends AsyncTask<Void, Void, Void> {
                 credential.setSelectedAccountName(mEmail);
                 service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName(mActivity.getString(R.string.app_name)).build();
 
-                Task result = service.tasks().insert("@default", task).execute();
+                List<TaskList> tasklists = service.tasklists().list().execute().getItems();
+                String firstTasklistId = tasklists.get(0).getId();
+                Task result = service.tasks().insert(firstTasklistId, task).execute();
                 DatabaseHelper dbHelper = new DatabaseHelper(mActivity);
                 dbHelper.insertTask(task);
                 dbHelper.close();

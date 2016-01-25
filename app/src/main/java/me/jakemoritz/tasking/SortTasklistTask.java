@@ -16,16 +16,18 @@ import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.tasks.Tasks;
 import com.google.api.services.tasks.TasksScopes;
 import com.google.api.services.tasks.model.Task;
+import com.google.api.services.tasks.model.TaskList;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class UpdateTasklistTask extends AsyncTask<Void, Void, Void> {
+public class SortTasklistTask extends AsyncTask<Void, Void, Void> {
 
-    private static final String TAG = "UpdateTasklistTask";
+    private static final String TAG = "SortTasklistTask";
 
-    public UpdateTasklistResponse delegate = null;
+    public sortTasklistResponse delegate = null;
 
     Activity mActivity;
     String mEmail;
@@ -36,7 +38,7 @@ public class UpdateTasklistTask extends AsyncTask<Void, Void, Void> {
     List<Task> taskList;
     Tasks service;
 
-    public UpdateTasklistTask(Activity mActivity, List<Task> taskList) {
+    public SortTasklistTask(Activity mActivity, List<Task> taskList) {
         this.mActivity = mActivity;
 
         SharedPreferences sharedPreferences = mActivity.getSharedPreferences(mActivity.getString(R.string.shared_prefs_account), 0);
@@ -58,10 +60,18 @@ public class UpdateTasklistTask extends AsyncTask<Void, Void, Void> {
                 SQLiteDatabase s = dbHelper.getWritableDatabase();
                 s.execSQL("DROP TABLE IF EXISTS tasks");
                 dbHelper.onCreate(s);*/
+                List<TaskList> tasklists = service.tasklists().list().execute().getItems();
+                String firstTasklistId = tasklists.get(0).getId();
 
-                List<Task> list = service.tasks().list("@default").execute().getItems();
+                List<Task> reversedList = new ArrayList<>();
+                reversedList.addAll(taskList);
+                Collections.reverse(reversedList);
+                for (Task task : reversedList){
+                    Task result = service.tasks().move(firstTasklistId, task.getId()).execute();
+                }
+/*                List<Task> list = service.tasks().list(firstTasklistId).execute().getItems();
                 for (Task task : list){
-                    service.tasks().delete("@default", task.getId()).execute();
+                    service.tasks().delete(firstTasklistId, task.getId()).execute();
                 }
 
                 for (int i = taskList.size() - 1; i >= 0; i--){
@@ -78,9 +88,9 @@ public class UpdateTasklistTask extends AsyncTask<Void, Void, Void> {
                         newTask.setCompleted(task.getCompleted());
                     }
                     //task.setPosition(null);
-                    Task result = service.tasks().insert("@default", newTask).execute();
-                    //dbHelper.insertTask(newTask);
-                }
+                    Task result = service.tasks().insert(firstTasklistId, newTask).execute();
+                    //dbHelper.insertTask(newTask);*/
+//                }
             }
         } catch (IOException e){
             // The fetchToken() method handles Google-specific exceptions,
@@ -108,7 +118,7 @@ public class UpdateTasklistTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        delegate.updateTasklistFinish();
+        delegate.sortTasklistFinish();
     }
 
 }
