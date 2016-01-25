@@ -65,7 +65,6 @@ public class EditTaskTask extends AsyncTask<Void, Void, Void> {
                 DatabaseHelper dbHelper = new DatabaseHelper(mActivity);
                 dbHelper.updateTaskInDb(task.getId(), task);
                 dbHelper.close();
-                Log.d(TAG, result.toPrettyString());
             }
         } catch (IOException e){
             // The fetchToken() method handles Google-specific exceptions,
@@ -95,5 +94,4 @@ public class EditTaskTask extends AsyncTask<Void, Void, Void> {
     protected void onPostExecute(Void aVoid) {
         delegate.editTaskFinish();
     }
-
 }

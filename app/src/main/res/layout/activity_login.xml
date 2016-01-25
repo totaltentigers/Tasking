@@ -2,7 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" android:gravity="center_horizontal"
     android:orientation="vertical"
-    tools:context="me.jakemoritz.tasking.LoginActivity">
+    tools:context="me.jakemoritz.tasking.LoginActivity"
+    android:id="@+id/activity_login">
 
 
         <ImageView

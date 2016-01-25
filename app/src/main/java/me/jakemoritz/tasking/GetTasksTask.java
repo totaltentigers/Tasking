@@ -48,7 +48,6 @@ public class GetTasksTask extends AsyncTask<Void, Void, Void> {
     // Runs when you call execute() on an instance
     @Override
     protected Void doInBackground(Void... params) {
-        //Log.d(TAG, "doInBackground");
         try {
             String token = fetchToken();
             if (token != null){
@@ -59,10 +58,11 @@ public class GetTasksTask extends AsyncTask<Void, Void, Void> {
                 List<TaskList> tasklists = service.tasklists().list().execute().getItems();
                 String firstTasklistId = tasklists.get(0).getId();
                 tasks = service.tasks().list(firstTasklistId).execute().getItems();
+
                 if (tasks != null){
                     Task emptyTask = tasks.get(tasks.size()-1);
                     if (emptyTask.getTitle().length() == 0 && emptyTask.getNotes() == null){
-                        tasks.remove(tasks.size() -1);
+                        tasks.remove(tasks.size() - 1);
                     }
                 }
             }
@@ -94,5 +94,4 @@ public class GetTasksTask extends AsyncTask<Void, Void, Void> {
     protected void onPostExecute(Void aVoid) {
         delegate.getTasksFinish(tasks);
     }
-
 }

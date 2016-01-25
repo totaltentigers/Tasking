@@ -119,5 +119,4 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 TASK_COLUMN_ID + " = ? ",
                 new String[]{id});
     }
-
 }

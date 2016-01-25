@@ -66,8 +66,6 @@ public class AddTaskTask extends AsyncTask<Void, Void, Void> {
         } catch (IOException e){
             // The fetchToken() method handles Google-specific exceptions,
             // so there was an exception at a higher level.
-            Log.d(TAG, "error");
-
             Log.d(TAG, e.toString());
         }
         return null;

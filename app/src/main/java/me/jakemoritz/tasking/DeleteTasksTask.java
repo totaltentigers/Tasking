@@ -52,7 +52,6 @@ public class DeleteTasksTask extends AsyncTask<Void, Void, Void> {
     // Runs when you call execute() on an instance
     @Override
     protected Void doInBackground(Void... params) {
-        //Log.d(TAG, "doInBackground");
         try {
             String token = fetchToken();
             if (token != null){
@@ -104,5 +103,4 @@ public class DeleteTasksTask extends AsyncTask<Void, Void, Void> {
     protected void onPostExecute(Void aVoid) {
         delegate.deleteTasksFinish();
     }
-
 }

@@ -31,7 +31,6 @@ public class DatePickerFragment extends DialogFragment{
         if (fragment instanceof  AddTaskDialogFragment){
             return new DatePickerDialog(getActivity(),(AddTaskDialogFragment) fragment, year, month, day);
         } else {
-            // fragment instanceof  EditTaskDialogFragment
             return new DatePickerDialog(getActivity(),(EditTaskDialogFragment) fragment, year, month, day);
         }
     }

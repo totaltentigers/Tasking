@@ -56,41 +56,16 @@ public class SortTasklistTask extends AsyncTask<Void, Void, Void> {
                 credential.setSelectedAccountName(mEmail);
                 service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName("Tasking").build();
 
-                /*DatabaseHelper dbHelper = new DatabaseHelper(mActivity);
-                SQLiteDatabase s = dbHelper.getWritableDatabase();
-                s.execSQL("DROP TABLE IF EXISTS tasks");
-                dbHelper.onCreate(s);*/
                 List<TaskList> tasklists = service.tasklists().list().execute().getItems();
                 String firstTasklistId = tasklists.get(0).getId();
 
                 List<Task> reversedList = new ArrayList<>();
                 reversedList.addAll(taskList);
                 Collections.reverse(reversedList);
+
                 for (Task task : reversedList){
                     Task result = service.tasks().move(firstTasklistId, task.getId()).execute();
                 }
-/*                List<Task> list = service.tasks().list(firstTasklistId).execute().getItems();
-                for (Task task : list){
-                    service.tasks().delete(firstTasklistId, task.getId()).execute();
-                }
-
-                for (int i = taskList.size() - 1; i >= 0; i--){
-                    Task newTask = new Task();
-                    Task task = taskList.get(i);
-                    newTask.setId(task.getId());
-                    newTask.setTitle(task.getTitle());
-                    newTask.setNotes(task.getNotes());
-                    newTask.setStatus(task.getStatus());
-                    if (task.getDue() != null){
-                        newTask.setDue(task.getDue());
-                    }
-                    if (task.getCompleted() != null){
-                        newTask.setCompleted(task.getCompleted());
-                    }
-                    //task.setPosition(null);
-                    Task result = service.tasks().insert(firstTasklistId, newTask).execute();
-                    //dbHelper.insertTask(newTask);*/
-//                }
             }
         } catch (IOException e){
             // The fetchToken() method handles Google-specific exceptions,
@@ -120,5 +95,4 @@ public class SortTasklistTask extends AsyncTask<Void, Void, Void> {
     protected void onPostExecute(Void aVoid) {
         delegate.sortTasklistFinish();
     }
-
 }

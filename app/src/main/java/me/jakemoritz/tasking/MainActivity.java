@@ -16,6 +16,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -174,7 +175,6 @@ public class MainActivity extends AppCompatActivity
         }
         // If no image is loaded, pull from servers
         else {
-            //mGoogleApiClient.connect();
             Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
             if (user != null && user.getImage() != null){
                 new AsyncTask<String, Void, Bitmap>(){
@@ -202,7 +202,6 @@ public class MainActivity extends AppCompatActivity
                     }
                 }.execute(user.getImage().getUrl());
             }
-            //mGoogleApiClient.disconnect();
         }
     }
 
@@ -220,7 +219,6 @@ public class MainActivity extends AppCompatActivity
         }
         // If no image is loaded, pull from servers
         else {
-            //mGoogleApiClient.connect();
             Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
             if (user != null && user.getCover() != null) {
                 new AsyncTask<String, Void, Bitmap>() {
@@ -251,9 +249,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 }.execute(user.getCover().getCoverPhoto().getUrl());
             }
-            mGoogleApiClient.disconnect();
             wantToLoadUserImages = false;
-
         }
     }
 
@@ -270,7 +266,6 @@ public class MainActivity extends AppCompatActivity
 
         wantToSignOut = false;
         startActivity(new Intent(this, HelperActivity.class));
-
     }
 
     public void clearAppData(){
@@ -396,24 +391,21 @@ public class MainActivity extends AppCompatActivity
 //        Connection Result to see possible error codes.
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
 
-        if (!mIsResolving && mShouldResolve){
-            if (connectionResult.hasResolution()){
+        if (!mIsResolving && mShouldResolve) {
+            if (connectionResult.hasResolution()) {
                 try {
                     connectionResult.startResolutionForResult(this, RC_SIGN_IN);
                     mIsResolving = true;
-                } catch (IntentSender.SendIntentException e){
-                    Log.e(TAG, "Could not resolve ConnectionResult.", e);
+                } catch (IntentSender.SendIntentException e) {
+                    Log.e(TAG, "Could not resolve ConnectionResult." , e);
                     mIsResolving = false;
                     mGoogleApiClient.connect();
                 }
             } else {
                 // Could not resolve the connection result, show the user an
                 // error dialog.
-
+                Snackbar.make(findViewById(R.id.activity_login), getString(R.string.gpservices_conn_fail), Snackbar.LENGTH_INDEFINITE);
             }
-        } else {
-            // Show the signed-out UI
-
         }
     }
 

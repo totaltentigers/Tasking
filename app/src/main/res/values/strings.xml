@@ -58,5 +58,6 @@
     <string name="task_completed">completed</string>
     <string name="task_needsAction">needsAction</string>
 
-
+    <!-- Login Activity -->
+    <string name="gpservices_conn_fail">Failed to connect to Google Play Services.</string>
 </resources>

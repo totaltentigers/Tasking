@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -55,8 +56,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 .build();
 
         findViewById(R.id.sign_in_button).setOnClickListener(this);
-
-
     }
 
     @Override
@@ -98,7 +97,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             mIsResolving = false;
             mGoogleApiClient.connect();
         }
-
     }
 
     @Override
@@ -118,7 +116,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         saveUserInfo();
 
         Intent mainIntent = new Intent(this, MainActivity.class);
-        // Show the signed-in UI
+
         startActivity(mainIntent);
     }
 
@@ -165,8 +163,6 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         // attempt to resolve any errors that occur.
         mShouldResolve = true;
         mGoogleApiClient.connect();
-
-        // Show a message to the user that we are signing in.
     }
 
     @Override
@@ -189,9 +185,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             } else {
                 // Could not resolve the connection result, show the user an
                 // error dialog.
+                Snackbar.make(findViewById(R.id.activity_login), getString(R.string.gpservices_conn_fail), Snackbar.LENGTH_INDEFINITE);
             }
-        } else {
-            // Show the signed-out UI
         }
     }
 }

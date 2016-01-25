@@ -135,10 +135,6 @@ public class TaskAdapter extends ArrayAdapter<Task>{
         notifyDataSetChanged();
     }
 
-    public int getSelectedCount(){
-        return mSelectedItemIds.size();
-    }
-
     public SparseBooleanArray getSelectedIds(){
         return mSelectedItemIds;
     }

@@ -201,7 +201,6 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
     public void saveTasksToDb(){
         DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
-        Cursor res = null;
 
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         dbHelper.onUpgrade(db, 1, 1);
@@ -360,7 +359,6 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
                     if (mustKeep){
                         tasksToKeep.add(task);
                     }
-                    mustKeep = true;
                 }
 
                 onTasksDeleted(selected, mAdapter.getTaskList());
@@ -370,12 +368,6 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
                 mAdapter.notifyDataSetChanged();
                 saveTasksToDb();
 
-//                for (int i = 0; i < selected.size(); i++){
-//                    if (selected.valueAt(i)){
-//                        Task task = mAdapter.getItem(selected.keyAt(i));
-//                        mAdapter.remove(task);
-//                    }
-//                }
                 mode.finish();
                 return true;
             default:
