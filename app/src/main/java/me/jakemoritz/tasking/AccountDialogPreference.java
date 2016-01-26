@@ -20,7 +20,7 @@ public class AccountDialogPreference extends DialogPreference {
         super.onClick(dialog, which);
 
         if (which == Dialog.BUTTON_POSITIVE){
-            ((MainActivity) context).signOut();
+            ((MainActivity) context).signOutHelper();
         }
         else {
             dialog.cancel();

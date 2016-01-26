@@ -48,7 +48,7 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
+        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = "MainActivity";
 
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity
     private static final int RC_SIGN_IN = 0;
 
     /* Client used to interact with Google APIs. */
-    private GoogleApiClient mGoogleApiClient;
+    private static GoogleApiClient mGoogleApiClient;
 
     /* Is there a ConnectionResult resolution in progress? */
     private boolean mIsResolving = false;
@@ -71,12 +71,25 @@ public class MainActivity extends AppCompatActivity
     LinearLayout navUserCover;
 
     boolean wantToLoadUserImages;
+
     boolean wantToSignOut;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mGoogleApiClient.connect();
+    }
 
     @Override
     protected void onStop() {
         super.onStop();
         mGoogleApiClient.disconnect();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+//        mGoogleApiClient.connect();
     }
 
     @Override
@@ -93,7 +106,6 @@ public class MainActivity extends AppCompatActivity
                 .addScope(new Scope(Scopes.PROFILE))
                 .addScope(new Scope(Scopes.EMAIL))
                 .build();
-        mGoogleApiClient.connect();
 
         wantToLoadUserImages = true;
 
@@ -122,21 +134,21 @@ public class MainActivity extends AppCompatActivity
                 .commit();
     }
 
-    public void loadNavUserName(){
+    public void loadNavUserName() {
         SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.shared_prefs_account), 0);
         String name = sharedPreferences.getString(getString(R.string.shared_prefs_name), "");
 
         navUserName.setText(name);
     }
 
-    public void loadNavUserEmail(){
+    public void loadNavUserEmail() {
         SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.shared_prefs_account), 0);
         String email = sharedPreferences.getString(getString(R.string.shared_prefs_email), "");
 
         navUserEmail.setText(email);
     }
 
-    public void saveImageToFile(Bitmap bitmap, String filename){
+    public void saveImageToFile(Bitmap bitmap, String filename) {
         FileOutputStream outputStream;
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
@@ -147,115 +159,112 @@ public class MainActivity extends AppCompatActivity
             outputStream = new FileOutputStream(new File(filepath), true);
             outputStream.write(bitmapByteArray);
             outputStream.close();
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public Bitmap loadImageFromFile(String filename){
+    public Bitmap loadImageFromFile(String filename) {
         // Try to load image from file
         FileInputStream inputStream = null;
         File file = new File(getCacheDir() + File.separator + filename);
 
         try {
             inputStream = new FileInputStream(file);
-        } catch (FileNotFoundException fileNotFoundException){
+        } catch (FileNotFoundException fileNotFoundException) {
             return null;
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return BitmapFactory.decodeStream(inputStream);
     }
 
-    public void loadNavUserImage(){
-        // If an image is loaded, pass it
-        if (loadImageFromFile(getString(R.string.user_image)) != null){
-            navUserAvatar.setImageBitmap(getCircleBitmap(loadImageFromFile(getString(R.string.user_image))));
-        }
-        // If no image is loaded, pull from servers
-        else {
-            Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
-            if (user != null && user.getImage() != null){
-                new AsyncTask<String, Void, Bitmap>(){
-                    @Override
-                    protected void onPostExecute(Bitmap bitmap) {
-                        if (bitmap != null){
-                            Bitmap copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
+    public void loadNavUserImage() {
+        // First attempt to update images from server
+        Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
+        if (user != null && user.getImage() != null) {
+            new AsyncTask<String, Void, Bitmap>() {
+                @Override
+                protected void onPostExecute(Bitmap bitmap) {
+                    if (bitmap != null) {
+                        Bitmap copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
 
-                            Bitmap userImage = getCircleBitmap(bitmap);
-                            navUserAvatar.setImageBitmap(userImage);
-                            saveImageToFile(copy, getString(R.string.user_image));
-                        }
+                        Bitmap userImage = getCircleBitmap(bitmap);
+                        navUserAvatar.setImageBitmap(userImage);
+                        saveImageToFile(copy, getString(R.string.user_image));
                     }
+                }
 
-                    @Override
-                    protected Bitmap doInBackground(String... params) {
-                        try {
-                            URL url = new URL(params[0]);
-                            InputStream in = url.openStream();
-                            return BitmapFactory.decodeStream(in);
-                        } catch (Exception e){
-                            Log.e(TAG, e.toString());
-                        }
-                        return null;
+                @Override
+                protected Bitmap doInBackground(String... params) {
+                    try {
+                        URL url = new URL(params[0]);
+                        InputStream in = url.openStream();
+                        return BitmapFactory.decodeStream(in);
+                    } catch (Exception e) {
+                        Log.e(TAG, e.toString());
                     }
-                }.execute(user.getImage().getUrl());
+                    return null;
+                }
+            }.execute(user.getImage().getUrl().substring(0, user.getImage().getUrl().length() - 2) + 400);
+        } else {
+            // If server can't be contacted, attempt to load from file
+            if (loadImageFromFile(getString(R.string.user_image)) != null) {
+                navUserAvatar.setImageBitmap(getCircleBitmap(loadImageFromFile(getString(R.string.user_image))));
             }
         }
     }
 
-    public void loadNavUserCoverImage(){
+    public void loadNavUserCoverImage() {
         final Paint darken = new Paint();
         darken.setColor(Color.BLACK);
         darken.setAlpha(100);
 
-        // If an image is loaded, pass it
-        if (loadImageFromFile(getString(R.string.user_cover_image)) != null){
-            Bitmap bitmapCopy = loadImageFromFile(getString(R.string.user_cover_image)).copy(Bitmap.Config.ARGB_8888, true);
-            Canvas c = new Canvas(bitmapCopy);
-            c.drawPaint(darken);
-            navUserCover.setBackground(new BitmapDrawable(getResources(), bitmapCopy));
-        }
-        // If no image is loaded, pull from servers
-        else {
-            Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
-            if (user != null && user.getCover() != null) {
-                new AsyncTask<String, Void, Bitmap>() {
-                    @Override
-                    protected void onPostExecute(Bitmap bitmap) {
-                        if (bitmap != null){
-                            Bitmap copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
+        // First attempt to update images from server
+        Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
+        if (user != null && user.getCover() != null) {
+            new AsyncTask<String, Void, Bitmap>() {
+                @Override
+                protected void onPostExecute(Bitmap bitmap) {
+                    if (bitmap != null) {
+                        Bitmap copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
 
-                            Bitmap bitmapCopy = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-                            Canvas c = new Canvas(bitmapCopy);
-                            c.drawPaint(darken);
-                            navUserCover.setBackground(new BitmapDrawable(getResources(), bitmapCopy));
+                        Bitmap bitmapCopy = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                        Canvas c = new Canvas(bitmapCopy);
+                        c.drawPaint(darken);
+                        navUserCover.setBackground(new BitmapDrawable(getResources(), bitmapCopy));
 
-                            saveImageToFile(copy, getString(R.string.user_cover_image));
-                        }
+                        saveImageToFile(copy, getString(R.string.user_cover_image));
                     }
+                }
 
-                    @Override
-                    protected Bitmap doInBackground(String... params) {
-                        try {
-                            URL url = new URL(params[0]);
-                            InputStream in = url.openStream();
-                            return BitmapFactory.decodeStream(in);
-                        } catch (Exception e) {
-                            Log.e(TAG, e.toString());
-                        }
-                        return null;
+                @Override
+                protected Bitmap doInBackground(String... params) {
+                    try {
+                        URL url = new URL(params[0]);
+                        InputStream in = url.openStream();
+                        return BitmapFactory.decodeStream(in);
+                    } catch (Exception e) {
+                        Log.e(TAG, e.toString());
                     }
-                }.execute(user.getCover().getCoverPhoto().getUrl());
+                    return null;
+                }
+            }.execute(user.getCover().getCoverPhoto().getUrl());
+        } else {
+            // If server can't be contacted, attempt to load from file
+            if (loadImageFromFile(getString(R.string.user_cover_image)) != null) {
+                Bitmap bitmapCopy = loadImageFromFile(getString(R.string.user_cover_image)).copy(Bitmap.Config.ARGB_8888, true);
+                Canvas c = new Canvas(bitmapCopy);
+                c.drawPaint(darken);
+                navUserCover.setBackground(new BitmapDrawable(getResources(), bitmapCopy));
             }
-            wantToLoadUserImages = false;
         }
+        wantToLoadUserImages = false;
     }
 
-    public void signOutHelper(){
+    public void signOutHelper() {
         Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
-        mGoogleApiClient.disconnect();
 
         clearAppData();
 
@@ -268,13 +277,13 @@ public class MainActivity extends AppCompatActivity
         startActivity(new Intent(this, HelperActivity.class));
     }
 
-    public void clearAppData(){
+    public void clearAppData() {
         File cache = getCacheDir();
         File appDir = new File(cache.getParent());
-        if (appDir.exists()){
+        if (appDir.exists()) {
             String[] children = appDir.list();
-            for (String s : children){
-                if (!s.equals("lib")){
+            for (String s : children) {
+                if (!s.equals("lib")) {
                     deleteDir(new File(appDir, s));
                     Log.i(TAG, "File /data/data/me.jakemoritz.tasking/" + s + " DELETED");
                 }
@@ -282,12 +291,12 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public static boolean deleteDir(File dir){
-        if (dir != null && dir.isDirectory()){
+    public static boolean deleteDir(File dir) {
+        if (dir != null && dir.isDirectory()) {
             String[] children = dir.list();
-            for (int i = 0; i < children.length; i++){
+            for (int i = 0; i < children.length; i++) {
                 boolean success = deleteDir(new File(dir, children[i]));
-                if (!success){
+                if (!success) {
                     return false;
                 }
             }
@@ -296,7 +305,7 @@ public class MainActivity extends AppCompatActivity
         return dir.delete();
     }
 
-    public void signOut(){
+    public void signOut() {
         wantToSignOut = true;
         mGoogleApiClient.connect();
     }
@@ -320,8 +329,7 @@ public class MainActivity extends AppCompatActivity
             getFragmentManager().beginTransaction()
                     .replace(R.id.content_main, new TaskListFragment())
                     .commit();
-        }
-        else if (id == R.id.nav_settings) {
+        } else if (id == R.id.nav_settings) {
             getFragmentManager().beginTransaction()
                     .replace(R.id.content_main, new SettingsFragment())
                     .commit();
@@ -340,22 +348,16 @@ public class MainActivity extends AppCompatActivity
         Log.d(TAG, "onConnected:" + bundle);
         mShouldResolve = false;
 
-        if (wantToLoadUserImages){
+        if (wantToLoadUserImages) {
             loadNavUserImage();
             loadNavUserCoverImage();
         }
-        if (wantToSignOut){
+        if (wantToSignOut) {
             signOutHelper();
         }
     }
 
-    @Override
-    protected void onPostResume() {
-        super.onPostResume();
-        mGoogleApiClient.connect();
-    }
-
-    private Bitmap getCircleBitmap(Bitmap bitmap){
+    private Bitmap getCircleBitmap(Bitmap bitmap) {
         final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
 
         final Canvas canvas = new Canvas(output);

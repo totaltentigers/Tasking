@@ -32,6 +32,7 @@
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/date_picker_button"
         style="@style/Base.TextAppearance.AppCompat.Subhead"
-        android:layout_alignBaseline="@+id/date_picker_button" />
+        android:layout_alignBaseline="@+id/date_picker_button"
+        android:textColor="#D9000000"/>
 
 </RelativeLayout>
