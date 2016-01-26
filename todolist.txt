@@ -3,9 +3,6 @@
 -protect edge cases and null values
 -handle exceptions
 -create release-level API project
--check menu design
--create empty task list screen
--fix drawer close lag
 
 ==== Tasking Stretch Goals ====
 -support different task lists

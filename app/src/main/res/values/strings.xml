@@ -61,4 +61,7 @@
     <!-- Login Activity -->
     <string name="gpservices_conn_fail">Failed to connect to Google Play Services.</string>
     <string name="permissions_not_granted">Access to your accounts is required to sign in.</string>
+
+    <!-- ListView empty message -->
+    <string name="empty_listview_message">You have no tasks. Add one now!</string>
 </resources>
