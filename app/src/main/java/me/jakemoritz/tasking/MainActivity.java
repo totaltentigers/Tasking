@@ -141,13 +141,13 @@ public class MainActivity extends AppCompatActivity
                 .commit();
     }
 
-    public void resetNavItemColor(int position){
+    public void resetNavItemColor(int position) {
         Drawable taskMenuItemIcon = navigationView.getMenu().getItem(position).getIcon();
         taskMenuItemIcon.mutate().setColorFilter(0x8C000000, PorterDuff.Mode.MULTIPLY);
         navigationView.getMenu().getItem(position).setIcon(taskMenuItemIcon);
     }
 
-    public void setNavItemColorToPrimary(int position){
+    public void setNavItemColorToPrimary(int position) {
         // change selected item icon to app primary color
         Drawable icon;
         TypedValue typedValue = new TypedValue();
@@ -205,7 +205,7 @@ public class MainActivity extends AppCompatActivity
         return BitmapFactory.decodeStream(inputStream);
     }
 
-    public void loadNavUserImage() {
+    public void loadNavUserImageFromServer() {
         // First attempt to update images from server
         Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
         if (user != null && user.getImage() != null) {
@@ -233,15 +233,21 @@ public class MainActivity extends AppCompatActivity
                     return null;
                 }
             }.execute(user.getImage().getUrl().substring(0, user.getImage().getUrl().length() - 2) + 400);
-        } else {
-            // If server can't be contacted, attempt to load from file
-            if (loadImageFromFile(getString(R.string.user_image)) != null) {
-                navUserAvatar.setImageBitmap(getCircleBitmap(loadImageFromFile(getString(R.string.user_image))));
-            }
         }
     }
 
-    public void loadNavUserCoverImage() {
+    public void loadNavUserImage() {
+        if (loadImageFromFile(getString(R.string.user_image)) != null) {
+            navUserAvatar.setImageBitmap(getCircleBitmap(loadImageFromFile(getString(R.string.user_image))));
+            // attempt to update image
+            loadNavUserImageFromServer();
+        } else {
+            // If no file found, load from server
+            loadNavUserImageFromServer();
+        }
+    }
+
+    public void loadNavUserCoverImageFromServer() {
         final Paint darken = new Paint();
         darken.setColor(Color.BLACK);
         darken.setAlpha(100);
@@ -276,14 +282,25 @@ public class MainActivity extends AppCompatActivity
                     return null;
                 }
             }.execute(user.getCover().getCoverPhoto().getUrl());
+        }
+    }
+
+    public void loadNavUserCoverImage() {
+        final Paint darken = new Paint();
+        darken.setColor(Color.BLACK);
+        darken.setAlpha(100);
+
+        if (loadImageFromFile(getString(R.string.user_cover_image)) != null) {
+            Bitmap bitmapCopy = loadImageFromFile(getString(R.string.user_cover_image)).copy(Bitmap.Config.ARGB_8888, true);
+            Canvas c = new Canvas(bitmapCopy);
+            c.drawPaint(darken);
+            navUserCover.setBackground(new BitmapDrawable(getResources(), bitmapCopy));
+
+            // attempt to update user image from server
+            loadNavUserCoverImageFromServer();
         } else {
-            // If server can't be contacted, attempt to load from file
-            if (loadImageFromFile(getString(R.string.user_cover_image)) != null) {
-                Bitmap bitmapCopy = loadImageFromFile(getString(R.string.user_cover_image)).copy(Bitmap.Config.ARGB_8888, true);
-                Canvas c = new Canvas(bitmapCopy);
-                c.drawPaint(darken);
-                navUserCover.setBackground(new BitmapDrawable(getResources(), bitmapCopy));
-            }
+            // if no file found, pull from server
+            loadNavUserCoverImageFromServer();
         }
         wantToLoadUserImages = false;
     }
@@ -351,9 +368,9 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         // set colors of items
-        for (int i = 0; i < navigationView.getMenu().size(); i++){
+        for (int i = 0; i < navigationView.getMenu().size(); i++) {
             // if menu item is the selected item
-            if (navigationView.getMenu().getItem(i).getItemId() == item.getItemId()){
+            if (navigationView.getMenu().getItem(i).getItemId() == item.getItemId()) {
                 setNavItemColorToPrimary(i);
             } else {
                 resetNavItemColor(i);
