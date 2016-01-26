@@ -1,7 +1,6 @@
 ~~~~ Tasking To-Do List ~~~~
 
 -protect edge cases and null values
--check permissions
 -handle exceptions
 -create release-level API project
 -stop tapping screen exit fullscreen
@@ -12,3 +11,4 @@
 ==== Tasking Stretch Goals ====
 -support different task lists
 -provide localization
+-check permissions
