@@ -4,8 +4,6 @@
 -handle exceptions
 -create release-level API project
 -stop tapping screen exit fullscreen
--make scaled avatar not hideous
--fix UI alignment for tasks
 -check menu design
 -create empty task list screen
 
