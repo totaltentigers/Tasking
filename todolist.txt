@@ -3,9 +3,10 @@
 -protect edge cases and null values
 -handle exceptions
 -create release-level API project
--stop tapping screen exit fullscreen
 -check menu design
 -create empty task list screen
+-fix drawer close lag
+-load user images from files first, then check server
 
 ==== Tasking Stretch Goals ====
 -support different task lists

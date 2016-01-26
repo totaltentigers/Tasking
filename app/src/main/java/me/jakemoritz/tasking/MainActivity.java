@@ -13,6 +13,7 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -70,6 +71,8 @@ public class MainActivity extends AppCompatActivity
     TextView navUserEmail;
     LinearLayout navUserCover;
 
+    NavigationView navigationView;
+
     boolean wantToLoadUserImages;
 
     boolean wantToSignOut;
@@ -115,7 +118,7 @@ public class MainActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         View header = LayoutInflater.from(this).inflate(R.layout.nav_header_main, navigationView);
@@ -128,10 +131,33 @@ public class MainActivity extends AppCompatActivity
         loadNavUserName();
         loadNavUserEmail();
 
+        navigationView.getMenu().getItem(0).setChecked(true);
+        setNavItemColorToPrimary(0);
+        resetNavItemColor(1);
+        //setNavItemColorToPrimary(1);
+
+        // change selected item icon to app primary color
+        Drawable icon;
+        TypedValue typedValue = new TypedValue();
+        getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
+        int color = typedValue.data;
+
         // Initialize default fragment
         getFragmentManager().beginTransaction()
                 .replace(R.id.content_main, new TaskListFragment())
                 .commit();
+    }
+
+    public void resetNavItemColor(int position){
+        Drawable taskMenuItemIcon = navigationView.getMenu().getItem(position).getIcon();
+        taskMenuItemIcon.mutate().setColorFilter(0x8C000000, PorterDuff.Mode.MULTIPLY);
+        navigationView.getMenu().getItem(position).setIcon(taskMenuItemIcon);
+    }
+
+    public void setNavItemColorToPrimary(int position){
+        Drawable taskMenuItemIcon = navigationView.getMenu().getItem(position).getIcon();
+        taskMenuItemIcon.mutate().setColorFilter(0xFFF44336, PorterDuff.Mode.MULTIPLY);
+        navigationView.getMenu().getItem(position).setIcon(taskMenuItemIcon);
     }
 
     public void loadNavUserName() {
@@ -324,6 +350,16 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+
+        // set colors of items
+        for (int i = 0; i < navigationView.getMenu().size(); i++){
+            // if menu item is the selected item
+            if (navigationView.getMenu().getItem(i).getItemId() == item.getItemId()){
+                setNavItemColorToPrimary(i);
+            } else {
+                resetNavItemColor(i);
+            }
+        }
 
         if (id == R.id.nav_tasks) {
             getFragmentManager().beginTransaction()

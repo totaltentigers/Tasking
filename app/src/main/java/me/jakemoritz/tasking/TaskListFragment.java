@@ -79,7 +79,15 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         mListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
         mListView.setMultiChoiceModeListener(this);
 
+        if (mAdapter.getTaskList().isEmpty()){
+            showEmptyListImage();
+        }
+
         return view;
+    }
+
+    public void showEmptyListImage(){
+
     }
 
     @Override
