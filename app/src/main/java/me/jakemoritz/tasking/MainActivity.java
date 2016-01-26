@@ -134,13 +134,6 @@ public class MainActivity extends AppCompatActivity
         navigationView.getMenu().getItem(0).setChecked(true);
         setNavItemColorToPrimary(0);
         resetNavItemColor(1);
-        //setNavItemColorToPrimary(1);
-
-        // change selected item icon to app primary color
-        Drawable icon;
-        TypedValue typedValue = new TypedValue();
-        getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
-        int color = typedValue.data;
 
         // Initialize default fragment
         getFragmentManager().beginTransaction()
@@ -155,8 +148,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void setNavItemColorToPrimary(int position){
+        // change selected item icon to app primary color
+        Drawable icon;
+        TypedValue typedValue = new TypedValue();
+        getTheme().resolveAttribute(R.attr.colorPrimary, typedValue, true);
+        int color = typedValue.data;
+
         Drawable taskMenuItemIcon = navigationView.getMenu().getItem(position).getIcon();
-        taskMenuItemIcon.mutate().setColorFilter(0xFFF44336, PorterDuff.Mode.MULTIPLY);
+        taskMenuItemIcon.mutate().setColorFilter(color, PorterDuff.Mode.MULTIPLY);
         navigationView.getMenu().getItem(position).setIcon(taskMenuItemIcon);
     }
 
