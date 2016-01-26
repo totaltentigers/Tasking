@@ -27,9 +27,8 @@
             android:divider="@null"
             android:dividerHeight="0dp" />
 
-
     </android.support.v4.widget.SwipeRefreshLayout>
 
-    <include layout="@layout/empty_tasklist_view"/>
+    <!--<include layout="@layout/empty_tasklist_view"/>-->
 
 </FrameLayout>

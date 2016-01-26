@@ -33,7 +33,7 @@ import java.util.List;
 
 
 public class TaskListFragment extends Fragment implements AbsListView.OnItemClickListener,
-        GetTasksResponse, AddTaskResponse, AbsListView.OnItemLongClickListener,
+        GetTasksResponse, AddTaskResponse, /*AbsListView.OnItemLongClickListener,*/
         ActionMode.Callback, AbsListView.MultiChoiceModeListener, DeleteTasksResponse,
         EditTaskResponse, SwipeRefreshLayout.OnRefreshListener, CheckBox.OnCheckedChangeListener,
         sortTasklistResponse {
@@ -70,15 +70,14 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
         // Set the adapter
         mListView = (AbsListView) view.findViewById(android.R.id.list);
+//        mListView.setEmptyView(getActivity().findViewById(R.id.empty_tasklist));
         mListView.setAdapter(mAdapter);
 
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setOnItemClickListener(this);
-        mListView.setOnItemLongClickListener(this);
         mListView.setLongClickable(true);
         mListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
         mListView.setMultiChoiceModeListener(this);
-        mListView.setEmptyView(getActivity().findViewById(R.id.empty_tasklist));
 
         return view;
     }
@@ -316,12 +315,12 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         editTask(position);
     }
 
-    @Override
+/*    @Override
     public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         getActivity().startActionMode(this);
         mListView.setItemChecked(position, true);
         return true;
-    }
+    }*/
 
     // Called when action mode is created; startActionMode() called
     @Override
