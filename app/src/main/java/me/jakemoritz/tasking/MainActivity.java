@@ -77,6 +77,8 @@ public class MainActivity extends AppCompatActivity
 
     boolean wantToSignOut;
 
+    private MenuItem selectedMenuItem;
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -114,8 +116,43 @@ public class MainActivity extends AppCompatActivity
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+
+                if (selectedMenuItem != null) {
+                    // Handle navigation view item clicks here.
+                    int id = selectedMenuItem.getItemId();
+
+                    if ((id == R.id.nav_tasks) && (getFragmentManager().findFragmentById(R.id.content_main) instanceof TaskListFragment)) {
+                    } else if ((id == R.id.nav_settings) && (getFragmentManager().findFragmentById(R.id.content_main) instanceof SettingsFragment)) {
+                    } else {
+                        // set colors of items
+                        for (int i = 0; i < navigationView.getMenu().size(); i++) {
+                            // if menu item is the selected item
+                            if (navigationView.getMenu().getItem(i).getItemId() == selectedMenuItem.getItemId()) {
+                                setNavItemColorToPrimary(i);
+                            } else {
+                                resetNavItemColor(i);
+                            }
+                        }
+
+                        if (id == R.id.nav_tasks) {
+                            getFragmentManager().beginTransaction()
+                                    .replace(R.id.content_main, new TaskListFragment())
+                                    .commit();
+                        } else if (id == R.id.nav_settings) {
+                            getFragmentManager().beginTransaction()
+                                    .replace(R.id.content_main, new SettingsFragment())
+                                    .commit();
+                        }
+                    }
+                }
+            }
+        };
         drawer.setDrawerListener(toggle);
+
         toggle.syncState();
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -364,33 +401,14 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
+        selectedMenuItem = item;
 
-        // set colors of items
-        for (int i = 0; i < navigationView.getMenu().size(); i++) {
-            // if menu item is the selected item
-            if (navigationView.getMenu().getItem(i).getItemId() == item.getItemId()) {
-                setNavItemColorToPrimary(i);
-            } else {
-                resetNavItemColor(i);
-            }
-        }
-
-        if (id == R.id.nav_tasks) {
-            getFragmentManager().beginTransaction()
-                    .replace(R.id.content_main, new TaskListFragment())
-                    .commit();
-        } else if (id == R.id.nav_settings) {
-            getFragmentManager().beginTransaction()
-                    .replace(R.id.content_main, new SettingsFragment())
-                    .commit();
-        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
 
     @Override
     public void onConnected(Bundle bundle) {

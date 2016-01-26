@@ -6,8 +6,6 @@
 -check menu design
 -create empty task list screen
 -fix drawer close lag
--load user images from files first, then check server
--fix nav drawer icon color switching
 
 ==== Tasking Stretch Goals ====
 -support different task lists
