@@ -2,6 +2,7 @@ package me.jakemoritz.tasking;
 
 import android.app.Activity;
 import android.content.Context;
+import android.support.v7.widget.CardView;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,11 +54,19 @@ public class TaskAdapter extends ArrayAdapter<Task>{
         holder.taskNotes = (TextView) row.findViewById(R.id.task_item_notes);
         holder.taskDate = (TextView) row.findViewById(R.id.task_item_date);
         holder.taskCompleted = (CheckBox) row.findViewById(R.id.task_item_checkbox);
+        holder.cardView = (CardView) row.findViewById(R.id.card);
         if (task.getStatus().equals(context.getString(R.string.task_completed))){
             holder.taskCompleted.setChecked(true);
         } else {
             holder.taskCompleted.setChecked(false);
         }
+
+        for (int i = 0; i < mSelectedItemIds.size(); i++){
+            if (position == mSelectedItemIds.keyAt(i)){
+                holder.cardView.setCardBackgroundColor(context.getResources().getColor(R.color.colorAccent));
+            }
+        }
+
         holder.taskCompleted.setOnCheckedChangeListener(taskListFragment);
 
         row.setTag(holder);
@@ -100,7 +109,6 @@ public class TaskAdapter extends ArrayAdapter<Task>{
         } else {
             holder.taskDate.setVisibility(View.GONE);
         }
-
         return row;
     }
 
@@ -109,6 +117,7 @@ public class TaskAdapter extends ArrayAdapter<Task>{
         TextView taskNotes;
         TextView taskDate;
         CheckBox taskCompleted;
+        CardView cardView;
     }
 
     @Override
@@ -128,6 +137,7 @@ public class TaskAdapter extends ArrayAdapter<Task>{
 
     public void selectView(int position, boolean value){
         if (value){
+
             mSelectedItemIds.put(position, value);
         } else {
             mSelectedItemIds.delete(position);

@@ -33,10 +33,9 @@ import java.util.List;
 
 
 public class TaskListFragment extends Fragment implements AbsListView.OnItemClickListener,
-        GetTasksResponse, AddTaskResponse, /*AbsListView.OnItemLongClickListener,*/
-        ActionMode.Callback, AbsListView.MultiChoiceModeListener, DeleteTasksResponse,
-        EditTaskResponse, SwipeRefreshLayout.OnRefreshListener, CheckBox.OnCheckedChangeListener,
-        sortTasklistResponse {
+        GetTasksResponse, AddTaskResponse, ActionMode.Callback, AbsListView.MultiChoiceModeListener,
+        DeleteTasksResponse, EditTaskResponse, SwipeRefreshLayout.OnRefreshListener,
+        CheckBox.OnCheckedChangeListener, sortTasklistResponse {
 
     private static final String TAG = "TaskListFragment";
 
@@ -70,7 +69,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
         // Set the adapter
         mListView = (AbsListView) view.findViewById(android.R.id.list);
-//        mListView.setEmptyView(getActivity().findViewById(R.id.empty_tasklist));
+        mListView.setEmptyView(getActivity().findViewById(R.id.empty_tasklist));
         mListView.setAdapter(mAdapter);
 
         // Set OnItemClickListener so we can be notified on item clicks
@@ -95,18 +94,18 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         });
     }
 
-    public boolean isNetworkAvailable(){
+    public boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
         return (activeNetwork != null && activeNetwork.isConnectedOrConnecting());
     }
 
-    private void createTask(){
+    private void createTask() {
         AddTaskDialogFragment addTaskDialogFragment = AddTaskDialogFragment.newInstance(this);
         addTaskDialogFragment.show(getFragmentManager(), null);
     }
 
-    private void editTask(int position){
+    private void editTask(int position) {
         Task task = mAdapter.getItem(position);
         EditTaskDialogFragment editTaskDialogFragment = EditTaskDialogFragment.newInstance(this, task);
         editTaskDialogFragment.show(getFragmentManager(), null);
@@ -114,7 +113,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
     @Override
     public void getTasksFinish(List<Task> taskList) {
-        if (taskList != null){
+        if (taskList != null) {
             mAdapter.clear();
             mAdapter.addAll(taskList);
             mAdapter.notifyDataSetChanged();
@@ -142,7 +141,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         getTasksFromServer();
     }
 
-    public void getTasksFromServer(){
+    public void getTasksFromServer() {
         mAdapter.notifyDataSetChanged();
 
         GetTasksTask getTasksTask = new GetTasksTask(getActivity());
@@ -150,7 +149,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         getTasksTask.execute();
     }
 
-    public void onTasksDeleted(final SparseBooleanArray mSelectedIds, final List<Task> taskList){
+    public void onTasksDeleted(final SparseBooleanArray mSelectedIds, final List<Task> taskList) {
         final TaskListFragment callback = this;
 
         final List<Task> oldTaskList = new ArrayList<>();
@@ -184,7 +183,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     public void onStart() {
         super.onStart();
 
-        if (isNetworkAvailable()){
+        if (isNetworkAvailable()) {
             GetTasksTask getTasksTask = new GetTasksTask(getActivity());
             getTasksTask.delegate = this;
             getTasksTask.execute();
@@ -199,15 +198,15 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         saveTasksToDb();
     }
 
-    public void saveTasksToDb(){
+    public void saveTasksToDb() {
         DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
 
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         dbHelper.onUpgrade(db, 1, 1);
 
-        if (mAdapter.getTaskList() != null){
-            for (Task task : mAdapter.getTaskList()){
-                if (dbHelper.getTask(task.getId()).getCount() != 0){
+        if (mAdapter.getTaskList() != null) {
+            for (Task task : mAdapter.getTaskList()) {
+                if (dbHelper.getTask(task.getId()).getCount() != 0) {
                     dbHelper.updateTaskInDb(task.getId(), task);
                 } else {
                     dbHelper.insertTask(task);
@@ -217,7 +216,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         dbHelper.close();
     }
 
-    public void getTasksFromDb(){
+    public void getTasksFromDb() {
         DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
 
         Cursor res = dbHelper.getAllTasks();
@@ -225,7 +224,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         res.moveToFirst();
         List<Task> taskList = new ArrayList<>();
 
-        for (int i = res.getCount() - 1; i >= 0; i--){
+        for (int i = res.getCount() - 1; i >= 0; i--) {
             String taskId = res.getString(res.getColumnIndex(DatabaseHelper.TASK_COLUMN_ID));
             String taskTitle = res.getString(res.getColumnIndex(DatabaseHelper.TASK_COLUMN_TITLE));
             String taskNotes = res.getString(res.getColumnIndex(DatabaseHelper.TASK_COLUMN_NOTES));
@@ -235,26 +234,26 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
             Task task = new Task();
             task.setId(taskId);
-            if (taskTitle != null){
+            if (taskTitle != null) {
                 task.setTitle(taskTitle);
             }
-            if (taskNotes != null){
+            if (taskNotes != null) {
                 task.setNotes(taskNotes);
             }
-            if (taskStatus != null){
+            if (taskStatus != null) {
                 task.setStatus(taskStatus);
             }
-            if (taskDueDate != null){
+            if (taskDueDate != null) {
                 task.setDue(new DateTime(Long.valueOf(taskDueDate)));
             }
-            if (taskCompletedDate != null){
+            if (taskCompletedDate != null) {
                 task.setCompleted(new DateTime(Long.valueOf(taskCompletedDate)));
             }
             taskList.add(task);
             res.moveToNext();
         }
 
-        if (!taskList.isEmpty()){
+        if (!taskList.isEmpty()) {
             mAdapter.clear();
             mAdapter.addAll(taskList);
             mAdapter.notifyDataSetChanged();
@@ -268,11 +267,11 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         inflater.inflate(R.menu.main, menu);
     }
 
-    public void sortTasks(){
+    public void sortTasks() {
         List<Task> taskList = new ArrayList<>();
         taskList.addAll(mAdapter.getTaskList());
 
-        if (!taskList.isEmpty()){
+        if (!taskList.isEmpty()) {
             Collections.sort(taskList, new CompareTaskDueDate());
 
             mAdapter.clear();
@@ -315,13 +314,6 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         editTask(position);
     }
 
-/*    @Override
-    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-        getActivity().startActionMode(this);
-        mListView.setItemChecked(position, true);
-        return true;
-    }*/
-
     // Called when action mode is created; startActionMode() called
     @Override
     public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -339,24 +331,24 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
     // Called when user selects contextual menu item
     @Override
     public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.action_delete:
                 SparseBooleanArray selected = mAdapter.getSelectedIds();
 
                 List<Task> tasksToDelete = new ArrayList<>();
-                for (int i = 0; i < selected.size(); i++){
+                for (int i = 0; i < selected.size(); i++) {
                     tasksToDelete.add(mAdapter.getItem(selected.keyAt(i)));
                 }
 
                 List<Task> tasksToKeep = new ArrayList<>();
-                for (Task task : mAdapter.getTaskList()){
+                for (Task task : mAdapter.getTaskList()) {
                     boolean mustKeep = true;
-                    for (Task taskToDelete : tasksToDelete){
-                        if (task == taskToDelete){
+                    for (Task taskToDelete : tasksToDelete) {
+                        if (task == taskToDelete) {
                             mustKeep = false;
                         }
                     }
-                    if (mustKeep){
+                    if (mustKeep) {
                         tasksToKeep.add(task);
                     }
                 }
@@ -403,7 +395,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
         newTask.setTitle(task.getTitle());
         newTask.setNotes(task.getNotes());
 
-        if (isChecked){
+        if (isChecked) {
             task.setStatus(getString(R.string.task_completed));
             task.setCompleted(task.getDue());
             newTask.setStatus(getString(R.string.task_completed));
