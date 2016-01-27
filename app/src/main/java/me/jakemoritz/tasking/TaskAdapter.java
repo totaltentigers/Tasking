@@ -67,6 +67,10 @@ public class TaskAdapter extends ArrayAdapter<Task>{
             }
         }
 
+        if (position == 0){
+
+        }
+
         holder.taskCompleted.setOnCheckedChangeListener(taskListFragment);
 
         row.setTag(holder);

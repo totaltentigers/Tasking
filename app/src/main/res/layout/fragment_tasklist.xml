@@ -19,17 +19,21 @@
         android:id="@+id/swipe_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="16dp">
+        >
 
         <ListView
             android:id="@android:id/list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:divider="@null"
-            android:dividerHeight="0dp" />
+            android:dividerHeight="0dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="0dp"/>
+
+
 
     </android.support.v4.widget.SwipeRefreshLayout>
-
     <include layout="@layout/empty_tasklist_view"/>
+
 
 </FrameLayout>

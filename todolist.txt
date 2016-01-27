@@ -3,6 +3,7 @@
 -protect edge cases and null values
 -handle exceptions
 -create release-level API project
+-fix date problem
 
 ==== Tasking Stretch Goals ====
 -support different task lists

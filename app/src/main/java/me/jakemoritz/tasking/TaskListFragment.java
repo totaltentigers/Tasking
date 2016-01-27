@@ -1,6 +1,6 @@
 package me.jakemoritz.tasking;
 
-import android.app.Fragment;
+import android.app.ListFragment;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -32,7 +32,7 @@ import java.util.Collections;
 import java.util.List;
 
 
-public class TaskListFragment extends Fragment implements AbsListView.OnItemClickListener,
+public class TaskListFragment extends ListFragment implements AbsListView.OnItemClickListener,
         GetTasksResponse, AddTaskResponse, ActionMode.Callback, AbsListView.MultiChoiceModeListener,
         DeleteTasksResponse, EditTaskResponse, SwipeRefreshLayout.OnRefreshListener,
         CheckBox.OnCheckedChangeListener, sortTasklistResponse {
@@ -69,7 +69,7 @@ public class TaskListFragment extends Fragment implements AbsListView.OnItemClic
 
         // Set the adapter
         mListView = (AbsListView) view.findViewById(android.R.id.list);
-        mListView.setEmptyView(getActivity().findViewById(R.id.empty_tasklist));
+        mListView.setEmptyView(getActivity().findViewById(android.R.id.empty));
         mListView.setAdapter(mAdapter);
 
         // Set OnItemClickListener so we can be notified on item clicks
