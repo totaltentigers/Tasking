@@ -19,9 +19,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ListView;
 import android.widget.PopupMenu;
 
 import com.google.api.client.util.DateTime;
@@ -32,10 +32,10 @@ import java.util.Collections;
 import java.util.List;
 
 
-public class TaskListFragment extends ListFragment implements AbsListView.OnItemClickListener,
-        GetTasksResponse, AddTaskResponse, ActionMode.Callback, AbsListView.MultiChoiceModeListener,
-        DeleteTasksResponse, EditTaskResponse, SwipeRefreshLayout.OnRefreshListener,
-        CheckBox.OnCheckedChangeListener, sortTasklistResponse {
+public class TaskListFragment extends ListFragment implements GetTasksResponse, AddTaskResponse,
+        ActionMode.Callback, AbsListView.MultiChoiceModeListener, DeleteTasksResponse,
+        EditTaskResponse, SwipeRefreshLayout.OnRefreshListener, CheckBox.OnCheckedChangeListener,
+        sortTasklistResponse {
 
     private static final String TAG = "TaskListFragment";
 
@@ -73,7 +73,6 @@ public class TaskListFragment extends ListFragment implements AbsListView.OnItem
         mListView.setAdapter(mAdapter);
 
         // Set OnItemClickListener so we can be notified on item clicks
-        mListView.setOnItemClickListener(this);
         mListView.setLongClickable(true);
         mListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
         mListView.setMultiChoiceModeListener(this);
@@ -310,9 +309,12 @@ public class TaskListFragment extends ListFragment implements AbsListView.OnItem
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        super.onListItemClick(l, v, position, id);
         editTask(position);
+
     }
+
 
     // Called when action mode is created; startActionMode() called
     @Override
