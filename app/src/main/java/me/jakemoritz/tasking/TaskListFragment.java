@@ -23,6 +23,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.PopupMenu;
+import android.widget.ProgressBar;
 
 import com.google.api.client.util.DateTime;
 import com.google.api.services.tasks.model.Task;
@@ -41,6 +42,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
 
     private AbsListView mListView;
     SwipeRefreshLayout swipeRefreshLayout;
+    ProgressBar progressBar;
 
     private TaskAdapter mAdapter;
 
@@ -52,11 +54,21 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setHasOptionsMenu(true);
 
         tasks = new ArrayList<>();
 
         mAdapter = new TaskAdapter(getActivity(), this, R.layout.task_list_item, tasks);
+
+
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mListView.getEmptyView().setVisibility(ListView.GONE);
+
     }
 
     @Override
@@ -76,6 +88,9 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
         mListView.setLongClickable(true);
         mListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
         mListView.setMultiChoiceModeListener(this);
+
+        progressBar = (ProgressBar)view.findViewById(R.id.task_load_progress);
+        progressBar.setVisibility(View.VISIBLE);
 
         return view;
     }
@@ -117,6 +132,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
             mAdapter.addAll(taskList);
             mAdapter.notifyDataSetChanged();
             saveTasksToDb();
+            progressBar.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -186,6 +202,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
             GetTasksTask getTasksTask = new GetTasksTask(getActivity());
             getTasksTask.delegate = this;
             getTasksTask.execute();
+
         } else {
             getTasksFromDb();
         }
