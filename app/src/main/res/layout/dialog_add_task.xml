@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/task_title"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter a task." />
+
+    <EditText
+        android:id="@+id/task_notes"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter a note."
+        android:layout_below="@id/task_title"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/date_picker_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Choose a date"
+        android:layout_below="@id/task_notes"
+        android:layout_marginRight="8dp"/>
+
+    <TextView
+        android:id="@+id/chosen_date"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/date_picker_button"
+        style="@style/Base.TextAppearance.AppCompat.Subhead"
+        android:layout_alignBaseline="@+id/date_picker_button"
+        android:textColor="#D9000000"/>
+
+</RelativeLayout>

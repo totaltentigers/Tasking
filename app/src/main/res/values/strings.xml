@@ -1,8 +1,67 @@
 <resources>
-    <string name="app_name">Tasking</string>
+    <!-- Manifest -->
+    <string name="app_name" translatable="false">Tasking</string>
 
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="label_activity_login">Login</string>
+    <string name="label_activity_helper">Helper</string>
 
-    <string name="action_settings">Settings</string>
+    <!-- Menu items -->
+    <string name="action_delete">Delete</string>
+    <string name="action_sort">Sort</string>
+
+    <string name="sort_by_date">Sort by: Date</string>
+
+    <!-- Side nav -->
+    <string name="navigation_drawer_open">Open the navigation drawer</string>
+    <string name="navigation_drawer_close">Close the navigation drawer</string>
+
+    <string name="nav_tasks">Tasks</string>
+    <string name="nav_settings">Settings</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Edit/Add Task Dialog -->
+    <string name="add_task_dialog_title">Create your task.</string>
+    <string name="add_task_dialog_add">Add</string>
+    <string name="edit_task_dialog_edit">Edit</string>
+    <string name="edit_task_dialog_save">Save</string>
+    <string name="add_task_dialog_cancel">Cancel</string>
+    <string name="add_task_dialog_error_notitle">You must enter a task title.</string>
+
+    <!-- GoogleApiClient -->
+    <string name="gac_task_scope">https://www.googleapis.com/auth/tasks</string>
+
+    <!-- Task task oath scope -->
+    <string name="update_task_oathscope">oauth2:https://www.googleapis.com/auth/userinfo.profile</string>
+
+    <!-- Preferences -->
+    <string name="pref_account">Account</string>
+    <string name="pref_account_summ">Sign out of your Google+ account.</string>
+    <string name="pref_account_message">Would you like to sign out of your Google+ account?</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- SharedPrefs -->
+    <string name="shared_prefs_account">accountpreferences</string>
+    <string name="shared_prefs_email">useremail</string>
+    <string name="shared_prefs_logged_in">isuserloggedin</string>
+    <string name="shared_prefs_name">userdisplayname</string>
+
+    <!-- User images -->
+    <string name="user_image">userimage</string>
+    <string name="user_cover_image">usercoverimage</string>
+
+    <!-- Task deletion snackbar -->
+    <string name="task_deleted_snackbar_text">Deleted</string>
+    <string name="task_deleted_snackbar_undo">Undo</string>
+
+    <!-- Task API strings -->
+    <string name="task_completed">completed</string>
+    <string name="task_needsAction">needsAction</string>
+
+    <!-- Login Activity -->
+    <string name="gpservices_conn_fail">Failed to connect to Google Play Services.</string>
+    <string name="permissions_not_granted">Access to your accounts is required to sign in.</string>
+
+    <!-- ListView empty message -->
+    <string name="empty_listview_message">You have no tasks. Add one now!</string>
 </resources>
