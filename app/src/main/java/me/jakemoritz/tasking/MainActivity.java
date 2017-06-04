@@ -13,7 +13,6 @@ import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -33,19 +32,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.Scope;
-import com.google.android.gms.plus.Plus;
-import com.google.android.gms.plus.model.people.Person;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.net.URL;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -80,24 +73,6 @@ public class MainActivity extends AppCompatActivity
     private MenuItem selectedMenuItem;
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        mGoogleApiClient.connect();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mGoogleApiClient.disconnect();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-//        mGoogleApiClient.connect();
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setProgressBarIndeterminateVisibility(true);
@@ -106,14 +81,6 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(Plus.API)
-                .addScope(new Scope(Scopes.PROFILE))
-                .addScope(new Scope(Scopes.EMAIL))
-                .build();
 
         wantToLoadUserImages = true;
 
@@ -216,13 +183,15 @@ public class MainActivity extends AppCompatActivity
 
     public void loadNavUserImageFromServer() {
         // First attempt to update images from server
-        Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
-        if (user != null && user.getImage() != null) {
+/*        GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+        GoogleSignInAccount acct = result.getSignInAccount();
+
+        if (acct != null && acct.getPhotoUrl() != null) {
             new AsyncTask<String, Void, Bitmap>() {
                 @Override
                 protected void onPostExecute(Bitmap bitmap) {
                     if (bitmap != null) {
-                        Bitmap copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
+                        Bitmap copy = bitmap.copy(Bitmap.Config.RGB_565, false);
 
                         Bitmap userImage = getCircleBitmap(bitmap);
                         navUserAvatar.setImageBitmap(userImage);
@@ -242,7 +211,7 @@ public class MainActivity extends AppCompatActivity
                     return null;
                 }
             }.execute(user.getImage().getUrl().substring(0, user.getImage().getUrl().length() - 2) + 400);
-        }
+        }*/
     }
 
     public void loadNavUserImage() {
@@ -262,7 +231,7 @@ public class MainActivity extends AppCompatActivity
         darken.setAlpha(100);
 
         // First attempt to update images from server
-        Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
+/*        Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
         if (user != null && user.getCover() != null) {
             new AsyncTask<String, Void, Bitmap>() {
                 @Override
@@ -291,7 +260,7 @@ public class MainActivity extends AppCompatActivity
                     return null;
                 }
             }.execute(user.getCover().getCoverPhoto().getUrl());
-        }
+        }*/
     }
 
     public void loadNavUserCoverImage() {
@@ -315,7 +284,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void signOutHelper() {
-        Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
+//        Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
 
         clearAppData();
 

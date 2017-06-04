@@ -45,6 +45,7 @@
     <string name="shared_prefs_email">useremail</string>
     <string name="shared_prefs_logged_in">isuserloggedin</string>
     <string name="shared_prefs_name">userdisplayname</string>
+    <string name="shared_prefs_id">userid</string>
 
     <!-- User images -->
     <string name="user_image">userimage</string>
