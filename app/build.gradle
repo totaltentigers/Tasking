@@ -2,14 +2,6 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 
 android {
-    signingConfigs {
-        config {
-            keyAlias '***REMOVED***'
-            keyPassword '***REMOVED***'
-            storeFile file('***REMOVED***')
-            storePassword '***REMOVED***'
-        }
-    }
     compileSdkVersion 23
     buildToolsVersion '23.0.2'
     defaultConfig {
@@ -18,15 +10,12 @@ android {
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
-        signingConfig signingConfigs.config
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.config
             proguardFile 'E:/Documents/AndroidStudioProjects/Tasking/app/proguard-rules.pro'
-            debuggable false
         }
     }
     productFlavors {
