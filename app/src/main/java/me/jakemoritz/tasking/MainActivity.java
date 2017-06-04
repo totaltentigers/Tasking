@@ -128,9 +128,8 @@ public class MainActivity extends AppCompatActivity
                     // Handle navigation view item clicks here.
                     int id = selectedMenuItem.getItemId();
 
-                    if ((id == R.id.nav_tasks) && (getFragmentManager().findFragmentById(R.id.content_main) instanceof TaskListFragment)) {
-                    } else if ((id == R.id.nav_settings) && (getFragmentManager().findFragmentById(R.id.content_main) instanceof SettingsFragment)) {
-                    } else {
+                    if (!((id == R.id.nav_tasks) && (getFragmentManager().findFragmentById(R.id.content_main) instanceof TaskListFragment)) &&
+                            !((id == R.id.nav_settings) && (getFragmentManager().findFragmentById(R.id.content_main) instanceof SettingsFragment))) {
                         if (id == R.id.nav_tasks) {
                             getFragmentManager().beginTransaction()
                                     .replace(R.id.content_main, new TaskListFragment())
@@ -144,8 +143,8 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         };
-        drawer.setDrawerListener(toggle);
 
+        drawer.setDrawerListener(toggle);
         toggle.syncState();
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -442,7 +441,7 @@ public class MainActivity extends AppCompatActivity
                     connectionResult.startResolutionForResult(this, RC_SIGN_IN);
                     mIsResolving = true;
                 } catch (IntentSender.SendIntentException e) {
-                    Log.e(TAG, "Could not resolve ConnectionResult." , e);
+                    Log.e(TAG, "Could not resolve ConnectionResult.", e);
                     mIsResolving = false;
                     mGoogleApiClient.connect();
                 }
