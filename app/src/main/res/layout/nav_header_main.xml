@@ -17,8 +17,7 @@
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/user_avatar"
         android:layout_width="56dp"
-        android:layout_height="wrap_content"
-        android:paddingTop="@dimen/nav_header_vertical_spacing"
+        android:layout_height="56dp"
         android:src="@android:drawable/sym_def_app_icon"
         app:civ_border_width="0dp" />
 

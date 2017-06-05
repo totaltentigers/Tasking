@@ -3,7 +3,6 @@ package me.jakemoritz.tasking;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -41,7 +40,6 @@ import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -151,6 +149,8 @@ public class MainActivity extends AppCompatActivity
         connectGoogleApiClient();
         loadNavUserName();
         loadNavUserEmail();
+        setNavUserImage(getString(R.string.user_image));
+        setNavUserImage(getString(R.string.user_cover_image));
 
         navigationView.getMenu().getItem(0).setChecked(true);
 
@@ -208,22 +208,8 @@ public class MainActivity extends AppCompatActivity
         }
 
         bitmap.recycle();
-    }
 
-    public Bitmap loadBitmapFromFile(String filename) {
-        // Try to load image from file
-        FileInputStream inputStream = null;
-        File file = new File(getCacheDir() + File.separator + filename);
-
-        try {
-            inputStream = new FileInputStream(file);
-        } catch (FileNotFoundException fileNotFoundException) {
-            return null;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return BitmapFactory.decodeStream(inputStream);
+        setNavUserImage(filename);
     }
 
     private void getUserCoverImageUrl() {
@@ -242,13 +228,13 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
-                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()){
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
                     String coverPhotoUrl = response.body();
 
-                    if (coverImageURL != null){
+                    if (coverImageURL != null) {
                         Uri imageUri = Uri.parse(coverPhotoUrl);
 
-                        if (imageUri != null){
+                        if (imageUri != null) {
                             downloadUserImage(imageUri, getString(R.string.user_cover_image));
                         }
                     }
@@ -288,13 +274,21 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void setNavUserImage(final String filename) {
-        Picasso.with(this).load(new File(getCacheDir() + File.separator + filename)).into(new Target() {
+        Picasso.with(this).load(new File(getCacheDir() + File.separator + filename + ".jpg")).into(new Target() {
             @Override
             public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
                 if (filename.matches(getString(R.string.user_image))) {
                     navUserAvatar.setImageBitmap(bitmap);
                 } else if (filename.matches(getString(R.string.user_cover_image))) {
-                    navUserCover.setBackground(new BitmapDrawable(getResources(), bitmap));
+                    Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+                    Paint darken = new Paint();
+                    darken.setColor(Color.BLACK);
+                    darken.setAlpha(100);
+
+
+                    Canvas c = new Canvas(mutableBitmap);
+                    c.drawPaint(darken);
+                    navUserCover.setBackground(new BitmapDrawable(getResources(), mutableBitmap));
                 }
             }
 
@@ -306,71 +300,6 @@ public class MainActivity extends AppCompatActivity
             public void onPrepareLoad(Drawable placeHolderDrawable) {
             }
         });
-    }
-
-    public void loadNavUserImage(Uri imageUri, String filename) {
-        setNavUserImage(filename);
-
-        // Attempt to download image
-        downloadUserImage(imageUri, filename);
-    }
-
-    public void loadNavUserCoverImageFromServer() {
-        final Paint darken = new Paint();
-        darken.setColor(Color.BLACK);
-        darken.setAlpha(100);
-
-        // First attempt to update images from server
-/*        Person user = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient);
-        if (user != null && user.getCover() != null) {
-            new AsyncTask<String, Void, Bitmap>() {
-                @Override
-                protected void onPostExecute(Bitmap bitmap) {
-                    if (bitmap != null) {
-                        Bitmap copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
-
-                        Bitmap bitmapCopy = bitmap.copy(Bitmap.Config.ARGB_8888, true);
-                        Canvas c = new Canvas(bitmapCopy);
-                        c.drawPaint(darken);
-                        navUserCover.setBackground(new BitmapDrawable(getResources(), bitmapCopy));
-
-                        saveImageToFile(copy, getString(R.string.user_cover_image));
-                    }
-                }
-
-                @Override
-                protected Bitmap doInBackground(String... params) {
-                    try {
-                        URL url = new URL(params[0]);
-                        InputStream in = url.openStream();
-                        return BitmapFactory.decodeStream(in);
-                    } catch (Exception e) {
-                        Log.e(TAG, e.toString());
-                    }
-                    return null;
-                }
-            }.execute(user.getCover().getCoverPhoto().getUrl());
-        }*/
-    }
-
-    public void loadNavUserCoverImage() {
-        final Paint darken = new Paint();
-        darken.setColor(Color.BLACK);
-        darken.setAlpha(100);
-
-        if (loadBitmapFromFile(getString(R.string.user_cover_image)) != null) {
-            Bitmap bitmapCopy = loadBitmapFromFile(getString(R.string.user_cover_image)).copy(Bitmap.Config.ARGB_8888, true);
-            Canvas c = new Canvas(bitmapCopy);
-            c.drawPaint(darken);
-            navUserCover.setBackground(new BitmapDrawable(getResources(), bitmapCopy));
-
-            // attempt to update user image from server
-            loadNavUserCoverImageFromServer();
-        } else {
-            // if no file found, pull from server
-            loadNavUserCoverImageFromServer();
-        }
-        wantToLoadUserImages = false;
     }
 
     public void signOutHelper() {
@@ -448,21 +377,23 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.d(TAG, "onActivityResult:" + requestCode + ":" + resultCode + ":" + data);
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+
+            // Check for update user avatar and cover image
             if (wantToLoadUserImages) {
-                if (result != null && result.isSuccess()){
+                if (result != null && result.isSuccess()) {
                     GoogleSignInAccount acct = result.getSignInAccount();
 
-                    if (acct != null && acct.getPhotoUrl() != null && !acct.getPhotoUrl().toString().isEmpty()){
-                        loadNavUserImage(acct.getPhotoUrl(), getString(R.string.user_image));
+                    if (acct != null && acct.getPhotoUrl() != null && !acct.getPhotoUrl().toString().isEmpty()) {
+                        downloadUserImage(acct.getPhotoUrl(), getString(R.string.user_image));
                     }
                 }
-//                loadNavUserImage(result, getString(R.string.user_cover_image));
-getUserCoverImageUrl();
+
+                getUserCoverImageUrl();
+
                 wantToLoadUserImages = false;
             }
         }
