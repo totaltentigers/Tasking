@@ -1,28 +1,25 @@
 package me.jakemoritz.tasking;
 
 import android.content.Intent;
-import android.content.IntentSender;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,18 +28,27 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Scope;
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+
+import static com.squareup.picasso.Picasso.with;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = "MainActivity";
 
@@ -51,12 +57,6 @@ public class MainActivity extends AppCompatActivity
 
     /* Client used to interact with Google APIs. */
     private static GoogleApiClient mGoogleApiClient;
-
-    /* Is there a ConnectionResult resolution in progress? */
-    private boolean mIsResolving = false;
-
-    /* Should we automatically resolve ConnectionResults when possible? */
-    private boolean mShouldResolve = false;
 
     // Declare variables for views
     ImageView navUserAvatar;
@@ -81,6 +81,19 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // Configure sign-in to request the user's ID, email address, and basic
+        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestScopes(new Scope(getString(R.string.gac_task_scope)))
+                .build();
+
+        // Build GoogleApiClient with access to basic profile
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
 
         wantToLoadUserImages = true;
 
@@ -124,6 +137,7 @@ public class MainActivity extends AppCompatActivity
         navUserEmail = (TextView) header.findViewById(R.id.user_email);
         navUserCover = (LinearLayout) header.findViewById(R.id.user_cover);
 
+        connectGoogleApiClient();
         loadNavUserName();
         loadNavUserEmail();
 
@@ -133,6 +147,19 @@ public class MainActivity extends AppCompatActivity
         getFragmentManager().beginTransaction()
                 .replace(R.id.content_main, new TaskListFragment())
                 .commit();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
+    }
+
+    private void connectGoogleApiClient() {
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
     public void loadNavUserName() {
@@ -150,22 +177,29 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void saveImageToFile(Bitmap bitmap, String filename) {
-        FileOutputStream outputStream;
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-        byte[] bitmapByteArray = byteArrayOutputStream.toByteArray();
-        bitmap.recycle();
-        String filepath = getCacheDir() + File.separator + filename;
+        FileOutputStream fos = null;
         try {
-            outputStream = new FileOutputStream(new File(filepath), true);
-            outputStream.write(bitmapByteArray);
-            outputStream.close();
-        } catch (Exception e) {
+            File file = new File(getCacheDir(), filename + ".jpg");
+            fos = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fos);
+
+            setNavUserImage(filename);
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                if (fos != null) {
+                    fos.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
+        bitmap.recycle();
     }
 
-    public Bitmap loadImageFromFile(String filename) {
+    public Bitmap loadBitmapFromFile(String filename) {
         // Try to load image from file
         FileInputStream inputStream = null;
         File file = new File(getCacheDir() + File.separator + filename);
@@ -181,48 +215,58 @@ public class MainActivity extends AppCompatActivity
         return BitmapFactory.decodeStream(inputStream);
     }
 
-    public void loadNavUserImageFromServer() {
+    public void downloadUserImage(GoogleSignInResult googleSignInResult, final String filename) {
         // First attempt to update images from server
-/*        GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-        GoogleSignInAccount acct = result.getSignInAccount();
+        GoogleSignInAccount acct = googleSignInResult.getSignInAccount();
 
         if (acct != null && acct.getPhotoUrl() != null) {
-            new AsyncTask<String, Void, Bitmap>() {
+            new AsyncTask<Uri, Void, Bitmap>() {
                 @Override
                 protected void onPostExecute(Bitmap bitmap) {
                     if (bitmap != null) {
-                        Bitmap copy = bitmap.copy(Bitmap.Config.RGB_565, false);
-
-                        Bitmap userImage = getCircleBitmap(bitmap);
-                        navUserAvatar.setImageBitmap(userImage);
-                        saveImageToFile(copy, getString(R.string.user_image));
+                        saveImageToFile(bitmap, filename);
                     }
                 }
 
                 @Override
-                protected Bitmap doInBackground(String... params) {
+                protected Bitmap doInBackground(Uri... params) {
                     try {
-                        URL url = new URL(params[0]);
-                        InputStream in = url.openStream();
-                        return BitmapFactory.decodeStream(in);
+                        return with(getApplicationContext()).load(params[0]).get();
                     } catch (Exception e) {
-                        Log.e(TAG, e.toString());
+                        e.printStackTrace();
                     }
                     return null;
                 }
-            }.execute(user.getImage().getUrl().substring(0, user.getImage().getUrl().length() - 2) + 400);
-        }*/
+            }.execute(new Uri[]{acct.getPhotoUrl()});
+        }
     }
 
-    public void loadNavUserImage() {
-        if (loadImageFromFile(getString(R.string.user_image)) != null) {
-            navUserAvatar.setImageBitmap(getCircleBitmap(loadImageFromFile(getString(R.string.user_image))));
-            // attempt to update image
-            loadNavUserImageFromServer();
-        } else {
-            // If no file found, load from server
-            loadNavUserImageFromServer();
-        }
+    private void setNavUserImage(final String filename){
+        Picasso.with(this).load(new File(getCacheDir() + File.separator + filename)).into(new Target() {
+            @Override
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                if (filename.matches(getString(R.string.user_image))){
+                    navUserAvatar.setImageBitmap(bitmap);
+                } else if (filename.matches(getString(R.string.user_cover_image))){
+                    navUserCover.setBackground(new BitmapDrawable(getResources(), bitmap));
+                }
+            }
+
+            @Override
+            public void onBitmapFailed(Drawable errorDrawable) {
+            }
+
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable) {
+            }
+        });
+    }
+
+    public void loadNavUserImage(GoogleSignInResult googleSignInResult, String filename) {
+        setNavUserImage(filename);
+
+        // Attempt to download image
+        downloadUserImage(googleSignInResult, filename);
     }
 
     public void loadNavUserCoverImageFromServer() {
@@ -268,8 +312,8 @@ public class MainActivity extends AppCompatActivity
         darken.setColor(Color.BLACK);
         darken.setAlpha(100);
 
-        if (loadImageFromFile(getString(R.string.user_cover_image)) != null) {
-            Bitmap bitmapCopy = loadImageFromFile(getString(R.string.user_cover_image)).copy(Bitmap.Config.ARGB_8888, true);
+        if (loadBitmapFromFile(getString(R.string.user_cover_image)) != null) {
+            Bitmap bitmapCopy = loadBitmapFromFile(getString(R.string.user_cover_image)).copy(Bitmap.Config.ARGB_8888, true);
             Canvas c = new Canvas(bitmapCopy);
             c.drawPaint(darken);
             navUserCover.setBackground(new BitmapDrawable(getResources(), bitmapCopy));
@@ -350,76 +394,9 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-
     @Override
-    public void onConnected(Bundle bundle) {
-        // onConnected indicates that an account was selected on the device, that the selected
-        // account has granted any requested permissions to our app and that we were able to
-        // establish a service connection to Google Play services.
-        Log.d(TAG, "onConnected:" + bundle);
-        mShouldResolve = false;
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
-        if (wantToLoadUserImages) {
-            loadNavUserImage();
-            loadNavUserCoverImage();
-        }
-        if (wantToSignOut) {
-            signOutHelper();
-        }
-    }
-
-    private Bitmap getCircleBitmap(Bitmap bitmap) {
-        final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-
-        final Canvas canvas = new Canvas(output);
-
-        final int color = Color.RED;
-        final Paint paint = new Paint();
-        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-        final RectF rectF = new RectF(rect);
-
-        paint.setAntiAlias(true);
-        canvas.drawARGB(0, 0, 0, 0);
-        paint.setColor(color);
-        canvas.drawOval(rectF, paint);
-
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawBitmap(bitmap, rect, rect, paint);
-
-        bitmap.recycle();
-
-        int px = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 64, getResources().getDisplayMetrics());
-        return Bitmap.createScaledBitmap(output, px, px, true);
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-//        Couldn't connect to Google Play Services. The user needs to select an account,
-//        grant permissions or resolve an error in order to sign in. Refer to the javadoc for
-//        Connection Result to see possible error codes.
-        Log.d(TAG, "onConnectionFailed:" + connectionResult);
-
-        if (!mIsResolving && mShouldResolve) {
-            if (connectionResult.hasResolution()) {
-                try {
-                    connectionResult.startResolutionForResult(this, RC_SIGN_IN);
-                    mIsResolving = true;
-                } catch (IntentSender.SendIntentException e) {
-                    Log.e(TAG, "Could not resolve ConnectionResult.", e);
-                    mIsResolving = false;
-                    mGoogleApiClient.connect();
-                }
-            } else {
-                // Could not resolve the connection result, show the user an
-                // error dialog.
-                Snackbar.make(findViewById(R.id.activity_login), getString(R.string.gpservices_conn_fail), Snackbar.LENGTH_INDEFINITE);
-            }
-        }
     }
 
     @Override
@@ -427,14 +404,14 @@ public class MainActivity extends AppCompatActivity
         super.onActivityResult(requestCode, resultCode, data);
         Log.d(TAG, "onActivityResult:" + requestCode + ":" + resultCode + ":" + data);
 
+        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
-            // If the error resolution was not successful we should not resolve further.
-            if (resultCode != RESULT_OK) {
-                mShouldResolve = false;
-            }
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            if (wantToLoadUserImages) {
+                loadNavUserImage(result, getString(R.string.user_image));
 
-            mIsResolving = false;
-            mGoogleApiClient.connect();
+                wantToLoadUserImages = false;
+            }
         }
     }
 }
