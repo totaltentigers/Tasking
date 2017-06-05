@@ -36,7 +36,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
-                .requestScopes(new Scope(getString(R.string.gac_task_scope)))
+                .requestScopes(new Scope(getString(R.string.gac_task_scope)), new Scope("https://www.googleapis.com/auth/userinfo.profile"))
                 .build();
 
         // Build GoogleApiClient with access to basic profile

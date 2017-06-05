@@ -35,6 +35,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
@@ -44,6 +46,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.GsonConverterFactory;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+
 import static com.squareup.picasso.Picasso.with;
 
 public class MainActivity extends AppCompatActivity
@@ -51,6 +59,9 @@ public class MainActivity extends AppCompatActivity
         GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = "MainActivity";
+
+    private static final String COVER_IMAGE_BASE_URL = "https://www.googleapis.com/plus/v1/people/";
+    private static final String API_KEY = "***REMOVED***";
 
     /* Request code used to invoke sign in user interactions. */
     private static final int RC_SIGN_IN = 0;
@@ -86,7 +97,7 @@ public class MainActivity extends AppCompatActivity
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
-                .requestScopes(new Scope(getString(R.string.gac_task_scope)))
+                .requestScopes(new Scope(getString(R.string.gac_task_scope)), new Scope("https://www.googleapis.com/auth/userinfo.profile"))
                 .build();
 
         // Build GoogleApiClient with access to basic profile
@@ -215,11 +226,46 @@ public class MainActivity extends AppCompatActivity
         return BitmapFactory.decodeStream(inputStream);
     }
 
-    public void downloadUserImage(GoogleSignInResult googleSignInResult, final String filename) {
-        // First attempt to update images from server
-        GoogleSignInAccount acct = googleSignInResult.getSignInAccount();
+    private void getUserCoverImageUrl() {
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(String.class, new PlusPersonDeserializer())
+                .create();
 
-        if (acct != null && acct.getPhotoUrl() != null) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(COVER_IMAGE_BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+
+        GoogleEndpointInterface googleEndpointInterface = retrofit.create(GoogleEndpointInterface.class);
+        final Call<String> coverImageURL = googleEndpointInterface.getCoverImageURL(getSharedPreferences(getString(R.string.shared_prefs_account), 0).getString(getString(R.string.shared_prefs_id), "0"), API_KEY);
+        coverImageURL.enqueue(new Callback<String>() {
+
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()){
+                    String coverPhotoUrl = response.body();
+
+                    if (coverImageURL != null){
+                        Uri imageUri = Uri.parse(coverPhotoUrl);
+
+                        if (imageUri != null){
+                            downloadUserImage(imageUri, getString(R.string.user_cover_image));
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+                t.printStackTrace();
+            }
+        });
+    }
+
+    public void downloadUserImage(Uri imageUri, final String filename) {
+        // First attempt to update images from server
+
+        if (imageUri != null) {
             new AsyncTask<Uri, Void, Bitmap>() {
                 @Override
                 protected void onPostExecute(Bitmap bitmap) {
@@ -237,17 +283,17 @@ public class MainActivity extends AppCompatActivity
                     }
                     return null;
                 }
-            }.execute(new Uri[]{acct.getPhotoUrl()});
+            }.execute(new Uri[]{imageUri});
         }
     }
 
-    private void setNavUserImage(final String filename){
+    private void setNavUserImage(final String filename) {
         Picasso.with(this).load(new File(getCacheDir() + File.separator + filename)).into(new Target() {
             @Override
             public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                if (filename.matches(getString(R.string.user_image))){
+                if (filename.matches(getString(R.string.user_image))) {
                     navUserAvatar.setImageBitmap(bitmap);
-                } else if (filename.matches(getString(R.string.user_cover_image))){
+                } else if (filename.matches(getString(R.string.user_cover_image))) {
                     navUserCover.setBackground(new BitmapDrawable(getResources(), bitmap));
                 }
             }
@@ -262,11 +308,11 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    public void loadNavUserImage(GoogleSignInResult googleSignInResult, String filename) {
+    public void loadNavUserImage(Uri imageUri, String filename) {
         setNavUserImage(filename);
 
         // Attempt to download image
-        downloadUserImage(googleSignInResult, filename);
+        downloadUserImage(imageUri, filename);
     }
 
     public void loadNavUserCoverImageFromServer() {
@@ -408,8 +454,15 @@ public class MainActivity extends AppCompatActivity
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (wantToLoadUserImages) {
-                loadNavUserImage(result, getString(R.string.user_image));
+                if (result != null && result.isSuccess()){
+                    GoogleSignInAccount acct = result.getSignInAccount();
 
+                    if (acct != null && acct.getPhotoUrl() != null && !acct.getPhotoUrl().toString().isEmpty()){
+                        loadNavUserImage(acct.getPhotoUrl(), getString(R.string.user_image));
+                    }
+                }
+//                loadNavUserImage(result, getString(R.string.user_cover_image));
+getUserCoverImageUrl();
                 wantToLoadUserImages = false;
             }
         }
