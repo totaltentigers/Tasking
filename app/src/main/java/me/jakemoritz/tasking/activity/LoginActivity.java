@@ -1,7 +1,6 @@
 package me.jakemoritz.tasking.activity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -17,6 +16,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
 
 import me.jakemoritz.tasking.R;
+import me.jakemoritz.tasking.helper.SharedPrefsHelper;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener{
@@ -113,13 +113,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     private void saveUserInfo(GoogleSignInAccount acct){
         // Save sign-in state
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.shared_prefs_account), 0);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(getString(R.string.shared_prefs_email), acct.getEmail());
-        editor.putString(getString(R.string.shared_prefs_id), acct.getId());
-        editor.putString(getString(R.string.shared_prefs_name), acct.getDisplayName());
-        editor.putBoolean(getString(R.string.shared_prefs_logged_in), true);
-        editor.apply();
+        SharedPrefsHelper.getInstance().setUserEmail(acct.getEmail());
+        SharedPrefsHelper.getInstance().setLoggedIn(true);
+        SharedPrefsHelper.getInstance().setUserDisplayName(acct.getDisplayName());
+        SharedPrefsHelper.getInstance().setUserId(acct.getId());
     }
 
     private void onSignInClicked() {

@@ -1,7 +1,6 @@
 package me.jakemoritz.tasking.api.tasks;
 
 import android.app.Activity;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -23,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 import me.jakemoritz.tasking.R;
+import me.jakemoritz.tasking.helper.SharedPrefsHelper;
 
 public class GetTasksTask extends AsyncTask<Void, Void, Void> {
 
@@ -41,9 +41,7 @@ public class GetTasksTask extends AsyncTask<Void, Void, Void> {
 
     public GetTasksTask(Activity mActivity) {
         this.mActivity = mActivity;
-
-        SharedPreferences sharedPreferences = mActivity.getSharedPreferences(mActivity.getString(R.string.shared_prefs_account), 0);
-        this.mEmail = sharedPreferences.getString(mActivity.getString(R.string.shared_prefs_email), null);
+        this.mEmail = SharedPrefsHelper.getInstance().getUserEmail();
     }
 
     // Executes asynchronous job.

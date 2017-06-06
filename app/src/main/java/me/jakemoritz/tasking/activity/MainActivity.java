@@ -1,7 +1,6 @@
 package me.jakemoritz.tasking.activity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -44,11 +43,12 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import me.jakemoritz.tasking.R;
 import me.jakemoritz.tasking.api.retrofit.GoogleEndpointInterface;
 import me.jakemoritz.tasking.api.retrofit.PlusPersonDeserializer;
-import me.jakemoritz.tasking.R;
 import me.jakemoritz.tasking.fragment.SettingsFragment;
 import me.jakemoritz.tasking.fragment.TaskListFragment;
+import me.jakemoritz.tasking.helper.SharedPrefsHelper;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.GsonConverterFactory;
@@ -152,8 +152,8 @@ public class MainActivity extends AppCompatActivity
         navUserCover = (LinearLayout) header.findViewById(R.id.user_cover);
 
         connectGoogleApiClient();
-        loadNavUserName();
-        loadNavUserEmail();
+        navUserName.setText(SharedPrefsHelper.getInstance().getUserDisplayName());
+        navUserEmail.setText(SharedPrefsHelper.getInstance().getUserEmail());
         setNavUserImage(getString(R.string.user_image));
         setNavUserImage(getString(R.string.user_cover_image));
 
@@ -176,20 +176,6 @@ public class MainActivity extends AppCompatActivity
     private void connectGoogleApiClient() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-
-    public void loadNavUserName() {
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.shared_prefs_account), 0);
-        String name = sharedPreferences.getString(getString(R.string.shared_prefs_name), "");
-
-        navUserName.setText(name);
-    }
-
-    public void loadNavUserEmail() {
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.shared_prefs_account), 0);
-        String email = sharedPreferences.getString(getString(R.string.shared_prefs_email), "");
-
-        navUserEmail.setText(email);
     }
 
     public void saveImageToFile(Bitmap bitmap, String filename) {
@@ -228,7 +214,7 @@ public class MainActivity extends AppCompatActivity
                 .build();
 
         GoogleEndpointInterface googleEndpointInterface = retrofit.create(GoogleEndpointInterface.class);
-        final Call<String> coverImageURL = googleEndpointInterface.getCoverImageURL(getSharedPreferences(getString(R.string.shared_prefs_account), 0).getString(getString(R.string.shared_prefs_id), "0"), API_KEY);
+        final Call<String> coverImageURL = googleEndpointInterface.getCoverImageURL(SharedPrefsHelper.getInstance().getUserId(), API_KEY);
         coverImageURL.enqueue(new Callback<String>() {
 
             @Override
@@ -309,14 +295,8 @@ public class MainActivity extends AppCompatActivity
 
     public void signOutHelper() {
 //        Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
-
         clearAppData();
-
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.shared_prefs_account), 0);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(getString(R.string.shared_prefs_logged_in), false);
-        editor.commit();
-
+        SharedPrefsHelper.getInstance().setLoggedIn(false);
         wantToSignOut = false;
         startActivity(new Intent(this, HelperActivity.class));
     }

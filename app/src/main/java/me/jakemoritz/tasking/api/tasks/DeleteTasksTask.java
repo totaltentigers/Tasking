@@ -1,7 +1,6 @@
 package me.jakemoritz.tasking.api.tasks;
 
 import android.app.Activity;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.util.SparseBooleanArray;
@@ -23,8 +22,9 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import me.jakemoritz.tasking.database.DatabaseHelper;
 import me.jakemoritz.tasking.R;
+import me.jakemoritz.tasking.database.DatabaseHelper;
+import me.jakemoritz.tasking.helper.SharedPrefsHelper;
 
 public class DeleteTasksTask extends AsyncTask<Void, Void, Void> {
 
@@ -46,9 +46,7 @@ public class DeleteTasksTask extends AsyncTask<Void, Void, Void> {
     public DeleteTasksTask(Activity mActivity, SparseBooleanArray mSelectedItemIds) {
         this.mActivity = mActivity;
         this.mSelectedItemIds = mSelectedItemIds;
-
-        SharedPreferences sharedPreferences = mActivity.getSharedPreferences(mActivity.getString(R.string.shared_prefs_account), 0);
-        this.mEmail = sharedPreferences.getString(mActivity.getString(R.string.shared_prefs_email), null);
+        this.mEmail = SharedPrefsHelper.getInstance().getUserEmail();
     }
 
     // Executes asynchronous job.

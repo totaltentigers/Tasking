@@ -1,12 +1,12 @@
 package me.jakemoritz.tasking.activity;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import me.jakemoritz.tasking.R;
+import me.jakemoritz.tasking.helper.SharedPrefsHelper;
 
 public class HelperActivity extends AppCompatActivity {
 
@@ -19,10 +19,7 @@ public class HelperActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         // Check sign-in state
-        SharedPreferences sharedPreferences = getSharedPreferences(getString(R.string.shared_prefs_account), 0);
-        boolean isLoggedIn = sharedPreferences.getBoolean(getString(R.string.shared_prefs_logged_in), false);
-
-        if (isLoggedIn){
+        if (SharedPrefsHelper.getInstance().isLoggedIn()){
             startActivity(new Intent(this, MainActivity.class));
             finish();
         } else {
