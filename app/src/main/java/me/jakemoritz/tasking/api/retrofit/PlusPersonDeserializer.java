@@ -1,4 +1,4 @@
-package me.jakemoritz.tasking;
+package me.jakemoritz.tasking.api.retrofit;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;

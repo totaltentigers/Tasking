@@ -1,4 +1,4 @@
-package me.jakemoritz.tasking;
+package me.jakemoritz.tasking.api.tasks;
 
 import com.google.api.services.tasks.model.Task;
 

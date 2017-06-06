@@ -1,4 +1,4 @@
-package me.jakemoritz.tasking;
+package me.jakemoritz.tasking.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -44,6 +44,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import me.jakemoritz.tasking.api.retrofit.GoogleEndpointInterface;
+import me.jakemoritz.tasking.api.retrofit.PlusPersonDeserializer;
+import me.jakemoritz.tasking.R;
+import me.jakemoritz.tasking.fragment.SettingsFragment;
+import me.jakemoritz.tasking.fragment.TaskListFragment;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.GsonConverterFactory;

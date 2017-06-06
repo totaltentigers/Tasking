@@ -1,10 +1,9 @@
-package me.jakemoritz.tasking;
+package me.jakemoritz.tasking.api.tasks;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.util.SparseBooleanArray;
 
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
@@ -23,11 +22,14 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-public class DeleteTasksTask extends AsyncTask<Void, Void, Void> {
+import me.jakemoritz.tasking.database.DatabaseHelper;
+import me.jakemoritz.tasking.R;
 
-    private static final String TAG = "DeleteTasksTask";
+public class EditTaskTask extends AsyncTask<Void, Void, Void> {
 
-    public DeleteTasksResponse delegate = null;
+    private static final String TAG = "EditTaskTask";
+
+    public EditTaskResponse delegate = null;
 
     Activity mActivity;
     String mEmail;
@@ -35,14 +37,12 @@ public class DeleteTasksTask extends AsyncTask<Void, Void, Void> {
     final HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
     final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
     GoogleAccountCredential credential;
-    List<Task> tasks;
-    TaskList previousTasks;
+    Task task;
     Tasks service;
-    SparseBooleanArray mSelectedItemIds;
 
-    public DeleteTasksTask(Activity mActivity, SparseBooleanArray mSelectedItemIds) {
+    public EditTaskTask(Activity mActivity, Task task) {
         this.mActivity = mActivity;
-        this.mSelectedItemIds = mSelectedItemIds;
+        this.task = task;
 
         SharedPreferences sharedPreferences = mActivity.getSharedPreferences(mActivity.getString(R.string.shared_prefs_account), 0);
         this.mEmail = sharedPreferences.getString(mActivity.getString(R.string.shared_prefs_email), null);
@@ -52,6 +52,7 @@ public class DeleteTasksTask extends AsyncTask<Void, Void, Void> {
     // Runs when you call execute() on an instance
     @Override
     protected Void doInBackground(Void... params) {
+        //Log.d(TAG, "doInBackground");
         try {
             String token = fetchToken();
             if (token != null){
@@ -62,17 +63,10 @@ public class DeleteTasksTask extends AsyncTask<Void, Void, Void> {
                 List<TaskList> tasklists = service.tasklists().list().execute().getItems();
                 String firstTasklistId = tasklists.get(0).getId();
 
-                tasks = service.tasks().list(firstTasklistId).execute().getItems();
-
-                previousTasks = service.tasklists().get(firstTasklistId).execute();
+                Task result = service.tasks().update(firstTasklistId, task.getId(), task).execute();
 
                 DatabaseHelper dbHelper = new DatabaseHelper(mActivity);
-
-                for (int i = 0; i < mSelectedItemIds.size(); i++){
-                    Task task = tasks.get(mSelectedItemIds.keyAt(i));
-                    dbHelper.deleteTask(task.getId());
-                    service.tasks().delete(firstTasklistId, task.getId()).execute();
-                }
+                dbHelper.updateTaskInDb(task.getId(), task);
                 dbHelper.close();
             }
         } catch (IOException e){
@@ -101,6 +95,6 @@ public class DeleteTasksTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        delegate.deleteTasksFinish();
+        delegate.editTaskFinish();
     }
 }

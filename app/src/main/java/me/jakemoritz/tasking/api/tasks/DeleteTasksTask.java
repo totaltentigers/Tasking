@@ -1,9 +1,10 @@
-package me.jakemoritz.tasking;
+package me.jakemoritz.tasking.api.tasks;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
@@ -22,11 +23,14 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-public class GetTasksTask extends AsyncTask<Void, Void, Void> {
+import me.jakemoritz.tasking.database.DatabaseHelper;
+import me.jakemoritz.tasking.R;
 
-    private static final String TAG = "GetTasksTask";
+public class DeleteTasksTask extends AsyncTask<Void, Void, Void> {
 
-    public GetTasksResponse delegate = null;
+    private static final String TAG = "DeleteTasksTask";
+
+    public DeleteTasksResponse delegate = null;
 
     Activity mActivity;
     String mEmail;
@@ -35,10 +39,13 @@ public class GetTasksTask extends AsyncTask<Void, Void, Void> {
     final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
     GoogleAccountCredential credential;
     List<Task> tasks;
+    TaskList previousTasks;
     Tasks service;
+    SparseBooleanArray mSelectedItemIds;
 
-    public GetTasksTask(Activity mActivity) {
+    public DeleteTasksTask(Activity mActivity, SparseBooleanArray mSelectedItemIds) {
         this.mActivity = mActivity;
+        this.mSelectedItemIds = mSelectedItemIds;
 
         SharedPreferences sharedPreferences = mActivity.getSharedPreferences(mActivity.getString(R.string.shared_prefs_account), 0);
         this.mEmail = sharedPreferences.getString(mActivity.getString(R.string.shared_prefs_email), null);
@@ -57,14 +64,19 @@ public class GetTasksTask extends AsyncTask<Void, Void, Void> {
 
                 List<TaskList> tasklists = service.tasklists().list().execute().getItems();
                 String firstTasklistId = tasklists.get(0).getId();
+
                 tasks = service.tasks().list(firstTasklistId).execute().getItems();
 
-                if (tasks != null){
-                    Task emptyTask = tasks.get(tasks.size()-1);
-                    if (emptyTask.getTitle().length() == 0 && emptyTask.getNotes() == null){
-                        tasks.remove(tasks.size() - 1);
-                    }
+                previousTasks = service.tasklists().get(firstTasklistId).execute();
+
+                DatabaseHelper dbHelper = new DatabaseHelper(mActivity);
+
+                for (int i = 0; i < mSelectedItemIds.size(); i++){
+                    Task task = tasks.get(mSelectedItemIds.keyAt(i));
+                    dbHelper.deleteTask(task.getId());
+                    service.tasks().delete(firstTasklistId, task.getId()).execute();
                 }
+                dbHelper.close();
             }
         } catch (IOException e){
             // The fetchToken() method handles Google-specific exceptions,
@@ -92,6 +104,6 @@ public class GetTasksTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        delegate.getTasksFinish(tasks);
+        delegate.deleteTasksFinish();
     }
 }

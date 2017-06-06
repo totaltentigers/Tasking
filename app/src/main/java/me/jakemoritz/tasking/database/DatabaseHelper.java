@@ -1,4 +1,4 @@
-package me.jakemoritz.tasking;
+package me.jakemoritz.tasking.database;
 
 import android.content.ContentValues;
 import android.content.Context;

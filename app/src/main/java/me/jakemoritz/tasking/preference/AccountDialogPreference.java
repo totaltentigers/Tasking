@@ -1,10 +1,12 @@
-package me.jakemoritz.tasking;
+package me.jakemoritz.tasking.preference;
 
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
+
+import me.jakemoritz.tasking.activity.MainActivity;
 
 public class AccountDialogPreference extends DialogPreference {
 

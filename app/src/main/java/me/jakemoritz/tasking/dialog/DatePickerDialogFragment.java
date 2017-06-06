@@ -1,4 +1,4 @@
-package me.jakemoritz.tasking;
+package me.jakemoritz.tasking.dialog;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -8,16 +8,16 @@ import android.os.Bundle;
 
 import java.util.Calendar;
 
-public class DatePickerFragment extends DialogFragment{
+public class DatePickerDialogFragment extends DialogFragment{
 
-    private static final String TAG = "DatePickerFragment";
+    private static final String TAG = "DatePickerDialogFragment";
 
     private Fragment fragment;
 
-    public static DatePickerFragment newInstance(Fragment parentFragment){
-        DatePickerFragment datePickerFragment = new DatePickerFragment();
-        datePickerFragment.fragment = parentFragment;
-        return datePickerFragment;
+    public static DatePickerDialogFragment newInstance(Fragment parentFragment){
+        DatePickerDialogFragment datePickerDialogFragment = new DatePickerDialogFragment();
+        datePickerDialogFragment.fragment = parentFragment;
+        return datePickerDialogFragment;
     }
 
     @Override
@@ -28,7 +28,7 @@ public class DatePickerFragment extends DialogFragment{
         int month = c.get(Calendar.MONTH);
         int day = c.get(Calendar.DAY_OF_MONTH);
 
-        if (fragment instanceof  AddTaskDialogFragment){
+        if (fragment instanceof AddTaskDialogFragment){
             return new DatePickerDialog(getActivity(),(AddTaskDialogFragment) fragment, year, month, day);
         } else {
             return new DatePickerDialog(getActivity(),(EditTaskDialogFragment) fragment, year, month, day);

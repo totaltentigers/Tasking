@@ -1,4 +1,4 @@
-package me.jakemoritz.tasking;
+package me.jakemoritz.tasking.dialog;
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -18,17 +18,20 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.tasks.model.Task;
 
 import java.util.Calendar;
-import java.util.TimeZone;
+
+import me.jakemoritz.tasking.api.tasks.AddTaskTask;
+import me.jakemoritz.tasking.helper.DateFormatter;
+import me.jakemoritz.tasking.R;
+import me.jakemoritz.tasking.fragment.TaskListFragment;
 
 
-public class EditTaskDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener{
+public class AddTaskDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener{
 
-    private static final String TAG = "EditTaskDialogFragment";
+    private static final String TAG = "AddTaskDialogFragment";
 
-    final EditTaskDialogFragment callbackInstance = this;
+    final AddTaskDialogFragment callbackInstance = this;
 
     Fragment parentFragment;
-    Task task;
 
     int year;
     int monthOfYear;
@@ -40,11 +43,10 @@ public class EditTaskDialogFragment extends DialogFragment implements DatePicker
     TextView chosenDate;
     Button datePickerButton;
 
-    public static EditTaskDialogFragment newInstance(Fragment parentFragment, Task task) {
-        EditTaskDialogFragment editTaskDialogFragment = new EditTaskDialogFragment();
-        editTaskDialogFragment.parentFragment = parentFragment;
-        editTaskDialogFragment.task = task;
-        return editTaskDialogFragment;
+    public static AddTaskDialogFragment newInstance(Fragment parentFragment) {
+        AddTaskDialogFragment addTaskDialogFragment = new AddTaskDialogFragment();
+        addTaskDialogFragment.parentFragment = parentFragment;
+        return addTaskDialogFragment;
     }
 
     @Override
@@ -57,17 +59,13 @@ public class EditTaskDialogFragment extends DialogFragment implements DatePicker
         taskNotes = (EditText) view.findViewById(R.id.task_notes);
         datePickerButton = (Button) view.findViewById(R.id.date_picker_button);
 
-        taskTitle.setText(task.getTitle());
-        taskNotes.setText(task.getNotes());
-
-        displayTaskDueDate();
+        displayCurrentDate();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-
         builder.setView(view)
-                .setTitle(getString(R.string.edit_task_dialog_edit))
-                .setPositiveButton(R.string.edit_task_dialog_save, null)
-                .setNegativeButton(R.string.add_task_dialog_cancel, new DialogInterface.OnClickListener() {
+                .setTitle(getString(R.string.add_task_dialog_title))
+                .setPositiveButton(getString(R.string.add_task_dialog_add), null)
+                .setNegativeButton(getString(R.string.add_task_dialog_cancel), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dismiss();
@@ -83,24 +81,21 @@ public class EditTaskDialogFragment extends DialogFragment implements DatePicker
                     @Override
                     public void onClick(View v) {
                         if (!taskTitle.getText().toString().isEmpty()) {
+                            Task task = new Task();
                             task.setTitle(taskTitle.getText().toString());
                             task.setNotes(taskNotes.getText().toString());
 
-                            if (!chosenDate.getText().toString().isEmpty()){
-                                // Save time in ms
-                                Calendar cal = Calendar.getInstance();
-                                cal.set(year, monthOfYear, dayOfMonth);
-                                cal.setTimeZone(TimeZone.getDefault());
-                                timeInMs = cal.getTimeInMillis();
+                            // Save time in ms
+                            Calendar cal = Calendar.getInstance();
+                            cal.set(year, monthOfYear, dayOfMonth);
+                            timeInMs = cal.getTimeInMillis();
+                            DateTime dateTime = new DateTime(timeInMs);
 
-                                DateTime dateTime = new DateTime(timeInMs);
-                                task.setDue(dateTime);
-                            }
+                            task.setDue(dateTime);
 
-                            EditTaskTask editTaskTask = new EditTaskTask(getActivity(), task);
-                            editTaskTask.delegate = (TaskListFragment) parentFragment;
-                            editTaskTask.execute();
-
+                            AddTaskTask addTaskTask = new AddTaskTask(getActivity(), task);
+                            addTaskTask.delegate = (TaskListFragment) parentFragment;
+                            addTaskTask.execute();
                             dismiss();
                         } else {
                             taskTitle.setError(getString(R.string.add_task_dialog_error_notitle));
@@ -113,32 +108,24 @@ public class EditTaskDialogFragment extends DialogFragment implements DatePicker
         datePickerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DatePickerFragment datePickerFragment = DatePickerFragment.newInstance(callbackInstance);
-                datePickerFragment.show(getFragmentManager(), null);
+                DatePickerDialogFragment datePickerDialogFragment = DatePickerDialogFragment.newInstance(callbackInstance);
+                datePickerDialogFragment.show(getFragmentManager(), null);
             }
         });
 
         return alertDialog;
     }
 
-    public void displayTaskDueDate(){
-        if (task.getDue() != null){
-            // Get DateTime from task
-            DateTime dateTime = task.getDue();
-            timeInMs = dateTime.getValue();
+    public void displayCurrentDate(){
+        // Get new Calendar instance
+        Calendar cal = Calendar.getInstance();
 
-            // Create calendar from
-            Calendar cal = Calendar.getInstance();
-            timeInMs -= cal.getTimeZone().getRawOffset(); //fixes UTC time offset in dialog
-            cal.setTimeInMillis(timeInMs);
+        // Save current date and time values
+        this.year = cal.get(Calendar.YEAR);
+        this.monthOfYear = cal.get(Calendar.MONTH);
+        this.dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
 
-            // Save current date and time values
-            this.year = cal.get(Calendar.YEAR);
-            this.monthOfYear = cal.get(Calendar.MONTH);
-            this.dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
-
-            chosenDate.setText(DateFormatter.formatDate(year, monthOfYear, dayOfMonth));
-        }
+        chosenDate.setText(DateFormatter.formatDate(year, monthOfYear, dayOfMonth));
     }
 
     @Override

@@ -1,4 +1,4 @@
-package me.jakemoritz.tasking;
+package me.jakemoritz.tasking.api.tasks;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -22,24 +22,25 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-public class AddTaskTask extends AsyncTask<Void, Void, Void> {
+import me.jakemoritz.tasking.R;
 
-    private static final String TAG = "AddTaskTask";
+public class GetTasksTask extends AsyncTask<Void, Void, Void> {
 
-    public AddTaskResponse delegate = null;
+    private static final String TAG = "GetTasksTask";
+
+    public GetTasksResponse delegate = null;
 
     Activity mActivity;
     String mEmail;
-    Task task;
 
     final HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
     final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
     GoogleAccountCredential credential;
+    List<Task> tasks;
     Tasks service;
 
-    public AddTaskTask(Activity mActivity, Task task) {
+    public GetTasksTask(Activity mActivity) {
         this.mActivity = mActivity;
-        this.task = task;
 
         SharedPreferences sharedPreferences = mActivity.getSharedPreferences(mActivity.getString(R.string.shared_prefs_account), 0);
         this.mEmail = sharedPreferences.getString(mActivity.getString(R.string.shared_prefs_email), null);
@@ -58,10 +59,14 @@ public class AddTaskTask extends AsyncTask<Void, Void, Void> {
 
                 List<TaskList> tasklists = service.tasklists().list().execute().getItems();
                 String firstTasklistId = tasklists.get(0).getId();
-                Task result = service.tasks().insert(firstTasklistId, task).execute();
-                DatabaseHelper dbHelper = new DatabaseHelper(mActivity);
-                dbHelper.insertTask(task);
-                dbHelper.close();
+                tasks = service.tasks().list(firstTasklistId).execute().getItems();
+
+                if (tasks != null){
+                    Task emptyTask = tasks.get(tasks.size()-1);
+                    if (emptyTask.getTitle().length() == 0 && emptyTask.getNotes() == null){
+                        tasks.remove(tasks.size() - 1);
+                    }
+                }
             }
         } catch (IOException e){
             // The fetchToken() method handles Google-specific exceptions,
@@ -89,8 +94,6 @@ public class AddTaskTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        if (delegate != null){
-            delegate.addTaskFinish();
-        }
+        delegate.getTasksFinish(tasks);
     }
 }

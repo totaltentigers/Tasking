@@ -1,4 +1,4 @@
-package me.jakemoritz.tasking;
+package me.jakemoritz.tasking.fragment;
 
 import android.app.ListFragment;
 import android.content.Context;
@@ -31,6 +31,21 @@ import com.google.api.services.tasks.model.Task;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import me.jakemoritz.tasking.api.tasks.AddTaskResponse;
+import me.jakemoritz.tasking.misc.CompareTaskDueDate;
+import me.jakemoritz.tasking.database.DatabaseHelper;
+import me.jakemoritz.tasking.api.tasks.DeleteTasksResponse;
+import me.jakemoritz.tasking.api.tasks.DeleteTasksTask;
+import me.jakemoritz.tasking.api.tasks.EditTaskResponse;
+import me.jakemoritz.tasking.api.tasks.EditTaskTask;
+import me.jakemoritz.tasking.api.tasks.GetTasksResponse;
+import me.jakemoritz.tasking.api.tasks.GetTasksTask;
+import me.jakemoritz.tasking.R;
+import me.jakemoritz.tasking.api.tasks.SortTasklistTask;
+import me.jakemoritz.tasking.dialog.AddTaskDialogFragment;
+import me.jakemoritz.tasking.dialog.EditTaskDialogFragment;
+import me.jakemoritz.tasking.api.tasks.sortTasklistResponse;
 
 
 public class TaskListFragment extends ListFragment implements GetTasksResponse, AddTaskResponse,

@@ -1,8 +1,10 @@
-package me.jakemoritz.tasking;
+package me.jakemoritz.tasking.fragment;
 
 
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
+
+import me.jakemoritz.tasking.R;
 
 public class SettingsFragment extends PreferenceFragment {
 

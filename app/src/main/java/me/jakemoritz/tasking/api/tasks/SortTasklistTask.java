@@ -1,4 +1,4 @@
-package me.jakemoritz.tasking;
+package me.jakemoritz.tasking.api.tasks;
 
 import android.app.Activity;
 import android.content.SharedPreferences;
@@ -19,14 +19,17 @@ import com.google.api.services.tasks.model.Task;
 import com.google.api.services.tasks.model.TaskList;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class EditTaskTask extends AsyncTask<Void, Void, Void> {
+import me.jakemoritz.tasking.R;
 
-    private static final String TAG = "EditTaskTask";
+public class SortTasklistTask extends AsyncTask<Void, Void, Void> {
 
-    public EditTaskResponse delegate = null;
+    private static final String TAG = "SortTasklistTask";
+
+    public sortTasklistResponse delegate = null;
 
     Activity mActivity;
     String mEmail;
@@ -34,37 +37,37 @@ public class EditTaskTask extends AsyncTask<Void, Void, Void> {
     final HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
     final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
     GoogleAccountCredential credential;
-    Task task;
+    List<Task> taskList;
     Tasks service;
 
-    public EditTaskTask(Activity mActivity, Task task) {
+    public SortTasklistTask(Activity mActivity, List<Task> taskList) {
         this.mActivity = mActivity;
-        this.task = task;
 
         SharedPreferences sharedPreferences = mActivity.getSharedPreferences(mActivity.getString(R.string.shared_prefs_account), 0);
         this.mEmail = sharedPreferences.getString(mActivity.getString(R.string.shared_prefs_email), null);
+
+        this.taskList = taskList;
     }
 
-    // Executes asynchronous job.
-    // Runs when you call execute() on an instance
     @Override
     protected Void doInBackground(Void... params) {
-        //Log.d(TAG, "doInBackground");
         try {
             String token = fetchToken();
             if (token != null){
                 credential = GoogleAccountCredential.usingOAuth2(mActivity, Collections.singleton(TasksScopes.TASKS));
                 credential.setSelectedAccountName(mEmail);
-                service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName(mActivity.getString(R.string.app_name)).build();
+                service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName("Tasking").build();
 
                 List<TaskList> tasklists = service.tasklists().list().execute().getItems();
                 String firstTasklistId = tasklists.get(0).getId();
 
-                Task result = service.tasks().update(firstTasklistId, task.getId(), task).execute();
+                List<Task> reversedList = new ArrayList<>();
+                reversedList.addAll(taskList);
+                Collections.reverse(reversedList);
 
-                DatabaseHelper dbHelper = new DatabaseHelper(mActivity);
-                dbHelper.updateTaskInDb(task.getId(), task);
-                dbHelper.close();
+                for (Task task : reversedList){
+                    Task result = service.tasks().move(firstTasklistId, task.getId()).execute();
+                }
             }
         } catch (IOException e){
             // The fetchToken() method handles Google-specific exceptions,
@@ -92,6 +95,6 @@ public class EditTaskTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        delegate.editTaskFinish();
+        delegate.sortTasklistFinish();
     }
 }

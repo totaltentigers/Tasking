@@ -1,4 +1,4 @@
-package me.jakemoritz.tasking;
+package me.jakemoritz.tasking.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,6 +15,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
+
+import me.jakemoritz.tasking.R;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener{

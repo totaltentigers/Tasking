@@ -1,10 +1,12 @@
-package me.jakemoritz.tasking;
+package me.jakemoritz.tasking.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+
+import me.jakemoritz.tasking.R;
 
 public class HelperActivity extends AppCompatActivity {
 

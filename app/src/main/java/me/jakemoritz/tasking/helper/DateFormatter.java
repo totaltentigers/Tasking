@@ -1,4 +1,4 @@
-package me.jakemoritz.tasking;
+package me.jakemoritz.tasking.helper;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

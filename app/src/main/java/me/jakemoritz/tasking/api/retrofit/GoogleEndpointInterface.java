@@ -1,4 +1,4 @@
-package me.jakemoritz.tasking;
+package me.jakemoritz.tasking.api.retrofit;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

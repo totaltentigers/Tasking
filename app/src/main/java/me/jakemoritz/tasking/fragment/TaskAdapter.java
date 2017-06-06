@@ -1,4 +1,4 @@
-package me.jakemoritz.tasking;
+package me.jakemoritz.tasking.fragment;
 
 import android.app.Activity;
 import android.content.Context;
@@ -16,6 +16,9 @@ import com.google.api.services.tasks.model.Task;
 
 import java.util.Calendar;
 import java.util.List;
+
+import me.jakemoritz.tasking.helper.DateFormatter;
+import me.jakemoritz.tasking.R;
 
 
 public class TaskAdapter extends ArrayAdapter<Task>{
