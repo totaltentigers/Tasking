@@ -10,7 +10,6 @@ import me.jakemoritz.tasking.helper.SharedPrefsHelper;
 
 public class HelperActivity extends AppCompatActivity {
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,5 +26,4 @@ public class HelperActivity extends AppCompatActivity {
             finish();
         }
     }
-
 }

@@ -3,8 +3,8 @@ package me.jakemoritz.tasking.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 
 import com.google.android.gms.auth.api.Auth;
@@ -21,7 +21,7 @@ import me.jakemoritz.tasking.helper.SharedPrefsHelper;
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener{
 
-    private static final String TAG = "LoginActivity";
+    private static final String TAG = LoginActivity.class.getSimpleName();
 
     /* Request code used to invoke sign in user interactions. */
     private static final int RC_SIGN_IN = 0;
@@ -38,7 +38,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
-                .requestScopes(new Scope(getString(R.string.gac_task_scope)), new Scope("https://www.googleapis.com/auth/userinfo.profile"))
+                .requestScopes(new Scope(getString(R.string.gac_task_scope)), new Scope(getString(R.string.people_oathscope)))
                 .build();
 
         // Build GoogleApiClient with access to basic profile
@@ -53,15 +53,16 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     @Override
     protected void onResume() {
         super.onResume();
+
+        // Set fullscreen
         int mUIFlag = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LOW_PROFILE
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 
-        getWindow().getDecorView().setSystemUiVisibility(mUIFlag);;
+        getWindow().getDecorView().setSystemUiVisibility(mUIFlag);
     }
 
     @Override
@@ -71,16 +72,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.sign_in_button){
-            onSignInClicked();
-        }
-    }
-
-    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        Log.d(TAG, "onActivityResult:" + requestCode + ":" + resultCode + ":" + data);
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
@@ -89,34 +82,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         }
     }
 
-    private void handleSignInResult(GoogleSignInResult result) {
-        Log.d(TAG, "handleSignInResult:" + result.isSuccess());
-        if (result.isSuccess()) {
-            // Signed in successfully, show authenticated UI.
-            GoogleSignInAccount acct = result.getSignInAccount();
-            saveUserInfo(acct);
-            startMainActivity();
-//            mStatusTextView.setText(getString(R.string.signed_in_fmt, acct.getDisplayName()));
-//            updateUI(true);
-        } else {
-            // Signed out, show unauthenticated UI.
-//            updateUI(false);
+    @Override
+    public void onClick(View v) {
+        if (v.getId() == R.id.sign_in_button){
+            onSignInClicked();
         }
-    }
-
-    private void startMainActivity(){
-        Intent mainIntent = new Intent(this, MainActivity.class);
-        startActivity(mainIntent);
-
-        finish();
-    }
-
-    private void saveUserInfo(GoogleSignInAccount acct){
-        // Save sign-in state
-        SharedPrefsHelper.getInstance().setUserEmail(acct.getEmail());
-        SharedPrefsHelper.getInstance().setLoggedIn(true);
-        SharedPrefsHelper.getInstance().setUserDisplayName(acct.getDisplayName());
-        SharedPrefsHelper.getInstance().setUserId(acct.getId());
     }
 
     private void onSignInClicked() {
@@ -124,9 +94,33 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
+    private void handleSignInResult(GoogleSignInResult result) {
+        if (result.isSuccess()) {
+            // Signed in successfully, show authenticated UI.
+            GoogleSignInAccount acct = result.getSignInAccount();
+            saveUserInfo(acct);
+
+            Intent mainIntent = new Intent(this, MainActivity.class);
+            startActivityForResult(mainIntent, 0);
+
+            finish();
+        } else {
+            // Sign in failed, show unauthenticated UI
+            Snackbar signInErrorSnackbar = Snackbar.make(findViewById(R.id.activity_login), R.string.auth_error, Snackbar.LENGTH_LONG);
+            signInErrorSnackbar.show();
+        }
+    }
+
+    private void saveUserInfo(GoogleSignInAccount acct){
+        // Save sign-in state and user info
+        SharedPrefsHelper.getInstance().setUserEmail(acct.getEmail());
+        SharedPrefsHelper.getInstance().setLoggedIn(true);
+        SharedPrefsHelper.getInstance().setUserDisplayName(acct.getDisplayName());
+        SharedPrefsHelper.getInstance().setUserId(acct.getId());
+    }
+
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
     }
 }
 

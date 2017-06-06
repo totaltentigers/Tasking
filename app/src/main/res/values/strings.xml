@@ -32,6 +32,7 @@
 
     <!-- Task task oath scope -->
     <string name="update_task_oathscope">oauth2:https://www.googleapis.com/auth/userinfo.profile</string>
+    <string name="people_oathscope">https://www.googleapis.com/auth/userinfo.profile</string>
 
     <!-- Preferences -->
     <string name="pref_account">Account</string>
@@ -54,6 +55,10 @@
     <!-- Task deletion snackbar -->
     <string name="task_deleted_snackbar_text">Deleted</string>
     <string name="task_deleted_snackbar_undo">Undo</string>
+
+    <!-- General snackbar -->
+    <string name="auth_error">Error authenticating account</string>
+    <string name="auth_success">"Signed in as "</string>
 
     <!-- Task API strings -->
     <string name="task_completed">completed</string>
