@@ -1,6 +1,8 @@
 package me.jakemoritz.tasking.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -50,17 +52,27 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         findViewById(R.id.sign_in_button).setOnClickListener(this);
     }
 
+    @SuppressLint("NewApi")
     @Override
     protected void onResume() {
         super.onResume();
 
         // Set fullscreen
-        int mUIFlag = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LOW_PROFILE
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+        boolean apiGreaterThanOrEqual19 = (Build.VERSION.SDK_INT >= 19);
+
+        int mUIFlag = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
+
+        if (apiGreaterThanOrEqual19){
+            mUIFlag = mUIFlag | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        } else {
+            // Set fullscreen
+/*            mUIFlag = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    | View.SYSTEM_UI_FLAG_LOW_PROFILE
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;*/
+        }
 
         getWindow().getDecorView().setSystemUiVisibility(mUIFlag);
     }
