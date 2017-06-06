@@ -60,18 +60,17 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         // Set fullscreen
         boolean apiGreaterThanOrEqual19 = (Build.VERSION.SDK_INT >= 19);
 
-        int mUIFlag = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN;
+        int mUIFlag;
 
-        if (apiGreaterThanOrEqual19){
-            mUIFlag = mUIFlag | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        if (apiGreaterThanOrEqual19 || false){
+            mUIFlag =  View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         } else {
-            // Set fullscreen
-/*            mUIFlag = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+            mUIFlag =  View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                     | View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;*/
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN;
         }
 
         getWindow().getDecorView().setSystemUiVisibility(mUIFlag);
