@@ -10,6 +10,7 @@ import java.lang.reflect.Type;
 
 public class PlusPersonDeserializer implements JsonDeserializer<String> {
 
+    // Handles JSON response, extracts cover image URL
     @Override
     public String deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
         String coverPhotoUrl = null;

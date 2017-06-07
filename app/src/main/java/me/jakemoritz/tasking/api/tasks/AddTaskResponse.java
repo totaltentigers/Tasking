@@ -1,5 +1,5 @@
 package me.jakemoritz.tasking.api.tasks;
 
 public interface AddTaskResponse {
-    void addTaskFinish();
+    void taskAdded();
 }

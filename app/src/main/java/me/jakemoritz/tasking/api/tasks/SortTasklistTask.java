@@ -29,7 +29,7 @@ public class SortTasklistTask extends AsyncTask<Void, Void, Void> {
 
     private static final String TAG = "SortTasklistTask";
 
-    public sortTasklistResponse delegate = null;
+    public SortTasklistResponse delegate = null;
 
     Activity mActivity;
     String mEmail;
@@ -92,6 +92,6 @@ public class SortTasklistTask extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        delegate.sortTasklistFinish();
+        delegate.tasksSorted();
     }
 }

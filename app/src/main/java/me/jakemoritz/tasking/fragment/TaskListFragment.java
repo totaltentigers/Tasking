@@ -1,8 +1,6 @@
 package me.jakemoritz.tasking.fragment;
 
 import android.app.ListFragment;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -22,7 +20,6 @@ import android.widget.ListView;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 
-import com.google.api.client.util.DateTime;
 import com.google.api.services.tasks.model.Task;
 
 import java.util.ArrayList;
@@ -37,8 +34,8 @@ import me.jakemoritz.tasking.api.tasks.EditTaskResponse;
 import me.jakemoritz.tasking.api.tasks.EditTaskTask;
 import me.jakemoritz.tasking.api.tasks.GetTasksResponse;
 import me.jakemoritz.tasking.api.tasks.GetTasksTask;
+import me.jakemoritz.tasking.api.tasks.SortTasklistResponse;
 import me.jakemoritz.tasking.api.tasks.SortTasklistTask;
-import me.jakemoritz.tasking.api.tasks.sortTasklistResponse;
 import me.jakemoritz.tasking.database.DatabaseHelper;
 import me.jakemoritz.tasking.dialog.AddTaskDialogFragment;
 import me.jakemoritz.tasking.dialog.EditTaskDialogFragment;
@@ -49,17 +46,19 @@ import me.jakemoritz.tasking.misc.CompareTaskDueDate;
 public class TaskListFragment extends ListFragment implements GetTasksResponse, AddTaskResponse,
         ActionMode.Callback, AbsListView.MultiChoiceModeListener, DeleteTasksResponse,
         EditTaskResponse, SwipeRefreshLayout.OnRefreshListener, CheckBox.OnCheckedChangeListener,
-        sortTasklistResponse {
+        SortTasklistResponse {
 
-    private static final String TAG = "TaskListFragment";
+    private static final String TAG = TaskListFragment.class.getSimpleName();
 
+    // Views
     private AbsListView mListView;
-    SwipeRefreshLayout swipeRefreshLayout;
-    ProgressBar progressBar;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private ProgressBar progressBar;
 
     private TaskAdapter mAdapter;
 
-    List<Task> tasks;
+    // Data
+    private List<Task> tasks;
 
     public TaskListFragment() {
     }
@@ -67,21 +66,10 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setHasOptionsMenu(true);
 
         tasks = new ArrayList<>();
-
         mAdapter = new TaskAdapter(getActivity(), this, R.layout.task_list_item, tasks);
-
-
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        mListView.getEmptyView().setVisibility(ListView.GONE);
-
     }
 
     @Override
@@ -102,71 +90,73 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
         mListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
         mListView.setMultiChoiceModeListener(this);
 
+        // Display active progress bar
         progressBar = (ProgressBar)view.findViewById(R.id.task_load_progress);
         progressBar.setVisibility(View.VISIBLE);
         progressBar.setIndeterminate(true);
+
+        // Initialize new task FAB
+        FloatingActionButton newTaskFab = (FloatingActionButton) view.findViewById(R.id.fab);
+        newTaskFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openAddTaskDialog();
+            }
+        });
 
         return view;
     }
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onStart() {
+        super.onStart();
 
-        FloatingActionButton fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                createTask();
+        // Checks internet availability to choose task data source
+        if (App.getInstance().isNetworkAvailable()) {
+            GetTasksTask getTasksTask = new GetTasksTask(getActivity());
+            getTasksTask.delegate = this;
+            getTasksTask.execute();
+        } else {
+            DatabaseHelper databaseHelper = new DatabaseHelper(App.getInstance());
+            List<Task> tasks = databaseHelper.getTasksFromDb();
+            databaseHelper.close();
+
+            if (!tasks.isEmpty()) {
+                mAdapter.clear();
+                mAdapter.addAll(tasks);
+                mAdapter.notifyDataSetChanged();
             }
-        });
+        }
     }
 
-    private void createTask() {
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        DatabaseHelper databaseHelper = new DatabaseHelper(App.getInstance());
+        databaseHelper.saveTasksToDb(mAdapter.getTaskList());
+        databaseHelper.close();
+    }
+
+    @Override
+    public void onRefresh() {
+        getTasksFromServer();
+        swipeRefreshLayout.setRefreshing(true);
+    }
+
+    // Task CRUD methods
+    private void openAddTaskDialog() {
         AddTaskDialogFragment addTaskDialogFragment = AddTaskDialogFragment.newInstance(this);
-        addTaskDialogFragment.show(getFragmentManager(), null);
+        addTaskDialogFragment.show(getFragmentManager(), AddTaskDialogFragment.class.getSimpleName());
     }
 
     private void editTask(int position) {
         Task task = mAdapter.getItem(position);
         EditTaskDialogFragment editTaskDialogFragment = EditTaskDialogFragment.newInstance(this, task);
-        editTaskDialogFragment.show(getFragmentManager(), null);
+        editTaskDialogFragment.show(getFragmentManager(), EditTaskDialogFragment.class.getSimpleName());
     }
 
-    @Override
-    public void getTasksFinish(List<Task> taskList) {
-        if (taskList != null) {
-            mAdapter.clear();
-            mAdapter.addAll(taskList);
-            mAdapter.notifyDataSetChanged();
-            saveTasksToDb();
-            progressBar.setVisibility(View.INVISIBLE);
-            swipeRefreshLayout.setRefreshing(false);
-
-        }
-    }
-
-    @Override
-    public void addTaskFinish() {
-        getTasksFromServer();
-    }
-
-    @Override
-    public void deleteTasksFinish() {
-        getTasksFromServer();
-    }
-
-    @Override
-    public void editTaskFinish() {
-        getTasksFromServer();
-    }
-
-    @Override
-    public void sortTasklistFinish() {
-        getTasksFromServer();
-    }
-
-    public void getTasksFromServer() {
+    private void getTasksFromServer() {
         mAdapter.notifyDataSetChanged();
 
         GetTasksTask getTasksTask = new GetTasksTask(getActivity());
@@ -174,126 +164,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
         getTasksTask.execute();
     }
 
-    public void onTasksDeleted(final SparseBooleanArray mSelectedIds, final List<Task> taskList) {
-        final TaskListFragment callback = this;
-
-        final List<Task> oldTaskList = new ArrayList<>();
-        oldTaskList.addAll(taskList);
-
-        Snackbar snackbar = Snackbar.make(getView(), getString(R.string.task_deleted_snackbar_text), Snackbar.LENGTH_LONG);
-        snackbar.setAction(getString(R.string.task_deleted_snackbar_undo), new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mAdapter.clear();
-                mAdapter.addAll(oldTaskList);
-                mAdapter.notifyDataSetChanged();
-            }
-        });
-        snackbar.setCallback(new Snackbar.Callback() {
-            @Override
-            public void onDismissed(Snackbar snackbar, int event) {
-                super.onDismissed(snackbar, event);
-
-                if (event == DISMISS_EVENT_TIMEOUT) {
-                    DeleteTasksTask deleteTasksTask = new DeleteTasksTask(getActivity(), mSelectedIds);
-                    deleteTasksTask.delegate = callback;
-                    deleteTasksTask.execute();
-                }
-            }
-        });
-        snackbar.show();
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        if (App.getInstance().isNetworkAvailable()) {
-            GetTasksTask getTasksTask = new GetTasksTask(getActivity());
-            getTasksTask.delegate = this;
-            getTasksTask.execute();
-
-        } else {
-            getTasksFromDb();
-        }
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        saveTasksToDb();
-    }
-
-    public void saveTasksToDb() {
-        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
-
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-        dbHelper.onUpgrade(db, 1, 1);
-
-        if (mAdapter.getTaskList() != null) {
-            for (Task task : mAdapter.getTaskList()) {
-                if (dbHelper.getTask(task.getId()).getCount() != 0) {
-                    dbHelper.updateTaskInDb(task.getId(), task);
-                } else {
-                    dbHelper.insertTask(task);
-                }
-            }
-        }
-        dbHelper.close();
-    }
-
-    public void getTasksFromDb() {
-        DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
-
-        Cursor res = dbHelper.getAllTasks();
-
-        res.moveToFirst();
-        List<Task> taskList = new ArrayList<>();
-
-        for (int i = res.getCount() - 1; i >= 0; i--) {
-            String taskId = res.getString(res.getColumnIndex(DatabaseHelper.TASK_COLUMN_ID));
-            String taskTitle = res.getString(res.getColumnIndex(DatabaseHelper.TASK_COLUMN_TITLE));
-            String taskNotes = res.getString(res.getColumnIndex(DatabaseHelper.TASK_COLUMN_NOTES));
-            String taskStatus = res.getString(res.getColumnIndex(DatabaseHelper.TASK_COLUMN_STATUS));
-            String taskDueDate = res.getString(res.getColumnIndex(DatabaseHelper.TASK_COLUMN_DUE_DATE));
-            String taskCompletedDate = res.getString(res.getColumnIndex(DatabaseHelper.TASK_COLUMN_COMP_DATE));
-
-            Task task = new Task();
-            task.setId(taskId);
-            if (taskTitle != null) {
-                task.setTitle(taskTitle);
-            }
-            if (taskNotes != null) {
-                task.setNotes(taskNotes);
-            }
-            if (taskStatus != null) {
-                task.setStatus(taskStatus);
-            }
-            if (taskDueDate != null) {
-                task.setDue(new DateTime(Long.valueOf(taskDueDate)));
-            }
-            if (taskCompletedDate != null) {
-                task.setCompleted(new DateTime(Long.valueOf(taskCompletedDate)));
-            }
-            taskList.add(task);
-            res.moveToNext();
-        }
-
-        if (!taskList.isEmpty()) {
-            mAdapter.clear();
-            mAdapter.addAll(taskList);
-            mAdapter.notifyDataSetChanged();
-        }
-        dbHelper.close();
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.main, menu);
-    }
-
-    public void sortTasks() {
+    private void sortTasks() {
         List<Task> taskList = new ArrayList<>();
         taskList.addAll(mAdapter.getTaskList());
 
@@ -310,6 +181,85 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
         }
     }
 
+    // Task AsyncTask callbacks
+    @Override
+    public void tasksReceived(List<Task> taskList) {
+        if (taskList != null) {
+            mAdapter.clear();
+            mAdapter.addAll(taskList);
+            mAdapter.notifyDataSetChanged();
+
+            DatabaseHelper databaseHelper = new DatabaseHelper(App.getInstance());
+            databaseHelper.saveTasksToDb(mAdapter.getTaskList());
+            databaseHelper.close();
+
+            // Disable updating views
+            progressBar.setVisibility(View.INVISIBLE);
+            swipeRefreshLayout.setRefreshing(false);
+        }
+    }
+
+    @Override
+    public void taskAdded() {
+        getTasksFromServer();
+    }
+
+    @Override
+    public void tasksDeleted() {
+        getTasksFromServer();
+    }
+
+    @Override
+    public void taskEdited() {
+        getTasksFromServer();
+    }
+
+    @Override
+    public void tasksSorted() {
+        getTasksFromServer();
+    }
+
+    // Handles batch task deletion
+    private void onTasksDeleted(final SparseBooleanArray mSelectedIds, final List<Task> taskList) {
+        final TaskListFragment callback = this;
+
+        final List<Task> oldTaskList = new ArrayList<>();
+        oldTaskList.addAll(taskList);
+
+        if (getView() != null){
+            Snackbar snackbar = Snackbar.make(getView(), getString(R.string.task_deleted_snackbar_text), Snackbar.LENGTH_LONG);
+            snackbar.setAction(getString(R.string.task_deleted_snackbar_undo), new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mAdapter.clear();
+                    mAdapter.addAll(oldTaskList);
+                    mAdapter.notifyDataSetChanged();
+                }
+            });
+
+            // Adds Snackbar dismiss callback to allow user to undo task deletion
+            snackbar.addCallback(new Snackbar.Callback() {
+                @Override
+                public void onDismissed(Snackbar snackbar, int event) {
+                    super.onDismissed(snackbar, event);
+
+                    if (event == DISMISS_EVENT_TIMEOUT) {
+                        DeleteTasksTask deleteTasksTask = new DeleteTasksTask(getActivity(), mSelectedIds);
+                        deleteTasksTask.delegate = callback;
+                        deleteTasksTask.execute();
+                    }
+                }
+            });
+            snackbar.show();
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.main, menu);
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -318,14 +268,13 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
         int id = item.getItemId();
 
         if (id == R.id.action_sort) {
-//            View actionSortView = getView().findViewById(R.id.)
             PopupMenu popupMenu = new PopupMenu(getActivity(), getActivity().findViewById(R.id.action_sort));
             popupMenu.inflate(R.menu.sort_popup_menu);
             popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     sortTasks();
-                    return false;
+                    return true;
                 }
             });
             popupMenu.show();
@@ -339,9 +288,9 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
         editTask(position);
-
     }
 
+    /* Methods to handle long-press mode for batch actions on tasks */
 
     // Called when action mode is created; startActionMode() called
     @Override
@@ -387,7 +336,10 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
                 mAdapter.clear();
                 mAdapter.addAll(tasksToKeep);
                 mAdapter.notifyDataSetChanged();
-                saveTasksToDb();
+
+                DatabaseHelper databaseHelper = new DatabaseHelper(App.getInstance());
+                databaseHelper.saveTasksToDb(mAdapter.getTaskList());
+                databaseHelper.close();
 
                 mode.finish();
                 return true;
@@ -407,12 +359,6 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
         final int checkedCount = mListView.getCheckedItemCount();
         mode.setTitle(checkedCount + " Selected");
         mAdapter.toggleSelection(position);
-    }
-
-    @Override
-    public void onRefresh() {
-        getTasksFromServer();
-        swipeRefreshLayout.setRefreshing(true);
     }
 
     @Override
