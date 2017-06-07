@@ -27,21 +27,17 @@ import me.jakemoritz.tasking.fragment.TaskListFragment;
 
 public class AddTaskDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener{
 
-    private static final String TAG = "AddTaskDialogFragment";
+    private static final String TAG = AddTaskDialogFragment.class.getSimpleName();
 
-    final AddTaskDialogFragment callbackInstance = this;
-
-    Fragment parentFragment;
-
-    int year;
-    int monthOfYear;
-    int dayOfMonth;
-    long timeInMs;
-
-    EditText taskTitle;
-    EditText taskNotes;
-    TextView chosenDate;
-    Button datePickerButton;
+    private final AddTaskDialogFragment callbackInstance = this;
+    private Fragment parentFragment;
+    private int year;
+    private int month;
+    private int dayOfMonth;
+    private long timeInMs;
+    private EditText taskTitle;
+    private EditText taskNotes;
+    private TextView chosenDate;
 
     public static AddTaskDialogFragment newInstance(Fragment parentFragment) {
         AddTaskDialogFragment addTaskDialogFragment = new AddTaskDialogFragment();
@@ -57,7 +53,7 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
         chosenDate = (TextView) view.findViewById(R.id.chosen_date);
         taskTitle = (EditText) view.findViewById(R.id.task_title);
         taskNotes = (EditText) view.findViewById(R.id.task_notes);
-        datePickerButton = (Button) view.findViewById(R.id.date_picker_button);
+        Button datePickerButton = (Button) view.findViewById(R.id.date_picker_button);
 
         displayCurrentDate();
 
@@ -87,7 +83,7 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
 
                             // Save time in ms
                             Calendar cal = Calendar.getInstance();
-                            cal.set(year, monthOfYear, dayOfMonth);
+                            cal.set(year, month, dayOfMonth);
                             timeInMs = cal.getTimeInMillis();
                             DateTime dateTime = new DateTime(timeInMs);
 
@@ -116,11 +112,24 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
     }
 
     public void displayCurrentDate(){
-        chosenDate.setText(DateFormatter.getInstance().formatDate(Calendar.getInstance()));
+        // Get new Calendar instance
+        Calendar cal = Calendar.getInstance();
+
+        // Save current date values
+        this.year = cal.get(Calendar.YEAR);
+        this.month = cal.get(Calendar.MONTH);
+        this.dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
+
+        chosenDate.setText(DateFormatter.getInstance().formatDate(cal));
     }
 
     @Override
     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+        // Save current date values
+        this.year = year;
+        this.month = month;
+        this.dayOfMonth = dayOfMonth;
+
         chosenDate.setText(DateFormatter.getInstance().formatDate(dayOfMonth, month, year));
     }
 }
