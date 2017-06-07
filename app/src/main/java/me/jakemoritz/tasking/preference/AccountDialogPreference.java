@@ -3,10 +3,12 @@ package me.jakemoritz.tasking.preference;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
 
 import me.jakemoritz.tasking.activity.MainActivity;
+import me.jakemoritz.tasking.misc.App;
 
 public class AccountDialogPreference extends DialogPreference {
 
@@ -22,7 +24,11 @@ public class AccountDialogPreference extends DialogPreference {
         super.onClick(dialog, which);
 
         if (which == Dialog.BUTTON_POSITIVE){
-            ((MainActivity) context).signOutHelper();
+            // Send intent to MainActivity to start sign-out procedure
+            Intent clickIntent = new Intent(App.getInstance(), MainActivity.class);
+            clickIntent.putExtra("signOut", true);
+            clickIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            App.getInstance().startActivity(clickIntent);
         }
         else {
             dialog.cancel();

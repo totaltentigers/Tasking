@@ -13,7 +13,6 @@ public class App extends Application {
     public static final String PROFILE_SCOPE = "https://www.googleapis.com/auth/userinfo.profile";
     public static final String TASK_OAUTH = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
 
-
     public static synchronized App getInstance() {
         return mInstance;
     }

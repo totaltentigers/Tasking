@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
@@ -18,11 +19,9 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -61,49 +60,39 @@ import static com.squareup.picasso.Picasso.with;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        GoogleApiClient.OnConnectionFailedListener {
+        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = MainActivity.class.getSimpleName();
 
+    // Constants for cover image GET request
     private static final String COVER_IMAGE_BASE_URL = "https://www.googleapis.com/plus/v1/people/";
     private static final String API_KEY = "***REMOVED***";
 
-    /* Request code used to invoke sign in user interactions. */
+    // Request code used to invoke sign in user interactions
     private static final int RC_SIGN_IN = 0;
 
-    /* Client used to interact with Google APIs. */
+    // Client used to interact with Google APIs
     private static GoogleApiClient mGoogleApiClient;
 
-    // Declare variables for views
-    ImageView navUserAvatar;
-    TextView navUserName;
-    TextView navUserEmail;
-    LinearLayout navUserCover;
+    // Views
+    private ImageView navUserAvatar;
+    private LinearLayout navUserCover;
 
-    NavigationView navigationView;
-
-    boolean wantToLoadUserImages;
-
-    boolean wantToSignOut;
+    private boolean wantToLoadUserImages;
+    private boolean wantToSignOut;
 
     private MenuItem selectedMenuItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-        setProgressBarIndeterminateVisibility(true);
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (getCallingActivity() != null && getCallingActivity().getClassName().matches(LoginActivity.class.getName())){
-            // User just signed in
+        if (getCallingActivity() != null && getCallingActivity().getClassName().matches(LoginActivity.class.getName())) {
+            // User signed in for the first time
             Snackbar signInSuccessSnackbar = Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.auth_success) + SharedPrefsHelper.getInstance().getUserEmail(), Snackbar.LENGTH_LONG);
             signInSuccessSnackbar.show();
         }
-
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
@@ -114,11 +103,14 @@ public class MainActivity extends AppCompatActivity
 
         // Build GoogleApiClient with access to basic profile
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
+                .enableAutoManage(this , this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .addConnectionCallbacks(this)
                 .build();
 
-        wantToLoadUserImages = true;
+        // Initialize views
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -131,6 +123,7 @@ public class MainActivity extends AppCompatActivity
                     // Handle navigation view item clicks here.
                     int id = selectedMenuItem.getItemId();
 
+                    // Check if selected Fragment is already active
                     if (!((id == R.id.nav_tasks) && (getFragmentManager().findFragmentById(R.id.content_main) instanceof TaskListFragment)) &&
                             !((id == R.id.nav_settings) && (getFragmentManager().findFragmentById(R.id.content_main) instanceof SettingsFragment))) {
                         if (id == R.id.nav_tasks) {
@@ -147,26 +140,29 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        View header = LayoutInflater.from(this).inflate(R.layout.nav_header_main, navigationView);
+        // Inflate nav drawer header layout
+        LayoutInflater.from(this).inflate(R.layout.nav_header_main, navigationView);
 
-        navUserAvatar = (ImageView) header.findViewById(R.id.user_avatar);
-        navUserName = (TextView) header.findViewById(R.id.user_name);
-        navUserEmail = (TextView) header.findViewById(R.id.user_email);
-        navUserCover = (LinearLayout) header.findViewById(R.id.user_cover);
+        TextView navUserName = (TextView) navigationView.findViewById(R.id.user_name);
+        TextView navUserEmail = (TextView) navigationView.findViewById(R.id.user_email);
+        navUserAvatar = (ImageView) navigationView.findViewById(R.id.user_avatar);
+        navUserCover = (LinearLayout) navigationView.findViewById(R.id.user_cover);
 
-        connectGoogleApiClient();
         navUserName.setText(SharedPrefsHelper.getInstance().getUserDisplayName());
         navUserEmail.setText(SharedPrefsHelper.getInstance().getUserEmail());
         setNavUserImage(getString(R.string.user_image));
         setNavUserImage(getString(R.string.user_cover_image));
 
         navigationView.getMenu().getItem(0).setChecked(true);
+
+        wantToLoadUserImages = true;
+        connectGoogleApiClientForResult();
 
         // Initialize default fragment
         getFragmentManager().beginTransaction()
@@ -182,34 +178,31 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void connectGoogleApiClient() {
+    // Connect GoogleApiClient to get GoogleSignInAccount
+    private void connectGoogleApiClientForResult() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
-    public void saveImageToFile(Bitmap bitmap, String filename) {
-        FileOutputStream fos = null;
-        try {
-            File file = new File(getCacheDir(), filename + ".jpg");
-            fos = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fos);
-
-            setNavUserImage(filename);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (fos != null) {
-                    fos.close();
+    private void downloadUserImage(Uri imageUri, final String filename) {
+        new AsyncTask<Uri, Void, Bitmap>() {
+            @Override
+            protected void onPostExecute(Bitmap bitmap) {
+                if (bitmap != null) {
+                    saveImageToFile(bitmap, filename);
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-        }
 
-        bitmap.recycle();
-
-        setNavUserImage(filename);
+            @Override
+            protected Bitmap doInBackground(Uri... params) {
+                try {
+                    return with(App.getInstance()).load(params[0]).get();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return null;
+            }
+        }.execute(imageUri);
     }
 
     private void getUserCoverImageUrl() {
@@ -227,11 +220,11 @@ public class MainActivity extends AppCompatActivity
         coverImageURL.enqueue(new Callback<String>() {
 
             @Override
-            public void onResponse(Call<String> call, Response<String> response) {
-                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+            public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {
+                if (response.isSuccessful()) {
                     String coverPhotoUrl = response.body();
 
-                    if (coverImageURL != null) {
+                    if (coverPhotoUrl != null) {
                         Uri imageUri = Uri.parse(coverPhotoUrl);
 
                         if (imageUri != null) {
@@ -242,44 +235,45 @@ public class MainActivity extends AppCompatActivity
             }
 
             @Override
-            public void onFailure(Call<String> call, Throwable t) {
+            public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
                 t.printStackTrace();
             }
         });
     }
 
-    public void downloadUserImage(Uri imageUri, final String filename) {
-        // First attempt to update images from server
+    private void saveImageToFile(Bitmap bitmap, String filename) {
+        FileOutputStream fos = null;
+        try {
+            File file = new File(getCacheDir(), filename + ".jpg");
+            fos = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fos);
 
-        if (imageUri != null) {
-            new AsyncTask<Uri, Void, Bitmap>() {
-                @Override
-                protected void onPostExecute(Bitmap bitmap) {
-                    if (bitmap != null) {
-                        saveImageToFile(bitmap, filename);
-                    }
+            // Update ImageView if file saved
+            setNavUserImage(filename);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (fos != null) {
+                    fos.close();
                 }
-
-                @Override
-                protected Bitmap doInBackground(Uri... params) {
-                    try {
-                        return with(getApplicationContext()).load(params[0]).get();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                }
-            }.execute(new Uri[]{imageUri});
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
+        bitmap.recycle();
     }
 
     private void setNavUserImage(final String filename) {
+        // Create Target asynchronously load and set image
         Picasso.with(this).load(new File(getCacheDir() + File.separator + filename + ".jpg")).into(new Target() {
             @Override
             public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
                 if (filename.matches(getString(R.string.user_image))) {
                     navUserAvatar.setImageBitmap(bitmap);
                 } else if (filename.matches(getString(R.string.user_cover_image))) {
+                    // Draw black overlay to darken cover image
                     Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
                     Paint darken = new Paint();
                     darken.setColor(Color.BLACK);
@@ -302,47 +296,6 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    public void signOutHelper() {
-//        Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
-        clearAppData();
-        SharedPrefsHelper.getInstance().setLoggedIn(false);
-        wantToSignOut = false;
-        startActivity(new Intent(this, HelperActivity.class));
-    }
-
-    public void clearAppData() {
-        File cache = getCacheDir();
-        File appDir = new File(cache.getParent());
-        if (appDir.exists()) {
-            String[] children = appDir.list();
-            for (String s : children) {
-                if (!s.equals("lib")) {
-                    deleteDir(new File(appDir, s));
-                    Log.i(TAG, "File /data/data/me.jakemoritz.tasking/" + s + " DELETED");
-                }
-            }
-        }
-    }
-
-    public static boolean deleteDir(File dir) {
-        if (dir != null && dir.isDirectory()) {
-            String[] children = dir.list();
-            for (int i = 0; i < children.length; i++) {
-                boolean success = deleteDir(new File(dir, children[i]));
-                if (!success) {
-                    return false;
-                }
-            }
-        }
-
-        return dir.delete();
-    }
-
-    public void signOut() {
-        wantToSignOut = true;
-        mGoogleApiClient.connect();
-    }
-
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -354,18 +307,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        // Save selected menu item to check if already in selected Fragment
         selectedMenuItem = item;
-
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
     }
 
     @Override
@@ -374,11 +322,11 @@ public class MainActivity extends AppCompatActivity
 
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-
             // Check for update user avatar and cover image
             if (wantToLoadUserImages) {
-                if (result != null && result.isSuccess()) {
+                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+
+                if (result.isSuccess()) {
                     GoogleSignInAccount acct = result.getSignInAccount();
 
                     if (acct != null && acct.getPhotoUrl() != null && !acct.getPhotoUrl().toString().isEmpty()) {
@@ -387,9 +335,85 @@ public class MainActivity extends AppCompatActivity
                 }
 
                 getUserCoverImageUrl();
-
                 wantToLoadUserImages = false;
             }
         }
     }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        // Intent received for sign out
+        if (intent.hasExtra("signOut") && intent.getBooleanExtra("signOut", false)){
+            wantToSignOut = true;
+
+            // Connect GoogleApiClient before signing out
+            if (!mGoogleApiClient.isConnected()){
+                mGoogleApiClient.connect();
+            } else {
+                signOut();
+            }
+        }
+    }
+
+    private void signOut() {
+        // Sign out button clicked
+        // Sign out and disconnect user's Google account
+        // Clear app data
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient);
+        Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient);
+
+        clearAppData();
+        SharedPrefsHelper.getInstance().setLoggedIn(false);
+        wantToSignOut = false;
+
+        // Return to intro screen
+        startActivity(new Intent(this, HelperActivity.class));
+        finish();
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        if (wantToSignOut){
+            signOut();
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+    }
+
+    // Iterates though all files in cache directory
+    private void clearAppData() {
+        File cache = getCacheDir();
+        File appDir = new File(cache.getParent());
+        if (appDir.exists() && appDir.isDirectory()) {
+            for (String fileName : appDir.list()) {
+                if (!fileName.equals("lib")) {
+                    deleteDir(new File(appDir, fileName));
+                }
+            }
+        }
+    }
+
+    // Recursively deletes files and folders
+    private boolean deleteDir(File dir) {
+        if (dir != null) {
+            for (String fileName : dir.list()) {
+                boolean success = deleteDir(new File(dir, fileName));
+                if (!success) {
+                    return false;
+                }
+            }
+            return dir.delete();
+        }
+        return false;
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
 }

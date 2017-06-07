@@ -1,11 +1,8 @@
 package me.jakemoritz.tasking.fragment;
 
 import android.app.ListFragment;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -32,20 +29,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import me.jakemoritz.tasking.R;
 import me.jakemoritz.tasking.api.tasks.AddTaskResponse;
-import me.jakemoritz.tasking.misc.CompareTaskDueDate;
-import me.jakemoritz.tasking.database.DatabaseHelper;
 import me.jakemoritz.tasking.api.tasks.DeleteTasksResponse;
 import me.jakemoritz.tasking.api.tasks.DeleteTasksTask;
 import me.jakemoritz.tasking.api.tasks.EditTaskResponse;
 import me.jakemoritz.tasking.api.tasks.EditTaskTask;
 import me.jakemoritz.tasking.api.tasks.GetTasksResponse;
 import me.jakemoritz.tasking.api.tasks.GetTasksTask;
-import me.jakemoritz.tasking.R;
 import me.jakemoritz.tasking.api.tasks.SortTasklistTask;
+import me.jakemoritz.tasking.api.tasks.sortTasklistResponse;
+import me.jakemoritz.tasking.database.DatabaseHelper;
 import me.jakemoritz.tasking.dialog.AddTaskDialogFragment;
 import me.jakemoritz.tasking.dialog.EditTaskDialogFragment;
-import me.jakemoritz.tasking.api.tasks.sortTasklistResponse;
+import me.jakemoritz.tasking.misc.App;
+import me.jakemoritz.tasking.misc.CompareTaskDueDate;
 
 
 public class TaskListFragment extends ListFragment implements GetTasksResponse, AddTaskResponse,
@@ -106,6 +104,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
 
         progressBar = (ProgressBar)view.findViewById(R.id.task_load_progress);
         progressBar.setVisibility(View.VISIBLE);
+        progressBar.setIndeterminate(true);
 
         return view;
     }
@@ -121,12 +120,6 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
                 createTask();
             }
         });
-    }
-
-    public boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = connectivityManager.getActiveNetworkInfo();
-        return (activeNetwork != null && activeNetwork.isConnectedOrConnecting());
     }
 
     private void createTask() {
@@ -148,6 +141,8 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
             mAdapter.notifyDataSetChanged();
             saveTasksToDb();
             progressBar.setVisibility(View.INVISIBLE);
+            swipeRefreshLayout.setRefreshing(false);
+
         }
     }
 
@@ -213,7 +208,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     public void onStart() {
         super.onStart();
 
-        if (isNetworkAvailable()) {
+        if (App.getInstance().isNetworkAvailable()) {
             GetTasksTask getTasksTask = new GetTasksTask(getActivity());
             getTasksTask.delegate = this;
             getTasksTask.execute();
@@ -417,7 +412,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     @Override
     public void onRefresh() {
         getTasksFromServer();
-        swipeRefreshLayout.setRefreshing(false);
+        swipeRefreshLayout.setRefreshing(true);
     }
 
     @Override
