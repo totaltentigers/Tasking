@@ -23,6 +23,7 @@ import java.util.List;
 
 import me.jakemoritz.tasking.R;
 import me.jakemoritz.tasking.helper.SharedPrefsHelper;
+import me.jakemoritz.tasking.misc.App;
 
 public class GetTasksTask extends AsyncTask<Void, Void, Void> {
 
@@ -78,7 +79,7 @@ public class GetTasksTask extends AsyncTask<Void, Void, Void> {
     // handles GoogleAuthExceptions
     protected String fetchToken() throws IOException{
         try {
-            return GoogleAuthUtil.getToken(mActivity, mEmail, mActivity.getString(R.string.update_task_oathscope));
+            return GoogleAuthUtil.getToken(mActivity, mEmail, App.TASK_OAUTH);
         } catch (UserRecoverableAuthException userRecoverableException){
             // GooglePlayServices.apk is either old, disabled, or not present.
             // so we must display a UI to recover.

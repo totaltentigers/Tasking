@@ -27,13 +27,6 @@
     <string name="add_task_dialog_cancel">Cancel</string>
     <string name="add_task_dialog_error_notitle">You must enter a task title.</string>
 
-    <!-- GoogleApiClient -->
-    <string name="gac_task_scope">https://www.googleapis.com/auth/tasks</string>
-
-    <!-- Task task oath scope -->
-    <string name="update_task_oathscope">oauth2:https://www.googleapis.com/auth/userinfo.profile</string>
-    <string name="people_oathscope">https://www.googleapis.com/auth/userinfo.profile</string>
-
     <!-- Preferences -->
     <string name="pref_account">Account</string>
     <string name="pref_account_summ">Sign out of your Google+ account.</string>

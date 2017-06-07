@@ -50,6 +50,7 @@ import me.jakemoritz.tasking.api.retrofit.PlusPersonDeserializer;
 import me.jakemoritz.tasking.fragment.SettingsFragment;
 import me.jakemoritz.tasking.fragment.TaskListFragment;
 import me.jakemoritz.tasking.helper.SharedPrefsHelper;
+import me.jakemoritz.tasking.misc.App;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.GsonConverterFactory;
@@ -108,7 +109,7 @@ public class MainActivity extends AppCompatActivity
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
-                .requestScopes(new Scope(getString(R.string.gac_task_scope)), new Scope("https://www.googleapis.com/auth/userinfo.profile"))
+                .requestScopes(new Scope(App.TASK_SCOPE), new Scope(App.PROFILE_SCOPE))
                 .build();
 
         // Build GoogleApiClient with access to basic profile

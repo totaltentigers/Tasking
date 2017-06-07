@@ -19,6 +19,7 @@ import com.google.android.gms.common.api.Scope;
 
 import me.jakemoritz.tasking.R;
 import me.jakemoritz.tasking.helper.SharedPrefsHelper;
+import me.jakemoritz.tasking.misc.App;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener{
@@ -40,7 +41,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
-                .requestScopes(new Scope(getString(R.string.gac_task_scope)), new Scope(getString(R.string.people_oathscope)))
+                .requestScopes(new Scope(App.TASK_SCOPE), new Scope(App.PROFILE_SCOPE))
                 .build();
 
         // Build GoogleApiClient with access to basic profile
