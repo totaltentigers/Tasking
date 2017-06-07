@@ -28,26 +28,11 @@ repositories {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile('com.google.apis:google-api-services-tasks:v1-rev41-1.20.0') {
-        exclude module: 'httpclient'
+    compile('com.google.api-client:google-api-client-android:1.22.0') {
+        exclude group: 'org.apache.httpcomponents'
     }
-    compile('com.google.http-client:google-http-client-android:1.18.0-rc') {
-        exclude module: 'httpclient'
-    }
-    compile('com.google.apis:google-api-services-oauth2:v1-rev99-1.20.0') {
-        exclude module: 'httpclient'
-    }
-    compile('com.google.api-client:google-api-client:1.20.0') {
-        exclude module: 'httpclient'
-    }
-    compile('com.google.apis:google-api-services-tasks:v1-rev35-1.19.0') {
-        exclude module: 'httpclient'
-    }
-    compile('com.google.api-client:google-api-client-android:1.19.0') {
-        exclude module: 'httpclient'
-    }
-    compile('com.google.http-client:google-http-client-gson:1.19.0') {
-        exclude module: 'httpclient'
+    compile('com.google.apis:google-api-services-tasks:v1-rev47-1.22.0') {
+        exclude group: 'org.apache.httpcomponents'
     }
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:design:25.3.1'

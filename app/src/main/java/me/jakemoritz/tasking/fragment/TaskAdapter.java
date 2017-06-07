@@ -1,7 +1,8 @@
 package me.jakemoritz.tasking.fragment;
 
-import android.app.Activity;
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -17,78 +18,75 @@ import com.google.api.services.tasks.model.Task;
 import java.util.Calendar;
 import java.util.List;
 
-import me.jakemoritz.tasking.helper.DateFormatter;
 import me.jakemoritz.tasking.R;
+import me.jakemoritz.tasking.helper.DateFormatter;
 
 
-public class TaskAdapter extends ArrayAdapter<Task>{
+class TaskAdapter extends ArrayAdapter<Task>{
 
-    Context context;
-    int layoutResourceId;
-    List<Task> taskList = null;
-    TaskListFragment taskListFragment;
+    private Context context;
+    private int taskItemLayoutId;
+    private List<Task> taskList = null;
+    private TaskListFragment taskListFragment;
     private SparseBooleanArray mSelectedItemIds;
 
-    public List<Task> getTaskList() {
+    List<Task> getTaskList() {
         return taskList;
     }
 
-    public TaskAdapter(Context context, TaskListFragment taskListFragment, int layoutResourceId, List<Task> taskList){
-        super(context, layoutResourceId, taskList);
-        this.layoutResourceId = layoutResourceId;
+    TaskAdapter(Context context, TaskListFragment taskListFragment, int taskItemLayoutId, List<Task> taskList){
+        super(context, taskItemLayoutId, taskList);
+        this.taskItemLayoutId = taskItemLayoutId;
         this.context = context;
         this.taskListFragment = taskListFragment;
         this.taskList = taskList;
-        mSelectedItemIds = new SparseBooleanArray();
+        this.mSelectedItemIds = new SparseBooleanArray();
     }
 
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View row = convertView;
-        TaskHolder holder;
-
+    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         Task task = taskList.get(position);
 
-        LayoutInflater inflater = ((Activity) context).getLayoutInflater();
-        row = inflater.inflate(layoutResourceId, parent, false);
-
-        holder = new TaskHolder();
-        holder.taskTitle = (TextView) row.findViewById(R.id.task_item_title);
-        holder.taskNotes = (TextView) row.findViewById(R.id.task_item_notes);
-        holder.taskDate = (TextView) row.findViewById(R.id.task_item_date);
-        holder.taskCompleted = (CheckBox) row.findViewById(R.id.task_item_checkbox);
-        holder.cardView = (CardView) row.findViewById(R.id.card);
-        if (task.getStatus().equals(context.getString(R.string.task_completed))){
-            holder.taskCompleted.setChecked(true);
-        } else {
-            holder.taskCompleted.setChecked(false);
+        if (convertView == null){
+            convertView = LayoutInflater.from(context).inflate(taskItemLayoutId, parent, false);
         }
 
+        // Initialize row views
+        TextView taskTitle = (TextView) convertView.findViewById(R.id.task_item_title);
+        TextView taskNotes = (TextView) convertView.findViewById(R.id.task_item_notes);
+        TextView taskDate = (TextView) convertView.findViewById(R.id.task_item_date);
+        CheckBox taskCompleted = (CheckBox) convertView.findViewById(R.id.task_item_checkbox);
+        CardView taskCardView = (CardView) convertView.findViewById(R.id.card);
+
+        // Update views with task values
+        if (task.getStatus().equals(context.getString(R.string.task_completed))){
+            taskCompleted.setChecked(true);
+        } else {
+            taskCompleted.setChecked(false);
+        }
+
+        // Highlight row if selected
         for (int i = 0; i < mSelectedItemIds.size(); i++){
             if (position == mSelectedItemIds.keyAt(i)){
-                holder.cardView.setCardBackgroundColor(context.getResources().getColor(R.color.colorAccent));
+                taskCardView.setCardBackgroundColor(ContextCompat.getColor(context, R.color.colorAccent));
             }
         }
 
-        if (position == 0){
-
-        }
-
-        holder.taskCompleted.setOnCheckedChangeListener(taskListFragment);
-
-        row.setTag(holder);
+        taskCompleted.setOnCheckedChangeListener(taskListFragment);
 
         // Hide title if field empty
         if (task.getTitle() != null){
-            holder.taskTitle.setText(task.getTitle());
+            taskTitle.setText(task.getTitle());
         } else {
-            holder.taskTitle.setVisibility(View.GONE);
+            taskTitle.setVisibility(View.GONE);
         }
 
+        // Hide notes if field empty
         if (task.getNotes() != null){
-            holder.taskNotes.setText(task.getNotes());
+            taskNotes.setText(task.getNotes());
         } else {
-            holder.taskNotes.setVisibility(View.GONE);
+            taskNotes.setVisibility(View.GONE);
         }
 
         // Get DateTime from task
@@ -112,19 +110,11 @@ public class TaskAdapter extends ArrayAdapter<Task>{
             int monthOfYear = cal.get(Calendar.MONTH);
             int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
 
-            holder.taskDate.setText(DateFormatter.formatDate(year, monthOfYear, dayOfMonth));
+            taskDate.setText(DateFormatter.formatDate(year, monthOfYear, dayOfMonth));
         } else {
-            holder.taskDate.setVisibility(View.GONE);
+            taskDate.setVisibility(View.GONE);
         }
-        return row;
-    }
-
-    static class TaskHolder{
-        TextView taskTitle;
-        TextView taskNotes;
-        TextView taskDate;
-        CheckBox taskCompleted;
-        CardView cardView;
+        return convertView;
     }
 
     @Override
@@ -133,26 +123,25 @@ public class TaskAdapter extends ArrayAdapter<Task>{
         notifyDataSetChanged();
     }
 
-    public void toggleSelection(int position){
+    void toggleSelection(int position){
         selectView(position, !mSelectedItemIds.get(position));
     }
 
-    public void removeSelection(){
+    void removeSelection(){
         mSelectedItemIds = new SparseBooleanArray();
         notifyDataSetChanged();
     }
 
-    public void selectView(int position, boolean value){
+    private void selectView(int position, boolean value){
         if (value){
-
-            mSelectedItemIds.put(position, value);
+            mSelectedItemIds.put(position, true);
         } else {
             mSelectedItemIds.delete(position);
         }
         notifyDataSetChanged();
     }
 
-    public SparseBooleanArray getSelectedIds(){
+    SparseBooleanArray getSelectedIds(){
         return mSelectedItemIds;
     }
 }

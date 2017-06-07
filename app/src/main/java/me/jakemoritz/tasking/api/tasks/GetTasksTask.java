@@ -11,7 +11,7 @@ import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.services.tasks.Tasks;
 import com.google.api.services.tasks.TasksScopes;
 import com.google.api.services.tasks.model.Task;
@@ -35,7 +35,7 @@ public class GetTasksTask extends AsyncTask<Void, Void, Void> {
     String mEmail;
 
     final HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
-    final JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+    final JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
     GoogleAccountCredential credential;
     List<Task> tasks;
     Tasks service;
