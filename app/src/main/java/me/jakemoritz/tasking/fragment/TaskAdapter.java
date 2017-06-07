@@ -15,7 +15,6 @@ import android.widget.TextView;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.tasks.model.Task;
 
-import java.util.Calendar;
 import java.util.List;
 
 import me.jakemoritz.tasking.R;
@@ -90,30 +89,19 @@ class TaskAdapter extends ArrayAdapter<Task>{
         }
 
         // Get DateTime from task
-        DateTime dateTime = null;
+        DateTime taskDateTime = null;
         if (task.getStatus().equals(context.getString(R.string.task_completed))){
-            dateTime = task.getCompleted();
+            taskDateTime = task.getCompleted();
         } else if (task.getStatus().equals(context.getString(R.string.task_needsAction))){
-            dateTime = task.getDue();
+            taskDateTime = task.getDue();
         }
 
-        if (dateTime != null){
-            long timeInMs = dateTime.getValue();
-
-            // Create calendar from
-            Calendar cal = Calendar.getInstance();
-            timeInMs -= cal.getTimeZone().getRawOffset(); //fixes UTC time offset in dialog
-            cal.setTimeInMillis(timeInMs);
-
-            // Save current date and time values
-            int year = cal.get(Calendar.YEAR);
-            int monthOfYear = cal.get(Calendar.MONTH);
-            int dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
-
-            taskDate.setText(DateFormatter.formatDate(year, monthOfYear, dayOfMonth));
+        if (taskDateTime != null){
+            taskDate.setText(DateFormatter.getInstance().formatDate(taskDateTime));
         } else {
             taskDate.setVisibility(View.GONE);
         }
+
         return convertView;
     }
 

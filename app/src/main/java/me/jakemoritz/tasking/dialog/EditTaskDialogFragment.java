@@ -128,21 +128,7 @@ public class EditTaskDialogFragment extends DialogFragment implements DatePicker
 
     public void displayTaskDueDate(){
         if (task.getDue() != null){
-            // Get DateTime from task
-            DateTime dateTime = task.getDue();
-            timeInMs = dateTime.getValue();
-
-            // Create calendar from
-            Calendar cal = Calendar.getInstance();
-            timeInMs -= cal.getTimeZone().getRawOffset(); //fixes UTC time offset in dialog
-            cal.setTimeInMillis(timeInMs);
-
-            // Save current date and time values
-            this.year = cal.get(Calendar.YEAR);
-            this.monthOfYear = cal.get(Calendar.MONTH);
-            this.dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
-
-            chosenDate.setText(DateFormatter.formatDate(year, monthOfYear, dayOfMonth));
+            chosenDate.setText(DateFormatter.getInstance().formatDate( task.getDue()));
         }
     }
 
@@ -152,6 +138,6 @@ public class EditTaskDialogFragment extends DialogFragment implements DatePicker
         this.monthOfYear = monthOfYear;
         this.dayOfMonth = dayOfMonth;
 
-        chosenDate.setText(DateFormatter.formatDate(year, monthOfYear, dayOfMonth));
+        chosenDate.setText(DateFormatter.getInstance().formatDate(dayOfMonth, monthOfYear, year));
     }
 }
