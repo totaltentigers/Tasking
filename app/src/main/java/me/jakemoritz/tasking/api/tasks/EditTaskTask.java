@@ -2,11 +2,7 @@ package me.jakemoritz.tasking.api.tasks;
 
 import android.app.Activity;
 import android.os.AsyncTask;
-import android.util.Log;
 
-import com.google.android.gms.auth.GoogleAuthException;
-import com.google.android.gms.auth.GoogleAuthUtil;
-import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.http.HttpTransport;
@@ -24,27 +20,23 @@ import java.util.List;
 import me.jakemoritz.tasking.R;
 import me.jakemoritz.tasking.database.DatabaseHelper;
 import me.jakemoritz.tasking.helper.SharedPrefsHelper;
-import me.jakemoritz.tasking.misc.App;
 
 public class EditTaskTask extends AsyncTask<Void, Void, Void> {
 
-    private static final String TAG = "EditTaskTask";
+    private static final String TAG = EditTaskTask.class.getSimpleName();
 
-    public EditTaskResponse delegate = null;
+    private EditTaskResponse delegate = null;
+    private Activity mActivity;
+    private String mEmail;
+    private final HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
+    private final JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+    private Task taskToEdit;
 
-    Activity mActivity;
-    String mEmail;
-
-    final HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
-    final JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-    GoogleAccountCredential credential;
-    Task task;
-    Tasks service;
-
-    public EditTaskTask(Activity mActivity, Task task) {
+    public EditTaskTask(Activity mActivity, EditTaskResponse delegate, Task taskToEdit) {
         this.mActivity = mActivity;
-        this.task = task;
+        this.taskToEdit = taskToEdit;
         this.mEmail = SharedPrefsHelper.getInstance().getUserEmail();
+        this.delegate = delegate;
     }
 
     // Executes asynchronous job.
@@ -53,41 +45,26 @@ public class EditTaskTask extends AsyncTask<Void, Void, Void> {
     protected Void doInBackground(Void... params) {
         //Log.d(TAG, "doInBackground");
         try {
-            String token = fetchToken();
-            if (token != null){
-                credential = GoogleAccountCredential.usingOAuth2(mActivity, Collections.singleton(TasksScopes.TASKS));
-                credential.setSelectedAccountName(mEmail);
-                service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName(mActivity.getString(R.string.app_name)).build();
+            GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(mActivity, Collections.singleton(TasksScopes.TASKS));
+            credential.setSelectedAccountName(mEmail);
 
-                List<TaskList> tasklists = service.tasklists().list().execute().getItems();
-                String firstTasklistId = tasklists.get(0).getId();
+            // Build Tasks service object
+            Tasks service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName(mActivity.getString(R.string.app_name)).build();
 
-                Task result = service.tasks().update(firstTasklistId, task.getId(), task).execute();
+            // Gets list of user's taskToEdit lists
+            List<TaskList> taskLists = service.tasklists().list().execute().getItems();
 
-                DatabaseHelper dbHelper = new DatabaseHelper(mActivity);
-                dbHelper.updateTaskInDb(task.getId(), task);
-                dbHelper.close();
-            }
-        } catch (IOException e){
-            // The fetchToken() method handles Google-specific exceptions,
-            // so there was an exception at a higher level.
-            Log.d(TAG, e.toString());
-        }
-        return null;
-    }
+            // Gets default list
+            String firstTaskListId = taskLists.get(0).getId();
 
-    // Fetches authentication token from Google and
-    // handles GoogleAuthExceptions
-    protected String fetchToken() throws IOException{
-        try {
-            return GoogleAuthUtil.getToken(mActivity, mEmail, App.TASK_OAUTH);
-        } catch (UserRecoverableAuthException userRecoverableException){
-            // GooglePlayServices.apk is either old, disabled, or not present.
-            // so we must display a UI to recover.
-            //mActivity.handleException(userRecoverableException);
-            Log.e(TAG, userRecoverableException.toString());
-        } catch (GoogleAuthException fatalException){
-            Log.e(TAG, fatalException.toString());
+            // Update task
+            service.tasks().update(firstTaskListId, taskToEdit.getId(), taskToEdit).execute();
+
+            DatabaseHelper dbHelper = new DatabaseHelper(mActivity);
+            dbHelper.updateTaskInDb(taskToEdit.getId(), taskToEdit);
+            dbHelper.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return null;
     }

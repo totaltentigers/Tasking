@@ -102,8 +102,7 @@ public class EditTaskDialogFragment extends DialogFragment implements DatePicker
                                 task.setDue(dateTime);
                             }
 
-                            EditTaskTask editTaskTask = new EditTaskTask(getActivity(), task);
-                            editTaskTask.delegate = (TaskListFragment) parentFragment;
+                            EditTaskTask editTaskTask = new EditTaskTask(getActivity(), (TaskListFragment) parentFragment, task);
                             editTaskTask.execute();
 
                             dismiss();

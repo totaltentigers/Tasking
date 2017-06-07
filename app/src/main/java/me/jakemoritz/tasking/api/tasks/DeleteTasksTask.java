@@ -2,12 +2,8 @@ package me.jakemoritz.tasking.api.tasks;
 
 import android.app.Activity;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.util.SparseBooleanArray;
 
-import com.google.android.gms.auth.GoogleAuthException;
-import com.google.android.gms.auth.GoogleAuthUtil;
-import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.http.HttpTransport;
@@ -25,29 +21,23 @@ import java.util.List;
 import me.jakemoritz.tasking.R;
 import me.jakemoritz.tasking.database.DatabaseHelper;
 import me.jakemoritz.tasking.helper.SharedPrefsHelper;
-import me.jakemoritz.tasking.misc.App;
 
 public class DeleteTasksTask extends AsyncTask<Void, Void, Void> {
 
-    private static final String TAG = "DeleteTasksTask";
+    private static final String TAG = DeleteTasksTask.class.getSimpleName();
 
-    public DeleteTasksResponse delegate = null;
+    private DeleteTasksResponse delegate = null;
+    private Activity mActivity;
+    private String mEmail;
+    private final HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
+    private final JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
+    private SparseBooleanArray mSelectedItemIds;
 
-    Activity mActivity;
-    String mEmail;
-
-    final HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
-    final JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
-    GoogleAccountCredential credential;
-    List<Task> tasks;
-    TaskList previousTasks;
-    Tasks service;
-    SparseBooleanArray mSelectedItemIds;
-
-    public DeleteTasksTask(Activity mActivity, SparseBooleanArray mSelectedItemIds) {
+    public DeleteTasksTask(Activity mActivity, DeleteTasksResponse delegate, SparseBooleanArray mSelectedItemIds) {
         this.mActivity = mActivity;
         this.mSelectedItemIds = mSelectedItemIds;
         this.mEmail = SharedPrefsHelper.getInstance().getUserEmail();
+        this.delegate = delegate;
     }
 
     // Executes asynchronous job.
@@ -55,48 +45,33 @@ public class DeleteTasksTask extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... params) {
         try {
-            String token = fetchToken();
-            if (token != null){
-                credential = GoogleAccountCredential.usingOAuth2(mActivity, Collections.singleton(TasksScopes.TASKS));
-                credential.setSelectedAccountName(mEmail);
-                service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName(mActivity.getString(R.string.app_name)).build();
+            GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(mActivity, Collections.singleton(TasksScopes.TASKS));
+            credential.setSelectedAccountName(mEmail);
 
-                List<TaskList> tasklists = service.tasklists().list().execute().getItems();
-                String firstTasklistId = tasklists.get(0).getId();
+            // Build Tasks service object
+            Tasks service = new Tasks.Builder(httpTransport, jsonFactory, credential).setApplicationName(mActivity.getString(R.string.app_name)).build();
 
-                tasks = service.tasks().list(firstTasklistId).execute().getItems();
+            // Gets list of user's task lists
+            List<TaskList> taskLists = service.tasklists().list().execute().getItems();
 
-                previousTasks = service.tasklists().get(firstTasklistId).execute();
+            // Gets default list
+            String firstTaskListId = taskLists.get(0).getId();
 
-                DatabaseHelper dbHelper = new DatabaseHelper(mActivity);
+            // Gets tasks from default list
+            List<Task> tasks = service.tasks().list(firstTaskListId).execute().getItems();
 
-                for (int i = 0; i < mSelectedItemIds.size(); i++){
-                    Task task = tasks.get(mSelectedItemIds.keyAt(i));
-                    dbHelper.deleteTask(task.getId());
-                    service.tasks().delete(firstTasklistId, task.getId()).execute();
-                }
-                dbHelper.close();
+            DatabaseHelper dbHelper = new DatabaseHelper(mActivity);
+
+            // Loop through selected tasks, deleting each from default list
+            for (int i = 0; i < mSelectedItemIds.size(); i++) {
+                Task task = tasks.get(mSelectedItemIds.keyAt(i));
+                dbHelper.deleteTask(task.getId());
+                service.tasks().delete(firstTaskListId, task.getId()).execute();
             }
-        } catch (IOException e){
-            // The fetchToken() method handles Google-specific exceptions,
-            // so there was an exception at a higher level.
-            Log.d(TAG, e.toString());
-        }
-        return null;
-    }
 
-    // Fetches authentication token from Google and
-    // handles GoogleAuthExceptions
-    protected String fetchToken() throws IOException{
-        try {
-            return GoogleAuthUtil.getToken(mActivity, mEmail, App.TASK_OAUTH);
-        } catch (UserRecoverableAuthException userRecoverableException){
-            // GooglePlayServices.apk is either old, disabled, or not present.
-            // so we must display a UI to recover.
-            //mActivity.handleException(userRecoverableException);
-            Log.e(TAG, userRecoverableException.toString());
-        } catch (GoogleAuthException fatalException){
-            Log.e(TAG, fatalException.toString());
+            dbHelper.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return null;
     }

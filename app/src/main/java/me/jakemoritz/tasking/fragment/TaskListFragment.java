@@ -113,8 +113,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
 
         // Checks internet availability to choose task data source
         if (App.getInstance().isNetworkAvailable()) {
-            GetTasksTask getTasksTask = new GetTasksTask(getActivity());
-            getTasksTask.delegate = this;
+            GetTasksTask getTasksTask = new GetTasksTask(getActivity(), this);
             getTasksTask.execute();
         } else {
             DatabaseHelper databaseHelper = new DatabaseHelper(App.getInstance());
@@ -159,8 +158,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     private void getTasksFromServer() {
         mAdapter.notifyDataSetChanged();
 
-        GetTasksTask getTasksTask = new GetTasksTask(getActivity());
-        getTasksTask.delegate = this;
+        GetTasksTask getTasksTask = new GetTasksTask(getActivity(), this);
         getTasksTask.execute();
     }
 
@@ -175,8 +173,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
             mAdapter.addAll(taskList);
             mAdapter.notifyDataSetChanged();
 
-            SortTasklistTask sortTasklistTask = new SortTasklistTask(getActivity(), mAdapter.getTaskList());
-            sortTasklistTask.delegate = this;
+            SortTasklistTask sortTasklistTask = new SortTasklistTask(getActivity(), this, mAdapter.getTaskList());
             sortTasklistTask.execute();
         }
     }
@@ -244,8 +241,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
                     super.onDismissed(snackbar, event);
 
                     if (event == DISMISS_EVENT_TIMEOUT) {
-                        DeleteTasksTask deleteTasksTask = new DeleteTasksTask(getActivity(), mSelectedIds);
-                        deleteTasksTask.delegate = callback;
+                        DeleteTasksTask deleteTasksTask = new DeleteTasksTask(getActivity(), callback, mSelectedIds);
                         deleteTasksTask.execute();
                     }
                 }
@@ -383,8 +379,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
             newTask.setDue(task.getCompleted());
         }
 
-        EditTaskTask editTaskTask = new EditTaskTask(getActivity(), newTask);
-        editTaskTask.delegate = this;
+        EditTaskTask editTaskTask = new EditTaskTask(getActivity(), this, newTask);
         editTaskTask.execute();
     }
 }
