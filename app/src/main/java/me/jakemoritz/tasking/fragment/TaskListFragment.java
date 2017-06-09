@@ -44,8 +44,7 @@ import me.jakemoritz.tasking.misc.CompareTaskDueDate;
 
 
 public class TaskListFragment extends ListFragment implements GetTasksResponse, AddTaskResponse,
-        ActionMode.Callback, AbsListView.MultiChoiceModeListener, DeleteTasksResponse,
-        EditTaskResponse, SwipeRefreshLayout.OnRefreshListener, CheckBox.OnCheckedChangeListener,
+        DeleteTasksResponse, EditTaskResponse, SwipeRefreshLayout.OnRefreshListener, CheckBox.OnCheckedChangeListener,
         SortTasklistResponse {
 
     private static final String TAG = TaskListFragment.class.getSimpleName();
@@ -88,7 +87,71 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
         // Set OnItemClickListener so we can be notified on item clicks
         mListView.setLongClickable(true);
         mListView.setChoiceMode(AbsListView.CHOICE_MODE_MULTIPLE_MODAL);
-        mListView.setMultiChoiceModeListener(this);
+        mListView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+            @Override
+            public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+                final int checkedCount = mListView.getCheckedItemCount();
+                mode.setTitle(checkedCount + " Selected");
+                mAdapter.toggleSelection(position);
+            }
+
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                mode.getMenuInflater().inflate(R.menu.contextual_menu, menu);
+                return true;
+            }
+
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
+
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.action_delete:
+                        SparseBooleanArray selected = mAdapter.getSelectedIds();
+
+                        List<Task> tasksToDelete = new ArrayList<>();
+                        for (int i = 0; i < selected.size(); i++) {
+                            tasksToDelete.add(mAdapter.getItem(selected.keyAt(i)));
+                        }
+
+                        List<Task> tasksToKeep = new ArrayList<>();
+                        for (Task task : mAdapter.getTaskList()) {
+                            boolean mustKeep = true;
+                            for (Task taskToDelete : tasksToDelete) {
+                                if (task == taskToDelete) {
+                                    mustKeep = false;
+                                }
+                            }
+                            if (mustKeep) {
+                                tasksToKeep.add(task);
+                            }
+                        }
+
+                        onTasksDeleted(selected, mAdapter.getTaskList());
+
+                        mAdapter.clear();
+                        mAdapter.addAll(tasksToKeep);
+                        mAdapter.notifyDataSetChanged();
+
+                        DatabaseHelper databaseHelper = new DatabaseHelper(App.getInstance());
+                        databaseHelper.saveTasksToDb(mAdapter.getTaskList());
+                        databaseHelper.close();
+
+                        mode.finish();
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                mAdapter.removeSelection();
+            }
+        });
 
         // Display active progress bar
         progressBar = (ProgressBar)view.findViewById(R.id.task_load_progress);
@@ -284,77 +347,6 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
         editTask(position);
-    }
-
-    /* Methods to handle long-press mode for batch actions on tasks */
-
-    // Called when action mode is created; startActionMode() called
-    @Override
-    public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-        MenuInflater inflater = mode.getMenuInflater();
-        inflater.inflate(R.menu.contextual_menu, menu);
-        return true;
-    }
-
-    // Called when action mode is shown; always after onCreateActionMode or invalidated
-    @Override
-    public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-        return false;
-    }
-
-    // Called when user selects contextual menu item
-    @Override
-    public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_delete:
-                SparseBooleanArray selected = mAdapter.getSelectedIds();
-
-                List<Task> tasksToDelete = new ArrayList<>();
-                for (int i = 0; i < selected.size(); i++) {
-                    tasksToDelete.add(mAdapter.getItem(selected.keyAt(i)));
-                }
-
-                List<Task> tasksToKeep = new ArrayList<>();
-                for (Task task : mAdapter.getTaskList()) {
-                    boolean mustKeep = true;
-                    for (Task taskToDelete : tasksToDelete) {
-                        if (task == taskToDelete) {
-                            mustKeep = false;
-                        }
-                    }
-                    if (mustKeep) {
-                        tasksToKeep.add(task);
-                    }
-                }
-
-                onTasksDeleted(selected, mAdapter.getTaskList());
-
-                mAdapter.clear();
-                mAdapter.addAll(tasksToKeep);
-                mAdapter.notifyDataSetChanged();
-
-                DatabaseHelper databaseHelper = new DatabaseHelper(App.getInstance());
-                databaseHelper.saveTasksToDb(mAdapter.getTaskList());
-                databaseHelper.close();
-
-                mode.finish();
-                return true;
-            default:
-                return false;
-        }
-    }
-
-    // Called when user exits action mode
-    @Override
-    public void onDestroyActionMode(ActionMode mode) {
-        mAdapter.removeSelection();
-    }
-
-    @Override
-    public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
-        final int checkedCount = mListView.getCheckedItemCount();
-        mode.setTitle(checkedCount + " Selected");
-        mAdapter.toggleSelection(position);
     }
 
     @Override

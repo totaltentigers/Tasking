@@ -12,11 +12,8 @@ import me.jakemoritz.tasking.misc.App;
 
 public class AccountDialogPreference extends DialogPreference {
 
-    private Context context;
-
     public AccountDialogPreference(Context context, AttributeSet attributeSet){
         super(context, attributeSet);
-        this.context = context;
     }
 
     @Override

@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="80dp"
-        android:text="Tasking"
+        android:text="@string/app_name"
         android:textAlignment="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Display3"
         android:textColor="@android:color/white" />
@@ -27,7 +27,7 @@
         android:layout_below="@id/intro_title"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="60dp"
-        android:text="A simple to-do list manager to use with Google Tasks"
+        android:text="@string/subheading"
         android:textAlignment="center"
         android:textColor="@android:color/white"
         android:textSize="22sp" />

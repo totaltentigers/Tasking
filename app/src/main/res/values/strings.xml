@@ -1,6 +1,7 @@
 <resources>
     <!-- Manifest -->
     <string name="app_name" translatable="false">Tasking</string>
+    <string name="subheading">A simple to-do list manager to use with Google Tasks</string>
 
     <string name="label_activity_login">Login</string>
     <string name="label_activity_helper">Helper</string>
@@ -44,6 +45,11 @@
     <!-- User images -->
     <string name="user_image">userimage</string>
     <string name="user_cover_image">usercoverimage</string>
+
+    <!-- Add/Edit Task Dialog -->
+    <string name="task_title_hint">Enter a task.</string>
+    <string name="task_note_hint">Enter a note.</string>
+    <string name="task_date_button">Choose a date</string>
 
     <!-- Task deletion snackbar -->
     <string name="task_deleted_snackbar_text">Deleted</string>

@@ -21,7 +21,7 @@ import me.jakemoritz.tasking.R;
 import me.jakemoritz.tasking.helper.DateFormatter;
 
 
-class TaskAdapter extends ArrayAdapter<Task>{
+class TaskAdapter extends ArrayAdapter<Task> {
 
     private Context context;
     private int taskItemLayoutId;
@@ -29,11 +29,7 @@ class TaskAdapter extends ArrayAdapter<Task>{
     private TaskListFragment taskListFragment;
     private SparseBooleanArray mSelectedItemIds;
 
-    List<Task> getTaskList() {
-        return taskList;
-    }
-
-    TaskAdapter(Context context, TaskListFragment taskListFragment, int taskItemLayoutId, List<Task> taskList){
+    TaskAdapter(Context context, TaskListFragment taskListFragment, int taskItemLayoutId, List<Task> taskList) {
         super(context, taskItemLayoutId, taskList);
         this.taskItemLayoutId = taskItemLayoutId;
         this.context = context;
@@ -42,64 +38,79 @@ class TaskAdapter extends ArrayAdapter<Task>{
         this.mSelectedItemIds = new SparseBooleanArray();
     }
 
+    private class ViewHolder {
+        private TextView taskTitle;
+        private TextView taskNotes;
+        private TextView taskDate;
+        private CheckBox taskCompleted;
+        private CardView taskCardView;
+    }
+
     @NonNull
     @Override
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+        ViewHolder viewHolder;
+
         Task task = taskList.get(position);
 
-        if (convertView == null){
-            convertView = LayoutInflater.from(context).inflate(taskItemLayoutId, parent, false);
+        if (convertView == null) {
+            viewHolder = new ViewHolder();
+            convertView = LayoutInflater.from(context).inflate(taskItemLayoutId, null);
+
+            // Initialize row views
+            viewHolder.taskTitle = (TextView) convertView.findViewById(R.id.task_item_title);
+            viewHolder.taskNotes = (TextView) convertView.findViewById(R.id.task_item_notes);
+            viewHolder.taskDate = (TextView) convertView.findViewById(R.id.task_item_date);
+            viewHolder.taskCompleted = (CheckBox) convertView.findViewById(R.id.task_item_checkbox);
+            viewHolder.taskCardView = (CardView) convertView.findViewById(R.id.card);
+
+            convertView.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        // Initialize row views
-        TextView taskTitle = (TextView) convertView.findViewById(R.id.task_item_title);
-        TextView taskNotes = (TextView) convertView.findViewById(R.id.task_item_notes);
-        TextView taskDate = (TextView) convertView.findViewById(R.id.task_item_date);
-        CheckBox taskCompleted = (CheckBox) convertView.findViewById(R.id.task_item_checkbox);
-        CardView taskCardView = (CardView) convertView.findViewById(R.id.card);
-
         // Update views with task values
-        if (task.getStatus().equals(context.getString(R.string.task_completed))){
-            taskCompleted.setChecked(true);
+        if (task.getStatus().equals(context.getString(R.string.task_completed))) {
+            viewHolder.taskCompleted.setChecked(true);
         } else {
-            taskCompleted.setChecked(false);
+            viewHolder.taskCompleted.setChecked(false);
         }
 
         // Highlight row if selected
-        for (int i = 0; i < mSelectedItemIds.size(); i++){
-            if (position == mSelectedItemIds.keyAt(i)){
-                taskCardView.setCardBackgroundColor(ContextCompat.getColor(context, R.color.colorAccent));
+        for (int i = 0; i < mSelectedItemIds.size(); i++) {
+            if (position == mSelectedItemIds.keyAt(i)) {
+                viewHolder.taskCardView.setCardBackgroundColor(ContextCompat.getColor(context, R.color.colorAccent));
             }
         }
 
-        taskCompleted.setOnCheckedChangeListener(taskListFragment);
+        viewHolder.taskCompleted.setOnCheckedChangeListener(taskListFragment);
 
         // Hide title if field empty
-        if (task.getTitle() != null){
-            taskTitle.setText(task.getTitle());
+        if (task.getTitle() != null) {
+            viewHolder.taskTitle.setText(task.getTitle());
         } else {
-            taskTitle.setVisibility(View.GONE);
+            viewHolder.taskTitle.setVisibility(View.GONE);
         }
 
         // Hide notes if field empty
-        if (task.getNotes() != null){
-            taskNotes.setText(task.getNotes());
+        if (task.getNotes() != null) {
+            viewHolder.taskNotes.setText(task.getNotes());
         } else {
-            taskNotes.setVisibility(View.GONE);
+            viewHolder.taskNotes.setVisibility(View.GONE);
         }
 
         // Get DateTime from task
         DateTime taskDateTime = null;
-        if (task.getStatus().equals(context.getString(R.string.task_completed))){
+        if (task.getStatus().equals(context.getString(R.string.task_completed))) {
             taskDateTime = task.getCompleted();
-        } else if (task.getStatus().equals(context.getString(R.string.task_needsAction))){
+        } else if (task.getStatus().equals(context.getString(R.string.task_needsAction))) {
             taskDateTime = task.getDue();
         }
 
-        if (taskDateTime != null){
-            taskDate.setText(DateFormatter.getInstance().formatDate(taskDateTime));
+        if (taskDateTime != null) {
+            viewHolder.taskDate.setText(DateFormatter.getInstance().formatDate(taskDateTime));
         } else {
-            taskDate.setVisibility(View.GONE);
+            viewHolder.taskDate.setVisibility(View.GONE);
         }
 
         return convertView;
@@ -111,17 +122,21 @@ class TaskAdapter extends ArrayAdapter<Task>{
         notifyDataSetChanged();
     }
 
-    void toggleSelection(int position){
+    List<Task> getTaskList() {
+        return taskList;
+    }
+
+    void toggleSelection(int position) {
         selectView(position, !mSelectedItemIds.get(position));
     }
 
-    void removeSelection(){
-        mSelectedItemIds = new SparseBooleanArray();
+    void removeSelection() {
+        mSelectedItemIds.clear();
         notifyDataSetChanged();
     }
 
-    private void selectView(int position, boolean value){
-        if (value){
+    private void selectView(int position, boolean value) {
+        if (value) {
             mSelectedItemIds.put(position, true);
         } else {
             mSelectedItemIds.delete(position);
@@ -129,7 +144,7 @@ class TaskAdapter extends ArrayAdapter<Task>{
         notifyDataSetChanged();
     }
 
-    SparseBooleanArray getSelectedIds(){
+    SparseBooleanArray getSelectedIds() {
         return mSelectedItemIds;
     }
 }

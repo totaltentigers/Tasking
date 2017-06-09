@@ -7,11 +7,11 @@
     tools:context="me.jakemoritz.tasking.fragment.TaskListFragment">
 
     <ProgressBar
+        android:id="@+id/task_load_progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/task_load_progress"
         android:layout_gravity="center"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
@@ -25,8 +25,7 @@
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        >
+        android:layout_height="match_parent">
 
         <ListView
             android:id="@android:id/list"
@@ -34,14 +33,13 @@
             android:layout_height="match_parent"
             android:divider="@null"
             android:dividerHeight="0dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="0dp"/>
-
-
+            android:paddingBottom="0dp"
+            android:paddingTop="8dp" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
-    <include layout="@layout/empty_tasklist_view"
-        android:visibility="gone"/>
 
+    <include
+        layout="@layout/empty_tasklist_view"
+        android:visibility="gone" />
 
 </FrameLayout>

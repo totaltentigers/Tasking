@@ -8,13 +8,13 @@
         android:id="@+id/task_title"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter a task." />
+        android:hint="@string/task_title_hint" />
 
     <EditText
         android:id="@+id/task_notes"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter a note."
+        android:hint="@string/task_note_hint"
         android:layout_below="@id/task_title"
         android:layout_marginBottom="16dp"/>
 
@@ -22,7 +22,7 @@
         android:id="@+id/date_picker_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Choose a date"
+        android:text="@string/task_date_button"
         android:layout_below="@id/task_notes"
         android:layout_marginRight="8dp"/>
 

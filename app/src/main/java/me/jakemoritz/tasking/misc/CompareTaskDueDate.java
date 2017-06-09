@@ -4,6 +4,8 @@ import com.google.api.services.tasks.model.Task;
 
 import java.util.Comparator;
 
+import static java.lang.Long.valueOf;
+
 public class CompareTaskDueDate implements Comparator<Task> {
 
     @Override
@@ -17,7 +19,7 @@ public class CompareTaskDueDate implements Comparator<Task> {
         else if (lhs.getDue() == null && rhs.getDue() == null){
             return Integer.valueOf(lhs.getPosition()).compareTo(Integer.valueOf(rhs.getPosition()));
         } else {
-            return Long.valueOf(lhs.getDue().getValue()).compareTo(Long.valueOf(rhs.getDue().getValue()));
+            return valueOf(lhs.getDue().getValue()).compareTo(rhs.getDue().getValue());
         }
     }
 
