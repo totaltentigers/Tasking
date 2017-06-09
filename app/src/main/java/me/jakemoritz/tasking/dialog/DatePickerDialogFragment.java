@@ -3,35 +3,30 @@ package me.jakemoritz.tasking.dialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.app.Fragment;
 import android.os.Bundle;
 
 import java.util.Calendar;
 
-public class DatePickerDialogFragment extends DialogFragment{
+public class DatePickerDialogFragment extends DialogFragment {
 
-    private static final String TAG = "DatePickerDialogFragment";
+    private static final String TAG = DatePickerDialogFragment.class.getSimpleName();
 
-    private Fragment fragment;
+    private DatePickerDialog.OnDateSetListener onDateSetListener;
 
-    public static DatePickerDialogFragment newInstance(Fragment parentFragment){
+    public static DatePickerDialogFragment newInstance(DatePickerDialog.OnDateSetListener onDateSetListener) {
         DatePickerDialogFragment datePickerDialogFragment = new DatePickerDialogFragment();
-        datePickerDialogFragment.fragment = parentFragment;
+        datePickerDialogFragment.onDateSetListener = onDateSetListener;
         return datePickerDialogFragment;
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // Use current date as default date
-        final Calendar c = Calendar.getInstance();
-        int year = c.get(Calendar.YEAR);
-        int month = c.get(Calendar.MONTH);
-        int day = c.get(Calendar.DAY_OF_MONTH);
+        Calendar currentCal = Calendar.getInstance();
+        int year = currentCal.get(Calendar.YEAR);
+        int month = currentCal.get(Calendar.MONTH);
+        int day = currentCal.get(Calendar.DAY_OF_MONTH);
 
-        if (fragment instanceof AddTaskDialogFragment){
-            return new DatePickerDialog(getActivity(),(AddTaskDialogFragment) fragment, year, month, day);
-        } else {
-            return new DatePickerDialog(getActivity(),(EditTaskDialogFragment) fragment, year, month, day);
-        }
+        return new DatePickerDialog(getActivity(), onDateSetListener, year, month, day);
     }
 }

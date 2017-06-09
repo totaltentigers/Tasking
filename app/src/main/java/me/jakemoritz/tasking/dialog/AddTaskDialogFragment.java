@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -19,22 +20,26 @@ import com.google.api.services.tasks.model.Task;
 
 import java.util.Calendar;
 
-import me.jakemoritz.tasking.api.tasks.AddTaskTask;
-import me.jakemoritz.tasking.helper.DateFormatter;
 import me.jakemoritz.tasking.R;
+import me.jakemoritz.tasking.api.tasks.AddTaskTask;
 import me.jakemoritz.tasking.fragment.TaskListFragment;
+import me.jakemoritz.tasking.helper.DateFormatter;
 
 
-public class AddTaskDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener{
+public class AddTaskDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
 
     private static final String TAG = AddTaskDialogFragment.class.getSimpleName();
 
     private final AddTaskDialogFragment callbackInstance = this;
     private Fragment parentFragment;
+
+    // Date values
     private int year;
     private int month;
     private int dayOfMonth;
     private long timeInMs;
+
+    // Views
     private EditText taskTitle;
     private EditText taskNotes;
     private TextView chosenDate;
@@ -47,9 +52,9 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View view = inflater.inflate(R.layout.dialog_add_task, null);
+        View view = LayoutInflater.from(parentFragment.getActivity()).inflate(R.layout.dialog_add_task, (ViewGroup) null);
 
+        // Initialize views
         chosenDate = (TextView) view.findViewById(R.id.chosen_date);
         taskTitle = (EditText) view.findViewById(R.id.task_title);
         taskNotes = (EditText) view.findViewById(R.id.task_notes);
@@ -69,6 +74,9 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
                 });
 
         AlertDialog alertDialog = builder.create();
+
+        // Set positive button OnClickListener here to ensure dialog doesn't close on click
+        // Allow EditText error message to show if required
         alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
@@ -76,7 +84,7 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
                 positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (!taskTitle.getText().toString().isEmpty()) {
+                        if (!taskTitle.getText().toString().trim().isEmpty()) {
                             Task task = new Task();
                             task.setTitle(taskTitle.getText().toString());
                             task.setNotes(taskNotes.getText().toString());
@@ -91,6 +99,7 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
 
                             AddTaskTask addTaskTask = new AddTaskTask(getActivity(), (TaskListFragment) parentFragment, task);
                             addTaskTask.execute();
+
                             dismiss();
                         } else {
                             taskTitle.setError(getString(R.string.add_task_dialog_error_notitle));
@@ -111,7 +120,7 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
         return alertDialog;
     }
 
-    public void displayCurrentDate(){
+    public void displayCurrentDate() {
         // Get new Calendar instance
         Calendar cal = Calendar.getInstance();
 
@@ -125,7 +134,7 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
 
     @Override
     public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
-        // Save current date values
+        // Save set date values
         this.year = year;
         this.month = month;
         this.dayOfMonth = dayOfMonth;
