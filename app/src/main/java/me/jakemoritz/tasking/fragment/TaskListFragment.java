@@ -316,7 +316,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.main, menu);
+        inflater.inflate(R.menu.main_menu, menu);
     }
 
     @Override
@@ -365,9 +365,9 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
             newTask.setDue(task.getDue());
             newTask.setCompleted(task.getDue());
         } else {
-            task.setStatus(getString(R.string.task_needsAction));
+            task.setStatus(getString(R.string.task_needs_action));
             task.setDue(task.getCompleted());
-            newTask.setStatus(getString(R.string.task_needsAction));
+            newTask.setStatus(getString(R.string.task_needs_action));
             newTask.setDue(task.getCompleted());
         }
 

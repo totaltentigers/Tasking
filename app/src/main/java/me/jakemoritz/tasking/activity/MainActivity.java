@@ -8,7 +8,6 @@ import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -56,8 +55,6 @@ import retrofit2.GsonConverterFactory;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-import static com.squareup.picasso.Picasso.with;
-
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
@@ -94,7 +91,7 @@ public class MainActivity extends AppCompatActivity
             signInSuccessSnackbar.show();
         }
 
-        // Configure sign-in to request the user's ID, email address, and basic
+        // Configure sign-in to request the user'userImageTarget ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -185,25 +182,59 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void downloadUserImage(Uri imageUri, final String filename) {
-        new AsyncTask<Uri, Void, Bitmap>() {
-            @Override
-            protected void onPostExecute(Bitmap bitmap) {
-                if (bitmap != null) {
-                    saveImageToFile(bitmap, filename);
-                }
-            }
+        Target imageTarget = null;
 
-            @Override
-            protected Bitmap doInBackground(Uri... params) {
-                try {
-                    return with(App.getInstance()).load(params[0]).get();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                return null;
-            }
-        }.execute(imageUri);
+        if (filename.matches(getString(R.string.user_image))){
+            imageTarget = userImageTarget;
+        } else if (filename.matches(getString(R.string.user_cover_image))){
+            imageTarget = userCoverImageTarget;
+        }
+
+        if (imageTarget != null){
+            Picasso.with(App.getInstance()).load(imageUri).into(imageTarget);
+        }
     }
+
+    Target userImageTarget = new Target() {
+        @Override
+        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+            saveImageToFile(bitmap, getString(R.string.user_image));
+            navUserAvatar.setImageBitmap(bitmap);
+        }
+
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+        }
+    };
+
+    Target userCoverImageTarget = new Target() {
+        @Override
+        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+            saveImageToFile(bitmap, getString(R.string.user_cover_image));
+
+            // Draw black overlay to darken cover image
+            Bitmap mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true);
+            Paint darken = new Paint();
+            darken.setColor(Color.BLACK);
+            darken.setAlpha(100);
+
+
+            Canvas c = new Canvas(mutableBitmap);
+            c.drawPaint(darken);
+            navUserCover.setBackground(new BitmapDrawable(getResources(), mutableBitmap));        }
+
+        @Override
+        public void onBitmapFailed(Drawable errorDrawable) {
+        }
+
+        @Override
+        public void onPrepareLoad(Drawable placeHolderDrawable) {
+        }
+    };
 
     private void getUserCoverImageUrl() {
         Gson gson = new GsonBuilder()
@@ -247,9 +278,6 @@ public class MainActivity extends AppCompatActivity
             File file = new File(getCacheDir(), filename + ".jpg");
             fos = new FileOutputStream(file);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 50, fos);
-
-            // Update ImageView if file saved
-            setNavUserImage(filename);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } finally {
@@ -261,8 +289,6 @@ public class MainActivity extends AppCompatActivity
                 e.printStackTrace();
             }
         }
-
-        bitmap.recycle();
     }
 
     private void setNavUserImage(final String filename) {
@@ -359,7 +385,7 @@ public class MainActivity extends AppCompatActivity
 
     private void signOut() {
         // Sign out button clicked
-        // Sign out and disconnect user's Google account
+        // Sign out and disconnect user'userImageTarget Google account
         // Clear app data
         Auth.GoogleSignInApi.signOut(mGoogleApiClient);
         Auth.GoogleSignInApi.revokeAccess(mGoogleApiClient);

@@ -105,7 +105,7 @@ class TaskAdapter extends ArrayAdapter<Task> {
         DateTime taskDateTime = null;
         if (task.getStatus().equals(context.getString(R.string.task_completed))) {
             taskDateTime = task.getCompleted();
-        } else if (task.getStatus().equals(context.getString(R.string.task_needsAction))) {
+        } else if (task.getStatus().equals(context.getString(R.string.task_needs_action))) {
             taskDateTime = task.getDue();
         }
 
