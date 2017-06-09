@@ -76,6 +76,8 @@ class TaskAdapter extends ArrayAdapter<Task> {
             viewHolder.taskCompleted.setChecked(false);
         }
 
+        viewHolder.taskCardView.setCardBackgroundColor(ContextCompat.getColor(context, android.R.color.white));
+
         // Highlight row if selected
         for (int i = 0; i < mSelectedItemIds.size(); i++) {
             if (position == mSelectedItemIds.keyAt(i)) {
