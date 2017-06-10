@@ -56,6 +56,7 @@
     <!-- General snackbar -->
     <string name="auth_error">Error authenticating account</string>
     <string name="auth_success">"Signed in as "</string>
+    <string name="just_signed_out">You have signed out.</string>
 
     <!-- Task API strings -->
     <string name="task_completed">completed</string>

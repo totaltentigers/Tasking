@@ -37,6 +37,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        if (getIntent().hasExtra("justSignedOut") && getIntent().getBooleanExtra("justSignedOut", false) && findViewById(R.id.activity_login) != null){
+            Snackbar.make(findViewById(R.id.activity_login), R.string.just_signed_out, Snackbar.LENGTH_LONG).show();
+        }
+
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)

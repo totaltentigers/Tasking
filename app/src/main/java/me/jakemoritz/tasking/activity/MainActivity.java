@@ -395,7 +395,10 @@ public class MainActivity extends AppCompatActivity
         wantToSignOut = false;
 
         // Return to intro screen
-        startActivity(new Intent(this, HelperActivity.class));
+        Intent signOutIntent = new Intent(App.getInstance(), LoginActivity.class);
+        signOutIntent.putExtra("justSignedOut", true);
+        App.getInstance().startActivity(signOutIntent);
+
         finish();
     }
 
@@ -425,7 +428,7 @@ public class MainActivity extends AppCompatActivity
 
     // Recursively deletes files and folders
     private boolean deleteDir(File dir) {
-        if (dir != null) {
+        if (dir != null && dir.isDirectory()) {
             for (String fileName : dir.list()) {
                 boolean success = deleteDir(new File(dir, fileName));
                 if (!success) {
