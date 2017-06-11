@@ -31,5 +31,4 @@ public class AccountDialogPreference extends DialogPreference {
             dialog.cancel();
         }
     }
-
 }

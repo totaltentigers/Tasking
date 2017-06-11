@@ -165,18 +165,18 @@ public class MainActivity extends AppCompatActivity
         wantToLoadUserImages = true;
         connectGoogleApiClientForResult();
 
-        Fragment savedFragment = null;
+        Fragment defaultFragment = null;
         if (savedInstanceState != null) {
-            savedFragment = getFragmentManager().getFragment(savedInstanceState, "current_fragment");
+            defaultFragment = getFragmentManager().getFragment(savedInstanceState, "current_fragment");
         }
 
-        if (savedFragment == null) {
-            savedFragment = TaskListFragment.newInstance();
+        if (defaultFragment == null) {
+            defaultFragment = TaskListFragment.newInstance();
         }
 
         // Initialize default fragment
         getFragmentManager().beginTransaction()
-                .replace(R.id.content_main, savedFragment)
+                .replace(R.id.content_main, defaultFragment)
                 .commit();
     }
 

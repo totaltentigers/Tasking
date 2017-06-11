@@ -27,6 +27,8 @@
     <string name="add_task_dialog_error_notitle">You must enter a task title.</string>
 
     <!-- Preferences -->
+    <string name="pref_screen">prefscreen</string>
+
     <string name="pref_account">Account</string>
     <string name="pref_account_summ">Sign out of your Google account.</string>
     <string name="pref_account_message">Would you like to sign out of your Google account?</string>
