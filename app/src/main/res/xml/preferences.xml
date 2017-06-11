@@ -2,7 +2,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:key="@string/pref_screen">
     <me.jakemoritz.tasking.preference.AccountDialogPreference
-        android:key="@string/pref_account"
+        android:key="@string/pref_account_key"
         android:title="@string/pref_account"
         android:summary="@string/pref_account_summ"
         android:dialogTitle="@string/pref_account"
