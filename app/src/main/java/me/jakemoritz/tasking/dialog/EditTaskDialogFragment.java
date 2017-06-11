@@ -50,6 +50,7 @@ public class EditTaskDialogFragment extends DialogFragment implements DatePicker
         EditTaskDialogFragment editTaskDialogFragment = new EditTaskDialogFragment();
         editTaskDialogFragment.parentFragment = parentFragment;
         editTaskDialogFragment.task = task;
+        editTaskDialogFragment.setRetainInstance(true);
         return editTaskDialogFragment;
     }
 
@@ -123,6 +124,18 @@ public class EditTaskDialogFragment extends DialogFragment implements DatePicker
         });
 
         return alertDialog;
+    }
+
+    @Override
+    public void onDestroyView() {
+        Dialog dialog = getDialog();
+
+        // handles https://code.google.com/p/android/issues/detail?id=17423
+        if (dialog != null && getRetainInstance()){
+            dialog.setDismissMessage(null);
+        }
+
+        super.onDestroyView();
     }
 
     public void displayTaskDueDate(){

@@ -1,5 +1,6 @@
 package me.jakemoritz.tasking.activity;
 
+import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -85,10 +86,12 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (getCallingActivity() != null && getCallingActivity().getClassName().matches(LoginActivity.class.getName())) {
+        if (getCallingActivity() != null && getCallingActivity().getClassName().matches(LoginActivity.class.getName()) && !SharedPrefsHelper.getInstance().isLoginSnackbarShown()) {
             // User signed in for the first time
             Snackbar signInSuccessSnackbar = Snackbar.make(findViewById(R.id.drawer_layout), getString(R.string.auth_success) + SharedPrefsHelper.getInstance().getUserEmail(), Snackbar.LENGTH_LONG);
             signInSuccessSnackbar.show();
+
+            SharedPrefsHelper.getInstance().setLoginSnackbarShown(true);
         }
 
         // Configure sign-in to request the user'userImageTarget ID, email address, and basic
@@ -100,7 +103,7 @@ public class MainActivity extends AppCompatActivity
 
         // Build GoogleApiClient with access to basic profile
         mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this , this)
+                .enableAutoManage(this, this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .addConnectionCallbacks(this)
                 .build();
@@ -125,11 +128,12 @@ public class MainActivity extends AppCompatActivity
                             !((id == R.id.nav_settings) && (getFragmentManager().findFragmentById(R.id.content_main) instanceof SettingsFragment))) {
                         if (id == R.id.nav_tasks) {
                             getFragmentManager().beginTransaction()
-                                    .replace(R.id.content_main, new TaskListFragment())
+                                    .replace(R.id.content_main, TaskListFragment.newInstance())
                                     .commit();
                         } else if (id == R.id.nav_settings) {
                             getFragmentManager().beginTransaction()
-                                    .replace(R.id.content_main, new SettingsFragment())
+                                    .replace(R.id.content_main, SettingsFragment.newInstance())
+                                    .addToBackStack(SettingsFragment.class.getSimpleName())
                                     .commit();
                         }
                     }
@@ -161,10 +165,27 @@ public class MainActivity extends AppCompatActivity
         wantToLoadUserImages = true;
         connectGoogleApiClientForResult();
 
+        Fragment savedFragment = null;
+        if (savedInstanceState != null) {
+            savedFragment = getFragmentManager().getFragment(savedInstanceState, "current_fragment");
+        }
+
+        if (savedFragment == null) {
+            savedFragment = TaskListFragment.newInstance();
+        }
+
         // Initialize default fragment
         getFragmentManager().beginTransaction()
-                .replace(R.id.content_main, new TaskListFragment())
+                .replace(R.id.content_main, savedFragment)
                 .commit();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        Fragment currentFragment = getFragmentManager().findFragmentById(R.id.content_main);
+        getFragmentManager().putFragment(outState, "current_fragment", currentFragment);
+
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -184,13 +205,13 @@ public class MainActivity extends AppCompatActivity
     private void downloadUserImage(Uri imageUri, final String filename) {
         Target imageTarget = null;
 
-        if (filename.matches(getString(R.string.user_image))){
+        if (filename.matches(getString(R.string.user_image))) {
             imageTarget = userImageTarget;
-        } else if (filename.matches(getString(R.string.user_cover_image))){
+        } else if (filename.matches(getString(R.string.user_cover_image))) {
             imageTarget = userCoverImageTarget;
         }
 
-        if (imageTarget != null){
+        if (imageTarget != null) {
             Picasso.with(App.getInstance()).load(imageUri).into(imageTarget);
         }
     }
@@ -225,7 +246,8 @@ public class MainActivity extends AppCompatActivity
 
             Canvas c = new Canvas(mutableBitmap);
             c.drawPaint(darken);
-            navUserCover.setBackground(new BitmapDrawable(getResources(), mutableBitmap));        }
+            navUserCover.setBackground(new BitmapDrawable(getResources(), mutableBitmap));
+        }
 
         @Override
         public void onBitmapFailed(Drawable errorDrawable) {
@@ -371,11 +393,11 @@ public class MainActivity extends AppCompatActivity
         super.onNewIntent(intent);
 
         // Intent received for sign out
-        if (intent.hasExtra("signOut") && intent.getBooleanExtra("signOut", false)){
+        if (intent.hasExtra("signOut") && intent.getBooleanExtra("signOut", false)) {
             wantToSignOut = true;
 
             // Connect GoogleApiClient before signing out
-            if (!mGoogleApiClient.isConnected()){
+            if (!mGoogleApiClient.isConnected()) {
                 mGoogleApiClient.connect();
             } else {
                 signOut();
@@ -404,7 +426,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        if (wantToSignOut){
+        if (wantToSignOut) {
             signOut();
         }
     }

@@ -12,6 +12,12 @@ public class SettingsFragment extends PreferenceFragment {
         // Required empty public constructor
     }
 
+    public static SettingsFragment newInstance(){
+        SettingsFragment settingsFragment = new SettingsFragment();
+        settingsFragment.setRetainInstance(true);
+        return settingsFragment;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

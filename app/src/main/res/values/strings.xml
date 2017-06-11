@@ -39,6 +39,7 @@
     <string name="shared_prefs_logged_in">isuserloggedin</string>
     <string name="shared_prefs_name">userdisplayname</string>
     <string name="shared_prefs_id">userid</string>
+    <string name="shared_prefs_login_snackbar_shown">loginsnackbarshown</string>
 
     <!-- User images -->
     <string name="user_image">userimage</string>

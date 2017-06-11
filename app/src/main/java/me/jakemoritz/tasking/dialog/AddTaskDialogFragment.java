@@ -47,6 +47,7 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
     public static AddTaskDialogFragment newInstance(Fragment parentFragment) {
         AddTaskDialogFragment addTaskDialogFragment = new AddTaskDialogFragment();
         addTaskDialogFragment.parentFragment = parentFragment;
+        addTaskDialogFragment.setRetainInstance(true);
         return addTaskDialogFragment;
     }
 
@@ -118,6 +119,18 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
         });
 
         return alertDialog;
+    }
+
+    @Override
+    public void onDestroyView() {
+        Dialog dialog = getDialog();
+
+        // handles https://code.google.com/p/android/issues/detail?id=17423
+        if (dialog != null && getRetainInstance()){
+            dialog.setDismissMessage(null);
+        }
+
+        super.onDestroyView();
     }
 
     public void displayCurrentDate() {

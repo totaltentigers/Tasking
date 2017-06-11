@@ -57,4 +57,14 @@ public class SharedPrefsHelper {
         editor.putBoolean(App.getInstance().getString(R.string.shared_prefs_logged_in), loggedIn);
         editor.apply();
     }
+
+    public Boolean isLoginSnackbarShown(){
+        return sharedPrefs.getBoolean(App.getInstance().getString(R.string.shared_prefs_login_snackbar_shown), true);
+    }
+
+    public void setLoginSnackbarShown(Boolean loginSnackbarShown){
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putBoolean(App.getInstance().getString(R.string.shared_prefs_login_snackbar_shown), loginSnackbarShown);
+        editor.apply();
+    }
 }

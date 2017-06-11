@@ -62,6 +62,13 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     public TaskListFragment() {
     }
 
+    public static TaskListFragment newInstance(){
+        TaskListFragment taskListFragment = new TaskListFragment();
+        taskListFragment.setRetainInstance(true);
+        taskListFragment.setHasOptionsMenu(true);
+        return taskListFragment;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

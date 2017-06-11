@@ -16,6 +16,7 @@ public class DatePickerDialogFragment extends DialogFragment {
     public static DatePickerDialogFragment newInstance(DatePickerDialog.OnDateSetListener onDateSetListener) {
         DatePickerDialogFragment datePickerDialogFragment = new DatePickerDialogFragment();
         datePickerDialogFragment.onDateSetListener = onDateSetListener;
+        datePickerDialogFragment.setRetainInstance(true);
         return datePickerDialogFragment;
     }
 
@@ -28,5 +29,17 @@ public class DatePickerDialogFragment extends DialogFragment {
         int day = currentCal.get(Calendar.DAY_OF_MONTH);
 
         return new DatePickerDialog(getActivity(), onDateSetListener, year, month, day);
+    }
+
+    @Override
+    public void onDestroyView() {
+        Dialog dialog = getDialog();
+
+        // handles https://code.google.com/p/android/issues/detail?id=17423
+        if (dialog != null && getRetainInstance()){
+            dialog.setDismissMessage(null);
+        }
+
+        super.onDestroyView();
     }
 }
