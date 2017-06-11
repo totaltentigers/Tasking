@@ -32,6 +32,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.OptionalPendingResult;
+import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -163,7 +165,9 @@ public class MainActivity extends AppCompatActivity
         navigationView.getMenu().getItem(0).setChecked(true);
 
         wantToLoadUserImages = true;
-        connectGoogleApiClientForResult();
+
+        // Connect to update user images
+        mGoogleApiClient.connect();
 
         Fragment defaultFragment = null;
         if (savedInstanceState != null) {
@@ -194,12 +198,6 @@ public class MainActivity extends AppCompatActivity
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
-    }
-
-    // Connect GoogleApiClient to get GoogleSignInAccount
-    private void connectGoogleApiClientForResult() {
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
     private void downloadUserImage(Uri imageUri, final String filename) {
@@ -365,30 +363,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
-            // Check for update user avatar and cover image
-            if (wantToLoadUserImages) {
-                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-
-                if (result.isSuccess()) {
-                    GoogleSignInAccount acct = result.getSignInAccount();
-
-                    if (acct != null && acct.getPhotoUrl() != null && !acct.getPhotoUrl().toString().isEmpty()) {
-                        downloadUserImage(acct.getPhotoUrl(), getString(R.string.user_image));
-                    }
-                }
-
-                getUserCoverImageUrl();
-                wantToLoadUserImages = false;
-            }
-        }
-    }
-
-    @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
@@ -430,6 +404,27 @@ public class MainActivity extends AppCompatActivity
     public void onConnected(@Nullable Bundle bundle) {
         if (wantToSignOut) {
             signOut();
+        } else {
+            // Connected to update user images
+            OptionalPendingResult<GoogleSignInResult> optionalPendingResult = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+
+            optionalPendingResult.setResultCallback(new ResultCallback<GoogleSignInResult>() {
+                @Override
+                public void onResult(@NonNull GoogleSignInResult googleSignInResult) {
+                    if (wantToLoadUserImages) {
+                        if (googleSignInResult.isSuccess()) {
+                            GoogleSignInAccount acct = googleSignInResult.getSignInAccount();
+
+                            if (acct != null && acct.getPhotoUrl() != null && !acct.getPhotoUrl().toString().isEmpty()) {
+                                downloadUserImage(acct.getPhotoUrl(), getString(R.string.user_image));
+                            }
+                        }
+
+                        getUserCoverImageUrl();
+                        wantToLoadUserImages = false;
+                    }
+                }
+            });
         }
     }
 
