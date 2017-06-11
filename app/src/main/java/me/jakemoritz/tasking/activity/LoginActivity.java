@@ -37,8 +37,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        if (getIntent().hasExtra("justSignedOut") && getIntent().getBooleanExtra("justSignedOut", false) && findViewById(R.id.activity_login) != null){
+        if (getIntent().hasExtra("justSignedOut") && getIntent().getBooleanExtra("justSignedOut", false) && findViewById(R.id.activity_login) != null && !SharedPrefsHelper.getInstance().isSignOutSnackbarShown()){
             Snackbar.make(findViewById(R.id.activity_login), R.string.just_signed_out, Snackbar.LENGTH_LONG).show();
+
+            SharedPrefsHelper.getInstance().setSignOutSnackbarShown(true);
         }
 
         // Configure sign-in to request the user's ID, email address, and basic
@@ -118,6 +120,8 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
             saveUserInfo(acct);
+
+            SharedPrefsHelper.getInstance().setLoginSnackbarShown(false);
 
             Intent mainIntent = new Intent(this, MainActivity.class);
             startActivityForResult(mainIntent, 0);

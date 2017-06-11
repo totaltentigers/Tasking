@@ -416,6 +416,8 @@ public class MainActivity extends AppCompatActivity
         SharedPrefsHelper.getInstance().setLoggedIn(false);
         wantToSignOut = false;
 
+        SharedPrefsHelper.getInstance().setSignOutSnackbarShown(false);
+
         // Return to intro screen
         Intent signOutIntent = new Intent(App.getInstance(), LoginActivity.class);
         signOutIntent.putExtra("justSignedOut", true);

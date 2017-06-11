@@ -67,4 +67,14 @@ public class SharedPrefsHelper {
         editor.putBoolean(App.getInstance().getString(R.string.shared_prefs_login_snackbar_shown), loginSnackbarShown);
         editor.apply();
     }
+
+    public Boolean isSignOutSnackbarShown(){
+        return sharedPrefs.getBoolean(App.getInstance().getString(R.string.shared_prefs_sign_out_snackbar_shown), true);
+    }
+
+    public void setSignOutSnackbarShown(Boolean signOutSnackbarShown){
+        SharedPreferences.Editor editor = sharedPrefs.edit();
+        editor.putBoolean(App.getInstance().getString(R.string.shared_prefs_sign_out_snackbar_shown), signOutSnackbarShown);
+        editor.apply();
+    }
 }
