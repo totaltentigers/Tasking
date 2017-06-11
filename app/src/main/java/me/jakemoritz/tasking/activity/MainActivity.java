@@ -68,9 +68,6 @@ public class MainActivity extends AppCompatActivity
     private static final String COVER_IMAGE_BASE_URL = "https://www.googleapis.com/plus/v1/people/";
     private static final String API_KEY = "***REMOVED***";
 
-    // Request code used to invoke sign in user interactions
-    private static final int RC_SIGN_IN = 0;
-
     // Client used to interact with Google APIs
     private static GoogleApiClient mGoogleApiClient;
 
