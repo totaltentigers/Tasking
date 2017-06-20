@@ -9,4 +9,8 @@
         android:positiveButtonText="@string/sign_out"
         android:negativeButtonText="@string/cancel"
         android:dialogMessage="@string/pref_account_message"/>
+
+    <Preference
+        android:key="@string/pref_about_key"
+        android:title="@string/pref_about"/>
 </PreferenceScreen>
