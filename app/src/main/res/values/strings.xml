@@ -26,6 +26,25 @@
     <string name="add_task_dialog_cancel">Cancel</string>
     <string name="add_task_dialog_error_notitle">You must enter a task title.</string>
 
+    <!-- About dialog -->
+    <string name="bullet">&#8226;</string>
+    <string name="about_dialog_title">About</string>
+    <string name="about_title">This app was built with the help of:</string>
+
+    <string name="about_picasso">Picasso</string>
+    <string name="about_picasso_url">https://square.github.io/picasso/</string>
+
+    <string name="about_retrofit">Retrofit</string>
+    <string name="about_retrofit_url">https://square.github.io/retrofit/</string>
+
+    <string name="about_civ">CircleImageView</string>
+    <string name="about_civ_url">https://github.com/hdodenhof/CircleImageView</string>
+
+    <string name="license">"License: "</string>
+    <string name="apache_2.0">Apache 2.0</string>
+    <string name="local">" (local)"</string>
+    <string name="web">" (web)"</string>
+
     <!-- Preferences -->
     <string name="pref_screen">prefscreen</string>
 
