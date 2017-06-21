@@ -5,15 +5,10 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
-import me.jakemoritz.tasking.R;
 
 public class SimpleTextDialogFragment extends DialogFragment {
 
@@ -31,8 +26,6 @@ public class SimpleTextDialogFragment extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        View view = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_add_task, (ViewGroup) null);
-
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
         builder.setMessage(readTextFile())
@@ -56,7 +49,7 @@ public class SimpleTextDialogFragment extends DialogFragment {
 
         super.onDestroyView();
     }
-    
+
     private String readTextFile() {
         StringBuilder text = new StringBuilder();
         BufferedReader reader = null;
