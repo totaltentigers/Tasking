@@ -7,7 +7,6 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 
 import me.jakemoritz.tasking.R;
-import me.jakemoritz.tasking.dialog.AboutDialogFragment;
 
 public class SettingsFragment extends PreferenceFragment {
 
@@ -34,8 +33,10 @@ public class SettingsFragment extends PreferenceFragment {
         aboutPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                AboutDialogFragment aboutDialogFragment = AboutDialogFragment.newInstance();
-                aboutDialogFragment.show(getFragmentManager(), "about");
+                getFragmentManager().beginTransaction()
+                        .replace(R.id.content_main, AboutFragment.newInstance())
+                        .addToBackStack(AboutFragment.class.getSimpleName())
+                        .commit();
 
                 return true;
             }
