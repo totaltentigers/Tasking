@@ -1,8 +1,6 @@
 package me.jakemoritz.tasking.fragment;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.view.View;
@@ -11,11 +9,8 @@ import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-
 import me.jakemoritz.tasking.R;
+import me.jakemoritz.tasking.dialog.SimpleTextDialogFragment;
 
 class LibraryAdapter extends BaseAdapter implements ListAdapter {
 
@@ -100,16 +95,8 @@ class LibraryAdapter extends BaseAdapter implements ListAdapter {
             viewHolder.mLicenseLocal.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-                    builder.setMessage(readTextFile(libraryData[0]))
-                            .setPositiveButton("Close", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                }
-                            });
-
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
+                    SimpleTextDialogFragment simpleTextDialogFragment = SimpleTextDialogFragment.newInstance(libraryData[0]);
+                    simpleTextDialogFragment.show(activity.getFragmentManager(), SimpleTextDialogFragment.class.getSimpleName());
                 }
             });
         }
@@ -117,34 +104,7 @@ class LibraryAdapter extends BaseAdapter implements ListAdapter {
         return convertView;
     }
 
-    private String readTextFile(String library) {
-        StringBuilder text = new StringBuilder();
-        BufferedReader reader = null;
 
-        try {
-            reader = new BufferedReader(
-                    new InputStreamReader(activity.getAssets().open("license_" + library.toLowerCase() + ".txt")));
-
-            // do reading, usually loop until end of file reading
-            String mLine;
-            while ((mLine = reader.readLine()) != null) {
-                text.append(mLine);
-                text.append('\n');
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return text.toString();
-    }
 
     private static class ViewHolder {
         TextView mLibraryTitle;
