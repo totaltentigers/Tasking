@@ -66,7 +66,6 @@ public class MainActivity extends AppCompatActivity
 
     // Constants for cover image GET request
     private static final String COVER_IMAGE_BASE_URL = "https://www.googleapis.com/plus/v1/people/";
-    private static final String API_KEY = "***REMOVED***";
 
     // Client used to interact with Google APIs
     private static GoogleApiClient mGoogleApiClient;
@@ -264,7 +263,7 @@ public class MainActivity extends AppCompatActivity
                 .build();
 
         GoogleEndpointInterface googleEndpointInterface = retrofit.create(GoogleEndpointInterface.class);
-        final Call<String> coverImageURL = googleEndpointInterface.getCoverImageURL(SharedPrefsHelper.getInstance().getUserId(), API_KEY);
+        final Call<String> coverImageURL = googleEndpointInterface.getCoverImageURL(SharedPrefsHelper.getInstance().getUserId(), getString(R.string.google_api_key_debug));
         coverImageURL.enqueue(new Callback<String>() {
 
             @Override
