@@ -265,7 +265,7 @@ public class MainActivity extends AppCompatActivity
                 .build();
 
         GoogleEndpointInterface googleEndpointInterface = retrofit.create(GoogleEndpointInterface.class);
-        final Call<String> coverImageURL = googleEndpointInterface.getCoverImageURL(SharedPrefsHelper.getInstance().getUserId(), getString(R.string.google_api_key_debug));
+        final Call<String> coverImageURL = googleEndpointInterface.getCoverImageURL(SharedPrefsHelper.getInstance().getUserId(), getString(R.string.google_api_key_release));
         coverImageURL.enqueue(new Callback<String>() {
 
             @Override
