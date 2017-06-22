@@ -1,6 +1,7 @@
 package me.jakemoritz.tasking_new.fragment;
 
 import android.app.ListFragment;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -27,6 +28,7 @@ import java.util.Collections;
 import java.util.List;
 
 import me.jakemoritz.tasking_new.R;
+import me.jakemoritz.tasking_new.activity.MainActivity;
 import me.jakemoritz.tasking_new.api.tasks.AddTaskResponse;
 import me.jakemoritz.tasking_new.api.tasks.DeleteTasksResponse;
 import me.jakemoritz.tasking_new.api.tasks.DeleteTasksTask;
@@ -48,6 +50,8 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
         SortTasklistResponse {
 
     private static final String TAG = TaskListFragment.class.getSimpleName();
+
+    private MainActivity mainActivity;
 
     // Views
     private AbsListView mListView;
@@ -205,6 +209,21 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
         DatabaseHelper databaseHelper = new DatabaseHelper(App.getInstance());
         databaseHelper.saveTasksToDb(mAdapter.getTaskList());
         databaseHelper.close();
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        if (mainActivity.getSupportActionBar() != null){
+            mainActivity.getSupportActionBar().setTitle(getString(R.string.app_name));
+        }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        this.mainActivity = (MainActivity) context;
     }
 
     @Override

@@ -58,7 +58,6 @@ public class SettingsFragment extends PreferenceFragment {
                 Intent intent = new Intent(Intent.ACTION_VIEW, uri);
                 startActivity(intent);
                 return true;
-
             }
         });
     }
@@ -67,6 +66,10 @@ public class SettingsFragment extends PreferenceFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mainActivity.enableUpNavigation(false);
+
+        if (mainActivity.getSupportActionBar() != null){
+            mainActivity.getSupportActionBar().setTitle(getString(R.string.title_activity_settings));
+        }
     }
 
     @Override

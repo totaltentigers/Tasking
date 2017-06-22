@@ -44,5 +44,8 @@ public class AboutFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         mainActivity.enableUpNavigation(true);
+        if (mainActivity.getSupportActionBar() != null){
+            mainActivity.getSupportActionBar().setTitle(getString(R.string.about_fragment_title));
+        }
     }
 }
