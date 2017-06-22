@@ -4,7 +4,7 @@ android {
     compileSdkVersion 26
     buildToolsVersion '26.0.0'
     defaultConfig {
-        applicationId "me.jakemoritz.tasking"
+        applicationId "me.jakemoritz.tasking_new"
         minSdkVersion 16
         targetSdkVersion 26
         versionCode 1

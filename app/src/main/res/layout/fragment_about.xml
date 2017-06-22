@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:paddingTop="20dp"
-    tools:context="me.jakemoritz.tasking.fragment.AboutFragment">
+    tools:context="me.jakemoritz.tasking_new.fragment.AboutFragment">
 
     <TextView
         android:textSize="20sp"
