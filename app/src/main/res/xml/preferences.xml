@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <me.jakemoritz.tasking.AccountDialogPreference
-        android:key="@+id/pref_account"
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="@string/pref_screen">
+    <me.jakemoritz.tasking.preference.AccountDialogPreference
+        android:key="@string/pref_account_key"
         android:title="@string/pref_account"
         android:summary="@string/pref_account_summ"
         android:dialogTitle="@string/pref_account"
         android:positiveButtonText="@string/sign_out"
         android:negativeButtonText="@string/cancel"
         android:dialogMessage="@string/pref_account_message"/>
+
+    <Preference
+        android:key="@string/pref_about_key"
+        android:title="@string/pref_about"/>
 </PreferenceScreen>

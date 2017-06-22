@@ -1,28 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:id="@android:id/empty">
+    android:id="@android:id/empty"
+    android:orientation="vertical"
+    android:gravity="center">
 
     <ImageView
-        android:layout_width="250dp" android:layout_height="250dp"
+        android:layout_width="150dp" android:layout_height="150dp"
         android:id="@+id/empty_tasklist_image"
         android:src="@drawable/empty_tasklist"
-        android:adjustViewBounds="false"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="95dp" />
+        android:adjustViewBounds="false" />
 
     <TextView
-        android:layout_width="300dp"
+        android:layout_width="220dp"
         android:layout_height="wrap_content"
         android:text="@string/empty_listview_message"
-        android:layout_below="@+id/empty_tasklist_image"
-        android:layout_centerHorizontal="true"
-        style="@style/Base.TextAppearance.AppCompat.Display1"
+        style="@style/Base.TextAppearance.AppCompat.Headline"
         android:textAlignment="center"
+        android:textColor="#757575"
         android:layout_marginTop="30dp" />
 
-</RelativeLayout>
+</LinearLayout>
 
 

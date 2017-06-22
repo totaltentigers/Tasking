@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:android.support.v7.cardview="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android.support.v7.cardview:cardCornerRadius="2dp"
+    android.support.v7.cardview:cardElevation="3dp"
+    android.support.v7.cardview:cardUseCompatPadding="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimaryDark"
+            android:padding="12dp">
+
+            <TextView
+                android:id="@+id/library_title"
+                style="@style/Base.TextAppearance.AppCompat.Subhead"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:text="Library Title"
+                android:textColor="@android:color/white" />
+
+            <TextView
+                android:id="@+id/library_license"
+                style="@style/Base.TextAppearance.AppCompat.Subhead"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:drawableLeft="@drawable/ic_gavel"
+                android:drawablePadding="5dp"
+                android:text="License"
+                android:textColor="@android:color/white" />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="8dp"
+            android:weightSum="3">
+
+            <TextView
+                android:id="@+id/library_website"
+                style="@style/Base.TextAppearance.AppCompat.Body2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/ic_action_globe"
+                android:text="@string/website"
+                android:textAlignment="center"
+                android:textColor="@color/primaryOnLight" />
+
+            <TextView
+                android:id="@+id/library_license_local"
+                style="@style/Base.TextAppearance.AppCompat.Body2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawablePadding="5dp"
+                android:drawableTop="@drawable/ic_attachment"
+                android:text="@string/license_local"
+                android:textAlignment="center"
+                android:textColor="@color/primaryOnLight" />
+
+            <TextView
+                android:id="@+id/library_license_web"
+                style="@style/Base.TextAppearance.AppCompat.Body2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawablePadding="5dp"
+                android:drawableTop="@drawable/ic_open_in_browser"
+                android:text="@string/license_web"
+                android:textAlignment="center"
+                android:textColor="@color/primaryOnLight" />
+
+        </LinearLayout>
+    </LinearLayout>
+</android.support.v7.widget.CardView>
