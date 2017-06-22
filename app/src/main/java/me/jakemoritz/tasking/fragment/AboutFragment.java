@@ -3,22 +3,28 @@ package me.jakemoritz.tasking.fragment;
 
 import android.app.Fragment;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
 import me.jakemoritz.tasking.R;
+import me.jakemoritz.tasking.activity.MainActivity;
 
 public class AboutFragment extends Fragment {
+
+    private MainActivity mainActivity;
 
     public AboutFragment() {
 
     }
 
-    public static AboutFragment newInstance(){
+    public static AboutFragment newInstance(MainActivity mainActivity){
         AboutFragment fragment = new AboutFragment();
         fragment.setRetainInstance(true);
+        fragment.mainActivity = mainActivity;
         return fragment;
     }
 
@@ -34,4 +40,10 @@ public class AboutFragment extends Fragment {
         return aboutFragmentLayout;
     }
 
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        mainActivity.enableUpNavigation(true);
+    }
 }

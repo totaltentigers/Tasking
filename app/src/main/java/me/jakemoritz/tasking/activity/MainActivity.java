@@ -79,6 +79,9 @@ public class MainActivity extends AppCompatActivity
 
     private MenuItem selectedMenuItem;
 
+    private ActionBarDrawerToggle toggle;
+    private boolean toolbarNavigationListenerRegistered = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,7 +114,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+        toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
             @Override
             public void onDrawerClosed(View drawerView) {
@@ -131,7 +134,6 @@ public class MainActivity extends AppCompatActivity
                         } else if (id == R.id.nav_settings) {
                             getFragmentManager().beginTransaction()
                                     .replace(R.id.content_main, SettingsFragment.newInstance())
-                                    .addToBackStack(SettingsFragment.class.getSimpleName())
                                     .commit();
                         }
                     }
@@ -348,6 +350,35 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    public void enableUpNavigation(boolean enable) {
+        if (enable) {
+            toggle.setDrawerIndicatorEnabled(false);
+
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            }
+
+            if (!toolbarNavigationListenerRegistered) {
+                toggle.setToolbarNavigationClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        onBackPressed();
+                    }
+                });
+
+                toolbarNavigationListenerRegistered = true;
+            }
+        } else {
+            if (getSupportActionBar() != null) {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            }
+
+            toggle.setDrawerIndicatorEnabled(true);
+            toggle.setToolbarNavigationClickListener(null);
+            toolbarNavigationListenerRegistered = false;
+        }
+    }
+
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Save selected menu item to check if already in selected Fragment
@@ -459,5 +490,5 @@ public class MainActivity extends AppCompatActivity
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
-
+    
 }

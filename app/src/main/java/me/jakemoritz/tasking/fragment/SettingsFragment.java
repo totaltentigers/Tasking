@@ -1,14 +1,21 @@
 package me.jakemoritz.tasking.fragment;
 
 
+import android.content.Context;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
+import android.support.annotation.Nullable;
+import android.view.MenuItem;
+import android.view.View;
 
 import me.jakemoritz.tasking.R;
+import me.jakemoritz.tasking.activity.MainActivity;
 
 public class SettingsFragment extends PreferenceFragment {
+
+    private MainActivity mainActivity;
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -34,12 +41,24 @@ public class SettingsFragment extends PreferenceFragment {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 getFragmentManager().beginTransaction()
-                        .replace(R.id.content_main, AboutFragment.newInstance())
+                        .replace(R.id.content_main, AboutFragment.newInstance(mainActivity))
                         .addToBackStack(AboutFragment.class.getSimpleName())
                         .commit();
 
                 return true;
             }
         });
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mainActivity.enableUpNavigation(false);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        this.mainActivity = (MainActivity) context;
     }
 }
