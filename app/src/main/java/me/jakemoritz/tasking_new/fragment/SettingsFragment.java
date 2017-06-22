@@ -2,6 +2,8 @@ package me.jakemoritz.tasking_new.fragment;
 
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
@@ -20,7 +22,7 @@ public class SettingsFragment extends PreferenceFragment {
         // Required empty public constructor
     }
 
-    public static SettingsFragment newInstance(){
+    public static SettingsFragment newInstance() {
         SettingsFragment settingsFragment = new SettingsFragment();
         settingsFragment.setRetainInstance(true);
         return settingsFragment;
@@ -45,6 +47,18 @@ public class SettingsFragment extends PreferenceFragment {
                         .commit();
 
                 return true;
+            }
+        });
+
+        Preference privacyPolicyPreference = preferenceScreen.findPreference(getString(R.string.pref_privacy_policy_key));
+        privacyPolicyPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Uri uri = Uri.parse("https://www.iubenda.com/privacy-policy/8158356");
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+                return true;
+
             }
         });
     }
