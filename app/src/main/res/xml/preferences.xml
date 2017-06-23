@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     android:key="@string/pref_screen">
-    <me.jakemoritz.tasking.preference.AccountDialogPreference
+    <me.jakemoritz.tasking_new.preference.AccountDialogPreference
         android:key="@string/pref_account_key"
         android:title="@string/pref_account"
         android:summary="@string/pref_account_summ"
@@ -13,4 +13,8 @@
     <Preference
         android:key="@string/pref_about_key"
         android:title="@string/pref_about"/>
+
+    <Preference
+        android:key="@string/pref_privacy_policy_key"
+        android:title="@string/pref_privacy_policy_title"/>
 </PreferenceScreen>

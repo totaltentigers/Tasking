@@ -7,7 +7,7 @@
     android:background="@color/colorPrimary"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    tools:context="me.jakemoritz.tasking.activity.LoginActivity">
+    tools:context="me.jakemoritz.tasking_new.activity.LoginActivity">
 
     <TextView
         android:id="@+id/intro_title"

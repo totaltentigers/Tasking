@@ -60,6 +60,9 @@
     <string name="pref_about_key">prefaboutkey</string>
     <string name="pref_about">About</string>
 
+    <string name="pref_privacy_policy_key">prefprivacypolicykey</string>
+    <string name="pref_privacy_policy_title">Privacy Policy</string>
+
     <string name="pref_account_key">prefaccountkey</string>
     <string name="pref_account">Account</string>
     <string name="pref_account_summ">Sign out of your Google account.</string>
