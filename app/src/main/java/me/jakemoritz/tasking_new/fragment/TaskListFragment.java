@@ -43,6 +43,7 @@ import me.jakemoritz.tasking_new.dialog.AddTaskDialogFragment;
 import me.jakemoritz.tasking_new.dialog.EditTaskDialogFragment;
 import me.jakemoritz.tasking_new.misc.App;
 import me.jakemoritz.tasking_new.misc.CompareTaskDueDate;
+import me.jakemoritz.tasking_new.activity.MainActivity.PermissionRequired;
 
 
 public class TaskListFragment extends ListFragment implements GetTasksResponse, AddTaskResponse,
@@ -52,6 +53,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     private static final String TAG = TaskListFragment.class.getSimpleName();
 
     private MainActivity mainActivity;
+    private AddLaunched addLaunched;
 
     // Views
     private AbsListView mListView;
@@ -224,6 +226,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     public void onAttach(Context context) {
         super.onAttach(context);
         this.mainActivity = (MainActivity) context;
+        this.addLaunched = this.mainActivity;
     }
 
     @Override
@@ -236,6 +239,12 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     private void openAddTaskDialog() {
         AddTaskDialogFragment addTaskDialogFragment = AddTaskDialogFragment.newInstance(this);
         addTaskDialogFragment.show(getFragmentManager(), AddTaskDialogFragment.class.getSimpleName());
+
+        this.addLaunched.addLaunched(addTaskDialogFragment);
+    }
+
+    public interface AddLaunched{
+        void addLaunched(PermissionRequired permissionRequired);
     }
 
     private void editTask(int position) {

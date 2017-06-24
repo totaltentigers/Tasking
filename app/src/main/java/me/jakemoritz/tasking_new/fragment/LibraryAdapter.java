@@ -10,7 +10,7 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import me.jakemoritz.tasking_new.R;
-import me.jakemoritz.tasking_new.dialog.SimpleTextDialogFragment;
+import me.jakemoritz.tasking_new.dialog.TextFileDialogFragment;
 
 class LibraryAdapter extends BaseAdapter implements ListAdapter {
 
@@ -95,8 +95,8 @@ class LibraryAdapter extends BaseAdapter implements ListAdapter {
             viewHolder.mLicenseLocal.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    SimpleTextDialogFragment simpleTextDialogFragment = SimpleTextDialogFragment.newInstance(libraryData[0]);
-                    simpleTextDialogFragment.show(activity.getFragmentManager(), SimpleTextDialogFragment.class.getSimpleName());
+                    TextFileDialogFragment textFileDialogFragment = TextFileDialogFragment.newInstance(libraryData[0]);
+                    textFileDialogFragment.show(activity.getFragmentManager(), TextFileDialogFragment.class.getSimpleName());
                 }
             });
         }

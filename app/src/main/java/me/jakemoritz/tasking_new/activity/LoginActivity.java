@@ -1,7 +1,9 @@
 package me.jakemoritz.tasking_new.activity;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,11 +20,13 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Scope;
 
 import me.jakemoritz.tasking_new.R;
+import me.jakemoritz.tasking_new.dialog.PermissionRationaleDialogFragment;
+import me.jakemoritz.tasking_new.helper.PermissionHelper;
 import me.jakemoritz.tasking_new.helper.SharedPrefsHelper;
 import me.jakemoritz.tasking_new.misc.App;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener,
-        View.OnClickListener{
+        View.OnClickListener {
 
     private static final String TAG = LoginActivity.class.getSimpleName();
 
@@ -37,7 +41,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        if (getIntent().hasExtra("justSignedOut") && getIntent().getBooleanExtra("justSignedOut", false) && findViewById(R.id.activity_login) != null && !SharedPrefsHelper.getInstance().isSignOutSnackbarShown()){
+        if (getIntent().hasExtra("justSignedOut") && getIntent().getBooleanExtra("justSignedOut", false) && findViewById(R.id.activity_login) != null && !SharedPrefsHelper.getInstance().isSignOutSnackbarShown()) {
             Snackbar.make(findViewById(R.id.activity_login), R.string.just_signed_out, Snackbar.LENGTH_LONG).show();
 
             SharedPrefsHelper.getInstance().setSignOutSnackbarShown(true);
@@ -69,12 +73,12 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
         int mUIFlag;
 
-        if (apiGreaterThanOrEqual19){
-            mUIFlag =  View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+        if (apiGreaterThanOrEqual19) {
+            mUIFlag = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         } else {
-            mUIFlag =  View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+            mUIFlag = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                     | View.SYSTEM_UI_FLAG_LOW_PROFILE
                     | View.SYSTEM_UI_FLAG_FULLSCREEN;
@@ -87,7 +91,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     protected void onStop() {
         super.onStop();
 
-        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()){
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
             mGoogleApiClient.disconnect();
         }
     }
@@ -104,9 +108,28 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case (PermissionHelper.GET_ACCOUNTS_REQ_CODE):
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission granted
+                    onSignInClicked();
+                } else {
+                    // Permission denied
+                    PermissionRationaleDialogFragment permissionRationaleDialogFragment = PermissionRationaleDialogFragment.newInstance(this, Manifest.permission.GET_ACCOUNTS, getString(R.string.get_accounts_permission_denied));
+                    permissionRationaleDialogFragment.show(getFragmentManager(), PermissionRationaleDialogFragment.class.getSimpleName());
+                }
+        }
+    }
+
+    @Override
     public void onClick(View v) {
-        if (v.getId() == R.id.sign_in_button){
-            onSignInClicked();
+        if (v.getId() == R.id.sign_in_button) {
+            if (PermissionHelper.getInstance().permissionGranted(this, Manifest.permission.GET_ACCOUNTS)) {
+                onSignInClicked();
+            } else {
+                PermissionHelper.getInstance().requestPermission(this, Manifest.permission.GET_ACCOUNTS);
+            }
         }
     }
 
@@ -134,7 +157,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         }
     }
 
-    private void saveUserInfo(GoogleSignInAccount acct){
+    private void saveUserInfo(GoogleSignInAccount acct) {
         // Save sign-in state and user info
         SharedPrefsHelper.getInstance().setUserEmail(acct.getEmail());
         SharedPrefsHelper.getInstance().setLoggedIn(true);
