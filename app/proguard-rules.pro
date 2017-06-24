@@ -54,6 +54,10 @@
 -dontwarn com.squareup.okhttp.**
 -dontwarn okio.**
 
+# Keep line numbers in stack traces
+-renamesourcefileattribute SourceFile
+-keepattributes SourceFile,LineNumberTable
+
 # Use ProGuard while debugging
 -dontobfuscate
 
