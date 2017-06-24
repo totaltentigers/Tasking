@@ -64,7 +64,7 @@ import retrofit2.Retrofit;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, TaskListFragment.AddLaunched {
+        GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
@@ -417,7 +417,9 @@ public class MainActivity extends AppCompatActivity
             case (PermissionHelper.GET_ACCOUNTS_REQ_CODE):
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Permission granted
-                    permissionRequired.permissionRequired();
+                    if (permissionRequired != null){
+                        permissionRequired.permissionGranted();
+                    }
                 } else {
                     // Permission denied
                     PermissionRationaleDialogFragment permissionRationaleDialogFragment = PermissionRationaleDialogFragment.newInstance(this, Manifest.permission.GET_ACCOUNTS, getString(R.string.get_accounts_permission_denied));
@@ -426,13 +428,8 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public void addLaunched(PermissionRequired permissionRequired) {
-        this.permissionRequired = permissionRequired;
-    }
-
     public interface PermissionRequired {
-        void permissionRequired();
+        void permissionGranted();
     }
 
     private void signOut() {
@@ -519,5 +516,8 @@ public class MainActivity extends AppCompatActivity
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
-    
+
+    public void setPermissionRequired(PermissionRequired permissionRequired) {
+        this.permissionRequired = permissionRequired;
+    }
 }

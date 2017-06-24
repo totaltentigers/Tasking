@@ -1,5 +1,6 @@
 package me.jakemoritz.tasking_new.fragment;
 
+import android.Manifest;
 import android.app.ListFragment;
 import android.content.Context;
 import android.os.Bundle;
@@ -29,6 +30,7 @@ import java.util.List;
 
 import me.jakemoritz.tasking_new.R;
 import me.jakemoritz.tasking_new.activity.MainActivity;
+import me.jakemoritz.tasking_new.activity.MainActivity.PermissionRequired;
 import me.jakemoritz.tasking_new.api.tasks.AddTaskResponse;
 import me.jakemoritz.tasking_new.api.tasks.DeleteTasksResponse;
 import me.jakemoritz.tasking_new.api.tasks.DeleteTasksTask;
@@ -41,19 +43,18 @@ import me.jakemoritz.tasking_new.api.tasks.SortTasklistTask;
 import me.jakemoritz.tasking_new.database.DatabaseHelper;
 import me.jakemoritz.tasking_new.dialog.AddTaskDialogFragment;
 import me.jakemoritz.tasking_new.dialog.EditTaskDialogFragment;
+import me.jakemoritz.tasking_new.helper.PermissionHelper;
 import me.jakemoritz.tasking_new.misc.App;
 import me.jakemoritz.tasking_new.misc.CompareTaskDueDate;
-import me.jakemoritz.tasking_new.activity.MainActivity.PermissionRequired;
 
 
 public class TaskListFragment extends ListFragment implements GetTasksResponse, AddTaskResponse,
         DeleteTasksResponse, EditTaskResponse, SwipeRefreshLayout.OnRefreshListener, CheckBox.OnCheckedChangeListener,
-        SortTasklistResponse {
+        SortTasklistResponse, PermissionRequired {
 
     private static final String TAG = TaskListFragment.class.getSimpleName();
 
     private MainActivity mainActivity;
-    private AddLaunched addLaunched;
 
     // Views
     private AbsListView mListView;
@@ -189,8 +190,12 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
 
         // Checks internet availability to choose task data source
         if (App.getInstance().isNetworkAvailable()) {
-            GetTasksTask getTasksTask = new GetTasksTask(getActivity(), this);
-            getTasksTask.execute();
+            if (PermissionHelper.getInstance().permissionGranted(getActivity(), Manifest.permission.GET_ACCOUNTS)) {
+                GetTasksTask getTasksTask = new GetTasksTask(getActivity(), this);
+                getTasksTask.execute();
+            } else {
+                PermissionHelper.getInstance().requestPermission(getActivity(), Manifest.permission.GET_ACCOUNTS);
+            }
         } else {
             DatabaseHelper databaseHelper = new DatabaseHelper(App.getInstance());
             List<Task> tasks = databaseHelper.getTasksFromDb();
@@ -202,6 +207,14 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
                 mAdapter.notifyDataSetChanged();
             }
         }
+    }
+
+    @Override
+    public void permissionGranted() {
+        GetTasksTask getTasksTask = new GetTasksTask(getActivity(), this);
+        getTasksTask.execute();
+
+        this.mainActivity.setPermissionRequired(null);
     }
 
     @Override
@@ -226,7 +239,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     public void onAttach(Context context) {
         super.onAttach(context);
         this.mainActivity = (MainActivity) context;
-        this.addLaunched = this.mainActivity;
+        this.mainActivity.setPermissionRequired(this);
     }
 
     @Override
@@ -240,11 +253,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
         AddTaskDialogFragment addTaskDialogFragment = AddTaskDialogFragment.newInstance(this);
         addTaskDialogFragment.show(getFragmentManager(), AddTaskDialogFragment.class.getSimpleName());
 
-        this.addLaunched.addLaunched(addTaskDialogFragment);
-    }
-
-    public interface AddLaunched{
-        void addLaunched(PermissionRequired permissionRequired);
+        this.mainActivity.setPermissionRequired(addTaskDialogFragment);
     }
 
     private void editTask(int position) {
@@ -297,6 +306,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     @Override
     public void taskAdded() {
         getTasksFromServer();
+        this.mainActivity.setPermissionRequired(null);
     }
 
     @Override
@@ -307,6 +317,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     @Override
     public void taskEdited() {
         getTasksFromServer();
+        this.mainActivity.setPermissionRequired(null);
     }
 
     @Override
