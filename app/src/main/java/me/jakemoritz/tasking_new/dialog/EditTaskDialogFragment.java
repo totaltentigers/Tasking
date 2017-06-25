@@ -1,5 +1,6 @@
 package me.jakemoritz.tasking_new.dialog;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -21,12 +22,14 @@ import com.google.api.services.tasks.model.Task;
 import java.util.Calendar;
 
 import me.jakemoritz.tasking_new.R;
+import me.jakemoritz.tasking_new.activity.MainActivity;
 import me.jakemoritz.tasking_new.api.tasks.EditTaskTask;
 import me.jakemoritz.tasking_new.fragment.TaskListFragment;
 import me.jakemoritz.tasking_new.helper.DateFormatter;
+import me.jakemoritz.tasking_new.helper.PermissionHelper;
 
 
-public class EditTaskDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener{
+public class EditTaskDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener, MainActivity.PermissionRequired{
 
     private static final String TAG = EditTaskDialogFragment.class.getSimpleName();
 
@@ -103,10 +106,11 @@ public class EditTaskDialogFragment extends DialogFragment implements DatePicker
                                 task.setDue(dateTime);
                             }
 
-                            EditTaskTask editTaskTask = new EditTaskTask(getActivity(), (TaskListFragment) parentFragment, task);
-                            editTaskTask.execute();
-
-                            dismiss();
+                            if (PermissionHelper.getInstance().permissionGranted(parentFragment.getActivity(), Manifest.permission.GET_ACCOUNTS)) {
+                                editTask();
+                            } else {
+                                PermissionHelper.getInstance().requestPermission(parentFragment.getActivity(), Manifest.permission.GET_ACCOUNTS);
+                            }
                         } else {
                             taskTitle.setError(getString(R.string.add_task_dialog_error_notitle));
                         }
@@ -124,6 +128,18 @@ public class EditTaskDialogFragment extends DialogFragment implements DatePicker
         });
 
         return alertDialog;
+    }
+
+    private void editTask(){
+        EditTaskTask editTaskTask = new EditTaskTask(getActivity(), (TaskListFragment) parentFragment, task);
+        editTaskTask.execute();
+
+        dismiss();
+    }
+
+    @Override
+    public void permissionGranted(String action) {
+        editTask();
     }
 
     @Override

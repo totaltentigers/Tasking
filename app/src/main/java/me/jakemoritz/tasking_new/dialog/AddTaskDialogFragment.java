@@ -1,5 +1,6 @@
 package me.jakemoritz.tasking_new.dialog;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -21,12 +22,14 @@ import com.google.api.services.tasks.model.Task;
 import java.util.Calendar;
 
 import me.jakemoritz.tasking_new.R;
+import me.jakemoritz.tasking_new.activity.MainActivity;
 import me.jakemoritz.tasking_new.api.tasks.AddTaskTask;
 import me.jakemoritz.tasking_new.fragment.TaskListFragment;
 import me.jakemoritz.tasking_new.helper.DateFormatter;
+import me.jakemoritz.tasking_new.helper.PermissionHelper;
 
 
-public class AddTaskDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener {
+public class AddTaskDialogFragment extends DialogFragment implements DatePickerDialog.OnDateSetListener, MainActivity.PermissionRequired {
 
     private static final String TAG = AddTaskDialogFragment.class.getSimpleName();
 
@@ -40,9 +43,12 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
     private long timeInMs;
 
     // Views
-    private EditText taskTitle;
-    private EditText taskNotes;
-    private TextView chosenDate;
+    private EditText taskTitleEditText;
+    private EditText taskNotesEditText;
+    private TextView chosenDateTextView;
+
+    // Current task
+    private Task task;
 
     public static AddTaskDialogFragment newInstance(Fragment parentFragment) {
         AddTaskDialogFragment addTaskDialogFragment = new AddTaskDialogFragment();
@@ -56,9 +62,9 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
         View view = LayoutInflater.from(parentFragment.getActivity()).inflate(R.layout.dialog_add_task, (ViewGroup) null);
 
         // Initialize views
-        chosenDate = (TextView) view.findViewById(R.id.chosen_date);
-        taskTitle = (EditText) view.findViewById(R.id.task_title);
-        taskNotes = (EditText) view.findViewById(R.id.task_notes);
+        chosenDateTextView = (TextView) view.findViewById(R.id.chosen_date);
+        taskTitleEditText = (EditText) view.findViewById(R.id.task_title);
+        taskNotesEditText = (EditText) view.findViewById(R.id.task_notes);
         Button datePickerButton = (Button) view.findViewById(R.id.date_picker_button);
 
         displayCurrentDate();
@@ -85,10 +91,10 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
                 positiveButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (!taskTitle.getText().toString().trim().isEmpty()) {
-                            Task task = new Task();
-                            task.setTitle(taskTitle.getText().toString());
-                            task.setNotes(taskNotes.getText().toString());
+                        if (!taskTitleEditText.getText().toString().trim().isEmpty()) {
+                            task = new Task();
+                            task.setTitle(taskTitleEditText.getText().toString());
+                            task.setNotes(taskNotesEditText.getText().toString());
 
                             // Save time in ms
                             Calendar cal = Calendar.getInstance();
@@ -98,12 +104,13 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
 
                             task.setDue(dateTime);
 
-                            AddTaskTask addTaskTask = new AddTaskTask(getActivity(), (TaskListFragment) parentFragment, task);
-                            addTaskTask.execute();
-
-                            dismiss();
+                            if (PermissionHelper.getInstance().permissionGranted(parentFragment.getActivity(), Manifest.permission.GET_ACCOUNTS)) {
+                                addTask();
+                            } else {
+                                PermissionHelper.getInstance().requestPermission(parentFragment.getActivity(), Manifest.permission.GET_ACCOUNTS);
+                            }
                         } else {
-                            taskTitle.setError(getString(R.string.add_task_dialog_error_notitle));
+                            taskTitleEditText.setError(getString(R.string.add_task_dialog_error_notitle));
                         }
                     }
                 });
@@ -122,11 +129,23 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
     }
 
     @Override
+    public void permissionGranted(String action) {
+        addTask();
+    }
+
+    private void addTask(){
+        AddTaskTask addTaskTask = new AddTaskTask(getActivity(), (TaskListFragment) parentFragment, task);
+        addTaskTask.execute();
+
+        dismiss();
+    }
+
+    @Override
     public void onDestroyView() {
         Dialog dialog = getDialog();
 
         // handles https://code.google.com/p/android/issues/detail?id=17423
-        if (dialog != null && getRetainInstance()){
+        if (dialog != null && getRetainInstance()) {
             dialog.setDismissMessage(null);
         }
 
@@ -142,7 +161,7 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
         this.month = cal.get(Calendar.MONTH);
         this.dayOfMonth = cal.get(Calendar.DAY_OF_MONTH);
 
-        chosenDate.setText(DateFormatter.getInstance().formatDate(cal));
+        chosenDateTextView.setText(DateFormatter.getInstance().formatDate(cal));
     }
 
     @Override
@@ -152,6 +171,6 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
         this.month = month;
         this.dayOfMonth = dayOfMonth;
 
-        chosenDate.setText(DateFormatter.getInstance().formatDate(dayOfMonth, month, year));
+        chosenDateTextView.setText(DateFormatter.getInstance().formatDate(dayOfMonth, month, year));
     }
 }

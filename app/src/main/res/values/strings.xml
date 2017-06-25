@@ -26,6 +26,9 @@
     <string name="add_task_dialog_cancel">Cancel</string>
     <string name="add_task_dialog_error_notitle">You must enter a task title.</string>
 
+    <!-- PermissionRationaleDialogFragment -->
+    <string name="get_accounts_permission_denied">Tasking requires permission to access your Google account to sync with Google Tasks.</string>
+
     <!-- AboutFragment -->
     <string name="bullet">&#8226;</string>
     <string name="about_fragment_title">About</string>

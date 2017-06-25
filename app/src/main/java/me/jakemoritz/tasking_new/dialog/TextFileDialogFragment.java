@@ -10,18 +10,18 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class SimpleTextDialogFragment extends DialogFragment {
+public class TextFileDialogFragment extends DialogFragment {
 
     private String filename;
 
-    public SimpleTextDialogFragment() {
+    public TextFileDialogFragment() {
     }
 
-    public static SimpleTextDialogFragment newInstance(String filename){
-        SimpleTextDialogFragment simpleTextDialogFragment = new SimpleTextDialogFragment();
-        simpleTextDialogFragment.setRetainInstance(true);
-        simpleTextDialogFragment.filename = filename;
-        return simpleTextDialogFragment;
+    public static TextFileDialogFragment newInstance(String filename){
+        TextFileDialogFragment textFileDialogFragment = new TextFileDialogFragment();
+        textFileDialogFragment.setRetainInstance(true);
+        textFileDialogFragment.filename = filename;
+        return textFileDialogFragment;
     }
 
     @Override

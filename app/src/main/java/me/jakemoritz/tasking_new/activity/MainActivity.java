@@ -1,7 +1,9 @@
 package me.jakemoritz.tasking_new.activity;
 
+import android.Manifest;
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -48,8 +50,10 @@ import java.io.IOException;
 import me.jakemoritz.tasking_new.R;
 import me.jakemoritz.tasking_new.api.retrofit.GoogleEndpointInterface;
 import me.jakemoritz.tasking_new.api.retrofit.PlusPersonDeserializer;
+import me.jakemoritz.tasking_new.dialog.PermissionRationaleDialogFragment;
 import me.jakemoritz.tasking_new.fragment.SettingsFragment;
 import me.jakemoritz.tasking_new.fragment.TaskListFragment;
+import me.jakemoritz.tasking_new.helper.PermissionHelper;
 import me.jakemoritz.tasking_new.helper.SharedPrefsHelper;
 import me.jakemoritz.tasking_new.misc.App;
 import retrofit2.Call;
@@ -81,6 +85,9 @@ public class MainActivity extends AppCompatActivity
 
     private ActionBarDrawerToggle toggle;
     private boolean toolbarNavigationListenerRegistered = false;
+
+    private PermissionRequired permissionRequired;
+    private String permissionRequiredAction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -238,7 +245,6 @@ public class MainActivity extends AppCompatActivity
             Paint darken = new Paint();
             darken.setColor(Color.BLACK);
             darken.setAlpha(100);
-
 
             Canvas c = new Canvas(mutableBitmap);
             c.drawPaint(darken);
@@ -406,6 +412,33 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case (PermissionHelper.GET_ACCOUNTS_REQ_CODE):
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission granted
+                    if (permissionRequired != null && permissionRequiredAction != null){
+                        permissionRequired.permissionGranted(permissionRequiredAction);
+                    }
+                } else {
+                    // Permission denied
+                    PermissionRationaleDialogFragment permissionRationaleDialogFragment = PermissionRationaleDialogFragment.newInstance(this, Manifest.permission.GET_ACCOUNTS, getString(R.string.get_accounts_permission_denied));
+                    permissionRationaleDialogFragment.show(getFragmentManager(), PermissionRationaleDialogFragment.class.getSimpleName());
+                }
+        }
+    }
+
+    public interface PermissionRequired {
+        String ACTION_ADD = "ADD";
+        String ACTION_EDIT = "EDIT";
+        String ACTION_GET = "GET";
+        String ACTION_DELETE = "DELETE";
+        String ACTION_SORT = "SORT";
+
+        void permissionGranted(String action);
+    }
+
     private void signOut() {
         // Sign out button clicked
         // Sign out and disconnect user'userImageTarget Google account
@@ -490,5 +523,9 @@ public class MainActivity extends AppCompatActivity
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
-    
+
+    public void setPermissionRequired(PermissionRequired permissionRequired, String action) {
+        this.permissionRequired = permissionRequired;
+        this.permissionRequiredAction = action;
+    }
 }
