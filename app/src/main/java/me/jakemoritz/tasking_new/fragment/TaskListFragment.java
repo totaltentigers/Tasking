@@ -71,7 +71,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     public TaskListFragment() {
     }
 
-    public static TaskListFragment newInstance(){
+    public static TaskListFragment newInstance() {
         TaskListFragment taskListFragment = new TaskListFragment();
         taskListFragment.setRetainInstance(true);
         taskListFragment.setHasOptionsMenu(true);
@@ -170,7 +170,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
         });
 
         // Display active progress bar
-        progressBar = (ProgressBar)view.findViewById(R.id.task_load_progress);
+        progressBar = (ProgressBar) view.findViewById(R.id.task_load_progress);
         progressBar.setVisibility(View.VISIBLE);
         progressBar.setIndeterminate(true);
 
@@ -213,13 +213,16 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
 
     @Override
     public void permissionGranted(String action) {
-        switch (action){
+        switch (action) {
             case (PermissionRequired.ACTION_GET):
                 GetTasksTask getTasksTask = new GetTasksTask(getActivity(), this);
                 getTasksTask.execute();
                 break;
             case (PermissionRequired.ACTION_DELETE):
                 deleteTasks();
+                break;
+            case (PermissionRequired.ACTION_SORT):
+                sortTasks();
                 break;
         }
 
@@ -239,7 +242,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        if (mainActivity.getSupportActionBar() != null){
+        if (mainActivity.getSupportActionBar() != null) {
             mainActivity.getSupportActionBar().setTitle(getString(R.string.app_name));
         }
     }
@@ -302,6 +305,16 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
         }
     }
 
+    private void sortTasksWithPermissionCheck() {
+        this.mainActivity.setPermissionRequired(this, PermissionRequired.ACTION_SORT);
+
+        if (PermissionHelper.getInstance().permissionGranted(getActivity(), Manifest.permission.GET_ACCOUNTS)) {
+            sortTasks();
+        } else {
+            PermissionHelper.getInstance().requestPermission(getActivity(), Manifest.permission.GET_ACCOUNTS);
+        }
+    }
+
     // Task AsyncTask callbacks
     @Override
     public void tasksReceived(List<Task> taskList) {
@@ -318,6 +331,8 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
             progressBar.setVisibility(View.INVISIBLE);
             swipeRefreshLayout.setRefreshing(false);
         }
+
+        this.mainActivity.setPermissionRequired(null, null);
     }
 
     @Override
@@ -341,6 +356,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     @Override
     public void tasksSorted() {
         getTasksFromServer();
+        this.mainActivity.setPermissionRequired(null, null);
     }
 
     // Handles batch task deletion
@@ -356,13 +372,13 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
         }
     }
 
-    private void deleteTasks(){
+    private void deleteTasks() {
         final TaskListFragment callback = this;
 
         final List<Task> oldTaskList = new ArrayList<>();
         oldTaskList.addAll(savedTaskList);
 
-        if (getView() != null){
+        if (getView() != null) {
             Snackbar snackbar = Snackbar.make(getView(), getString(R.string.task_deleted_snackbar_text), Snackbar.LENGTH_LONG);
             snackbar.setAction(getString(R.string.task_deleted_snackbar_undo), new View.OnClickListener() {
                 @Override
@@ -408,7 +424,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
             popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
-                    sortTasks();
+                    sortTasksWithPermissionCheck();
                     return true;
                 }
             });

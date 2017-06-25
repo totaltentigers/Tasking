@@ -418,7 +418,7 @@ public class MainActivity extends AppCompatActivity
             case (PermissionHelper.GET_ACCOUNTS_REQ_CODE):
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Permission granted
-                    if (permissionRequired != null){
+                    if (permissionRequired != null && permissionRequiredAction != null){
                         permissionRequired.permissionGranted(permissionRequiredAction);
                     }
                 } else {
@@ -434,6 +434,7 @@ public class MainActivity extends AppCompatActivity
         String ACTION_EDIT = "EDIT";
         String ACTION_GET = "GET";
         String ACTION_DELETE = "DELETE";
+        String ACTION_SORT = "SORT";
 
         void permissionGranted(String action);
     }
