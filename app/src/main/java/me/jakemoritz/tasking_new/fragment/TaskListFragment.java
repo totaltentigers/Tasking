@@ -65,6 +65,8 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
 
     // Data
     private List<Task> tasks;
+    private SparseBooleanArray idsToDelete;
+    private List<Task> savedTaskList;
 
     public TaskListFragment() {
     }
@@ -210,11 +212,18 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     }
 
     @Override
-    public void permissionGranted() {
-        GetTasksTask getTasksTask = new GetTasksTask(getActivity(), this);
-        getTasksTask.execute();
+    public void permissionGranted(String action) {
+        switch (action){
+            case (PermissionRequired.ACTION_GET):
+                GetTasksTask getTasksTask = new GetTasksTask(getActivity(), this);
+                getTasksTask.execute();
+                break;
+            case (PermissionRequired.ACTION_DELETE):
+                deleteTasks();
+                break;
+        }
 
-        this.mainActivity.setPermissionRequired(null);
+        this.mainActivity.setPermissionRequired(null, null);
     }
 
     @Override
@@ -239,7 +248,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     public void onAttach(Context context) {
         super.onAttach(context);
         this.mainActivity = (MainActivity) context;
-        this.mainActivity.setPermissionRequired(this);
+        this.mainActivity.setPermissionRequired(this, PermissionRequired.ACTION_GET);
     }
 
     @Override
@@ -253,7 +262,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
         AddTaskDialogFragment addTaskDialogFragment = AddTaskDialogFragment.newInstance(this);
         addTaskDialogFragment.show(getFragmentManager(), AddTaskDialogFragment.class.getSimpleName());
 
-        this.mainActivity.setPermissionRequired(addTaskDialogFragment);
+        this.mainActivity.setPermissionRequired(addTaskDialogFragment, PermissionRequired.ACTION_ADD);
     }
 
     private void editTask(int position) {
@@ -261,14 +270,20 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
         EditTaskDialogFragment editTaskDialogFragment = EditTaskDialogFragment.newInstance(this, task);
         editTaskDialogFragment.show(getFragmentManager(), EditTaskDialogFragment.class.getSimpleName());
 
-        this.mainActivity.setPermissionRequired(editTaskDialogFragment);
+        this.mainActivity.setPermissionRequired(editTaskDialogFragment, PermissionRequired.ACTION_EDIT);
     }
 
     private void getTasksFromServer() {
-        mAdapter.notifyDataSetChanged();
+        this.mainActivity.setPermissionRequired(this, PermissionRequired.ACTION_GET);
 
-        GetTasksTask getTasksTask = new GetTasksTask(getActivity(), this);
-        getTasksTask.execute();
+        if (PermissionHelper.getInstance().permissionGranted(getActivity(), Manifest.permission.GET_ACCOUNTS)) {
+            mAdapter.notifyDataSetChanged();
+
+            GetTasksTask getTasksTask = new GetTasksTask(getActivity(), this);
+            getTasksTask.execute();
+        } else {
+            PermissionHelper.getInstance().requestPermission(getActivity(), Manifest.permission.GET_ACCOUNTS);
+        }
     }
 
     private void sortTasks() {
@@ -308,18 +323,19 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     @Override
     public void taskAdded() {
         getTasksFromServer();
-        this.mainActivity.setPermissionRequired(null);
+        this.mainActivity.setPermissionRequired(null, null);
     }
 
     @Override
     public void tasksDeleted() {
         getTasksFromServer();
+        this.mainActivity.setPermissionRequired(null, null);
     }
 
     @Override
     public void taskEdited() {
         getTasksFromServer();
-        this.mainActivity.setPermissionRequired(null);
+        this.mainActivity.setPermissionRequired(null, null);
     }
 
     @Override
@@ -328,11 +344,23 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
     }
 
     // Handles batch task deletion
-    private void onTasksDeleted(final SparseBooleanArray mSelectedIds, final List<Task> taskList) {
+    private void onTasksDeleted(SparseBooleanArray mSelectedIds, List<Task> taskList) {
+        this.idsToDelete = mSelectedIds.clone();
+        this.savedTaskList = taskList;
+        this.mainActivity.setPermissionRequired(this, PermissionRequired.ACTION_DELETE);
+
+        if (PermissionHelper.getInstance().permissionGranted(getActivity(), Manifest.permission.GET_ACCOUNTS)) {
+            deleteTasks();
+        } else {
+            PermissionHelper.getInstance().requestPermission(getActivity(), Manifest.permission.GET_ACCOUNTS);
+        }
+    }
+
+    private void deleteTasks(){
         final TaskListFragment callback = this;
 
         final List<Task> oldTaskList = new ArrayList<>();
-        oldTaskList.addAll(taskList);
+        oldTaskList.addAll(savedTaskList);
 
         if (getView() != null){
             Snackbar snackbar = Snackbar.make(getView(), getString(R.string.task_deleted_snackbar_text), Snackbar.LENGTH_LONG);
@@ -352,7 +380,7 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
                     super.onDismissed(snackbar, event);
 
                     if (event == DISMISS_EVENT_TIMEOUT) {
-                        DeleteTasksTask deleteTasksTask = new DeleteTasksTask(getActivity(), callback, mSelectedIds);
+                        DeleteTasksTask deleteTasksTask = new DeleteTasksTask(getActivity(), callback, idsToDelete);
                         deleteTasksTask.execute();
                     }
                 }

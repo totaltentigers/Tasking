@@ -129,7 +129,7 @@ public class AddTaskDialogFragment extends DialogFragment implements DatePickerD
     }
 
     @Override
-    public void permissionGranted() {
+    public void permissionGranted(String action) {
         addTask();
     }
 

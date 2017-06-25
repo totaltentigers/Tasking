@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity
     private boolean toolbarNavigationListenerRegistered = false;
 
     private PermissionRequired permissionRequired;
+    private String permissionRequiredAction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -418,7 +419,7 @@ public class MainActivity extends AppCompatActivity
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Permission granted
                     if (permissionRequired != null){
-                        permissionRequired.permissionGranted();
+                        permissionRequired.permissionGranted(permissionRequiredAction);
                     }
                 } else {
                     // Permission denied
@@ -429,7 +430,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     public interface PermissionRequired {
-        void permissionGranted();
+        String ACTION_ADD = "ADD";
+        String ACTION_EDIT = "EDIT";
+        String ACTION_GET = "GET";
+        String ACTION_DELETE = "DELETE";
+
+        void permissionGranted(String action);
     }
 
     private void signOut() {
@@ -517,7 +523,8 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public void setPermissionRequired(PermissionRequired permissionRequired) {
+    public void setPermissionRequired(PermissionRequired permissionRequired, String action) {
         this.permissionRequired = permissionRequired;
+        this.permissionRequiredAction = action;
     }
 }

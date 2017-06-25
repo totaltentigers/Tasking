@@ -138,7 +138,7 @@ public class EditTaskDialogFragment extends DialogFragment implements DatePicker
     }
 
     @Override
-    public void permissionGranted() {
+    public void permissionGranted(String action) {
         editTask();
     }
 
