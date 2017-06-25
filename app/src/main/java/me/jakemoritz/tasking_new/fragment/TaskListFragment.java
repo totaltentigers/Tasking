@@ -260,6 +260,8 @@ public class TaskListFragment extends ListFragment implements GetTasksResponse, 
         Task task = mAdapter.getItem(position);
         EditTaskDialogFragment editTaskDialogFragment = EditTaskDialogFragment.newInstance(this, task);
         editTaskDialogFragment.show(getFragmentManager(), EditTaskDialogFragment.class.getSimpleName());
+
+        this.mainActivity.setPermissionRequired(editTaskDialogFragment);
     }
 
     private void getTasksFromServer() {
